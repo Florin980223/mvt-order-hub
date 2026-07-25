@@ -4,7 +4,17 @@
   --bg: #fff;
   --border: #e5e4e7;
 
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
+  /* Approved brand palette (fixed — no dark-mode variant supplied yet). */
+  --color-navy: #001f4b;
+  --color-primary: #0f5acd;
+  --color-success: #16a34a;
+  --color-warning: #f59e0b;
+  --color-error: #dc2626;
+  --color-surface: #ffffff;
+  --color-bg: #f8fafc;
+  --color-text: #0a1640;
+
+  --sans: 'Inter', system-ui, 'Segoe UI', Roboto, sans-serif;
 
   font: 16px/145% var(--sans);
   color-scheme: light dark;

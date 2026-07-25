@@ -22,6 +22,20 @@ npm run dev
 - `npm run build` — typecheck and build for production
 - `npm run preview` — preview the production build locally
 
+## Database migrations
+
+SQL migrations live in `supabase/migrations/`. No Supabase project is linked yet in this
+repo. Once real project credentials are available:
+
+```bash
+supabase link --project-ref <your-project-ref>
+supabase db push
+```
+
+This applies `supabase/migrations/20260725120000_create_profiles.sql`, which creates the
+`profiles` table (RLS-protected) and the trigger that populates it from `auth.users` on
+signup.
+
 ## Documentation
 
 See [`CLAUDE.md`](./CLAUDE.md) for project conventions, and the [`docs/`](./docs) folder for architecture, decisions, and roadmap.

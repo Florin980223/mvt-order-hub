@@ -1,0 +1,91 @@
+.app-layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+.app-sidebar {
+  width: 240px;
+  flex-shrink: 0;
+  background: var(--color-navy);
+  color: #ffffff;
+  padding: 20px 16px;
+}
+
+.app-sidebar-brand {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 24px;
+  padding: 0 12px;
+}
+
+.app-sidebar-nav {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.app-sidebar-link {
+  display: block;
+  padding: 10px 12px;
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.75);
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.app-sidebar-link:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+}
+
+.app-sidebar-link-active {
+  background: var(--color-primary);
+  color: #ffffff;
+}
+
+.app-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-bg);
+  min-width: 0;
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 16px;
+  padding: 12px 24px;
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--border);
+}
+
+.app-header-user {
+  color: var(--color-text);
+  font-size: 14px;
+}
+
+.app-header-logout {
+  background: transparent;
+  border: 1px solid var(--color-primary);
+  color: var(--color-primary);
+  border-radius: 8px;
+  padding: 8px 14px;
+  font: inherit;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.app-header-logout:hover {
+  background: var(--color-primary);
+  color: #ffffff;
+}
+
+.app-main {
+  flex: 1;
+  padding: 24px;
+}

@@ -1,8 +1,10 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { AppLayout } from '../components/layout/AppLayout'
+import { ProtectedRoute } from '../components/auth/ProtectedRoute'
 import { LoginPage } from '../pages/auth/LoginPage'
 import { RegisterPage } from '../pages/auth/RegisterPage'
 import { ForgotPasswordPage } from '../pages/auth/ForgotPasswordPage'
+import { ResetPasswordPage } from '../pages/auth/ResetPasswordPage'
 import { DashboardPage } from '../pages/DashboardPage'
 import { EmailsPage } from '../pages/EmailsPage'
 import { PendingOrdersPage } from '../pages/PendingOrdersPage'
@@ -18,15 +20,18 @@ export function AppRouter() {
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+      <Route path="/reset-password" element={<ResetPasswordPage />} />
 
-      {/* Application routes. A ProtectedRoute guard will wrap this group in the next phase. */}
-      <Route element={<AppLayout />}>
-        <Route path="/dashboard" element={<DashboardPage />} />
-        <Route path="/emails" element={<EmailsPage />} />
-        <Route path="/pending-orders" element={<PendingOrdersPage />} />
-        <Route path="/sent-orders" element={<SentOrdersPage />} />
-        <Route path="/reports" element={<ReportsPage />} />
-        <Route path="/settings" element={<SettingsPage />} />
+      {/* Application routes: require a session. */}
+      <Route element={<ProtectedRoute />}>
+        <Route element={<AppLayout />}>
+          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/emails" element={<EmailsPage />} />
+          <Route path="/pending-orders" element={<PendingOrdersPage />} />
+          <Route path="/sent-orders" element={<SentOrdersPage />} />
+          <Route path="/reports" element={<ReportsPage />} />
+          <Route path="/settings" element={<SettingsPage />} />
+        </Route>
       </Route>
 
       <Route path="/" element={<Navigate to="/dashboard" replace />} />
