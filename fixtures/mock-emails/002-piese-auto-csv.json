@@ -1,0 +1,10 @@
+{
+  "graphMessageId": "mock-002-piese-auto",
+  "sender": "logistica@daciaparts-distribution.ro",
+  "subject": "Comandă transport piese auto - atașat fișier",
+  "receivedAt": "2026-07-30T09:40:00Z",
+  "bodyHtml": "<div><p>Bună ziua,</p><p>Detaliile comenzii sunt în fișierul atașat.</p><p>Vă mulțumim,<br>Dacia Parts Distribution SRL</p></div>",
+  "attachments": [
+    { "filename": "comanda-piese-auto.csv", "mimeType": "text/csv", "generatorRef": "piese-auto-csv" }
+  ]
+}

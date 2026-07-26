@@ -1,0 +1,8 @@
+{
+  "graphMessageId": "mock-006-porumb-incomplet",
+  "sender": "transport@transcereale-moldova.ro",
+  "subject": "Comandă transport porumb",
+  "receivedAt": "2026-07-30T13:35:00Z",
+  "bodyHtml": "<div><p>Bună ziua,</p><p>Nr. comandă: TCM-2026-0299</p><p>Client: TransCereale Moldova SRL</p><p>Adresă ridicare: Baza cerealieră Iași, Șos. Bucium nr. 34, Iași</p><p>Data ridicare: 15.08.2026, ora 09:00</p><p>Adresă livrare: Silozuri Vaslui, Str. Depozitelor nr. 8, Vaslui</p><p>Marfă: Porumb boabe, vrac</p><p>Cantitate: 18 tone</p><p>Observații: Transportatorul va conveni valoarea ulterior; livrare estimativă în aceeași săptămână.</p></div>",
+  "attachments": []
+}

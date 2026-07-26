@@ -1,0 +1,10 @@
+{
+  "graphMessageId": "mock-003-utilaje-agricole",
+  "sender": "comenzi@agromasini-vest.ro",
+  "subject": "Transport utilaj agricol - comandă",
+  "receivedAt": "2026-07-30T10:05:00Z",
+  "bodyHtml": "<div><p>Bună ziua,</p><p>Comanda de transport pentru utilajul agricol este atașată.</p><p>Cu stimă,<br>AgroMasini Vest SRL</p></div>",
+  "attachments": [
+    { "filename": "comanda-utilaj.xlsx", "mimeType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "generatorRef": "utilaje-agricole-xlsx" }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "graphMessageId": "mock-001-cereale",
+  "sender": "comenzi@agroexport-cernavoda.ro",
+  "subject": "Comandă transport cereale - grâu 24t",
+  "receivedAt": "2026-07-30T08:12:00Z",
+  "bodyHtml": "<div><p>Bună ziua,</p><p>Vă transmitem o comandă de transport cu următoarele detalii:</p><p>Nr. comandă: AGX-2026-0447</p><p>Client: SC AgroExport Cernavodă SRL</p><p>Adresă ridicare: Baza cerealieră Cernavodă, Str. Portului nr. 12, Cernavodă, jud. Constanța</p><p>Data ridicare: 03.08.2026, ora 08:00</p><p>Adresă livrare: Moara Dunărea, Șos. Națională nr. 45, Brăila</p><p>Data livrare: 04.08.2026, ora 10:00</p><p>Marfă: Grâu, vrac</p><p>Cantitate: 24 tone</p><p>Valoare transport: 3.200 RON</p><p>Observații: Vă rugăm confirmați disponibilitatea camionului până mâine.</p><p>Cu stimă,<br>SC AgroExport Cernavodă SRL</p></div>",
+  "attachments": []
+}

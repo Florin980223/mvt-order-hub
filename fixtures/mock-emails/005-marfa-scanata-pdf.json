@@ -1,0 +1,10 @@
+{
+  "graphMessageId": "mock-005-marfa-scanata",
+  "sender": "birou@logitrans-sud.ro",
+  "subject": "Comandă scanată - marfă generală",
+  "receivedAt": "2026-07-30T12:50:00Z",
+  "bodyHtml": "<div><p>Bună ziua,</p><p>Comanda este atașată, scanată de la birou.</p><p>LogiTrans Sud SRL</p></div>",
+  "attachments": [
+    { "filename": "comanda-scanata.pdf", "mimeType": "application/pdf", "generatorRef": "marfa-scanata-pdf" }
+  ]
+}

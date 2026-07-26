@@ -1,0 +1,10 @@
+{
+  "graphMessageId": "mock-004-materiale-constructii",
+  "sender": "aprovizionare@constructmat-prod.ro",
+  "subject": "Comandă transport materiale de construcție",
+  "receivedAt": "2026-07-30T11:20:00Z",
+  "bodyHtml": "<div><p>Bună ziua,</p><p>Vă rugăm procesați comanda atașată (PDF).</p><p>ConstructMat Prod SRL</p></div>",
+  "attachments": [
+    { "filename": "comanda-materiale.pdf", "mimeType": "application/pdf", "generatorRef": "materiale-constructii-pdf" }
+  ]
+}
