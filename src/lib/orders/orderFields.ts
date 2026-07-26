@@ -5,6 +5,10 @@ export interface OrderFieldDef {
   label: string
   fieldName: string
   value: (order: OrderRow) => string
+  // False for fields that aren't AI-extracted (e.g. external_reference_id,
+  // set by submit-order on import) — excluded from countLowConfidenceFields
+  // below, which otherwise assumes every field has a confidence source.
+  trackConfidence?: boolean
 }
 
 export interface OrderFieldSection {
@@ -12,13 +16,25 @@ export interface OrderFieldSection {
   fields: OrderFieldDef[]
 }
 
-/** Grouped per the brief's mockup — covers all 15 orders columns (quantity_unit/currency ride along with quantity/transport_amount rather than as separate rows). */
+/**
+ * Grouped per the brief's mockup — covers all 15 AI-extracted orders columns
+ * (quantity_unit/currency ride along with quantity/transport_amount rather
+ * than as separate rows), plus external_reference_id — submission metadata
+ * rather than an extracted field, with no approved mockup section for it
+ * yet, so it's appended to Date comandă rather than given a new section.
+ */
 export const ORDER_FIELD_SECTIONS: OrderFieldSection[] = [
   {
     title: 'Date comandă',
     fields: [
       { label: 'Nr. comandă', fieldName: 'client_order_number', value: (order) => order.client_order_number ?? '—' },
       { label: 'Client / Expeditor', fieldName: 'client_name', value: (order) => order.client_name ?? '—' },
+      {
+        label: 'ID extern',
+        fieldName: 'external_reference_id',
+        value: (order) => order.external_reference_id ?? '—',
+        trackConfidence: false,
+      },
     ],
   },
   {
@@ -85,7 +101,9 @@ export function latestSourceFor(sources: OrderFieldSourceRow[], fieldName: strin
 const LOW_CONFIDENCE_THRESHOLD = 0.6
 
 export function countLowConfidenceFields(order: OrderRow): number {
-  const allFields = ORDER_FIELD_SECTIONS.flatMap((section) => section.fields)
+  const allFields = ORDER_FIELD_SECTIONS.flatMap((section) => section.fields).filter(
+    (field) => field.trackConfidence !== false,
+  )
   return allFields.filter((field) => {
     const source = latestSourceFor(order.order_field_sources, field.fieldName)
     return source?.confidence == null || source.confidence < LOW_CONFIDENCE_THRESHOLD

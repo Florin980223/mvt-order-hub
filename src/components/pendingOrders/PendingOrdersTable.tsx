@@ -8,11 +8,17 @@ interface PendingOrdersTableProps {
   items: Array<{ email: EmailRow; order: OrderRow }>
   selectedOrderId: string | null
   onSelect: (orderId: string) => void
+  emptyMessage?: string
 }
 
-export function PendingOrdersTable({ items, selectedOrderId, onSelect }: PendingOrdersTableProps) {
+export function PendingOrdersTable({
+  items,
+  selectedOrderId,
+  onSelect,
+  emptyMessage = 'Niciun email în așteptare.',
+}: PendingOrdersTableProps) {
   if (items.length === 0) {
-    return <div className="pending-orders-table-empty">Niciun email în așteptare.</div>
+    return <div className="pending-orders-table-empty">{emptyMessage}</div>
   }
 
   const handleKeyDown = (event: KeyboardEvent<HTMLTableRowElement>, orderId: string) => {
