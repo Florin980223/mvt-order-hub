@@ -1,0 +1,9 @@
+project_id = "vwhykufuqumrumhzwujx"
+
+# Microsoft calls these directly — they never carry a Supabase JWT, so they
+# validate themselves instead (state / clientState hash checks).
+[functions.outlook-oauth-callback]
+verify_jwt = false
+
+[functions.graph-webhook]
+verify_jwt = false
