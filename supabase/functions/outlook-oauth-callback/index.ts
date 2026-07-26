@@ -1,21 +1,36 @@
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { GRAPH_SCOPES, graphFetch } from '../_shared/graphClient.ts'
-import { sha256Hex, timingSafeEqual } from '../_shared/security.ts'
-import { FUNCTION_BASE_URL } from '../_shared/config.ts'
+import { hmacSha256Hex, sha256Hex, timingSafeEqual } from '../_shared/security.ts'
+import { FUNCTION_BASE_URL, OAUTH_REDIRECT_URI } from '../_shared/config.ts'
 
-const REDIRECT_URI = `${FUNCTION_BASE_URL}/outlook-oauth-callback`
 const WEBHOOK_URL = `${FUNCTION_BASE_URL}/graph-webhook`
 const SUBSCRIPTION_LIFETIME_MS = 2.5 * 24 * 60 * 60 * 1000
+const STATE_MAX_AGE_MS = 10 * 60 * 1000
 
-// Phase-4a-only simplification: a static shared-secret `state` value is
-// enough for this backend-only manual test (no frontend session exists
-// yet to originate a per-request nonce). MUST become a real per-request
-// nonce, generated and verified server-side, before Phase 4b ships a
-// public "Connect Outlook" button — do not carry this shortcut forward.
-function isValidState(state: string | null): boolean {
-  const expected = Deno.env.get('GRAPH_CLIENT_STATE_SECRET')
-  if (!state || !expected) return false
-  return timingSafeEqual(state, expected)
+// Verifies the per-attempt nonce minted by outlook-oauth-start (see that
+// function for the state format). Signed with OAUTH_STATE_HMAC_SECRET, a
+// secret dedicated to this purpose — deliberately NOT
+// GRAPH_CLIENT_STATE_SECRET, which authenticates graph-webhook's
+// clientState and must never be exposed via this browser-visible query
+// param. Rejects a missing/malformed/expired/tampered state; doesn't
+// track single-use, but a bare replayed state is useless without also
+// having a still-unused `code` from the same Microsoft consent attempt,
+// and Microsoft's authorization codes are already single-use.
+async function isValidState(state: string | null): Promise<boolean> {
+  if (!state) return false
+
+  const parts = state.split('.')
+  if (parts.length !== 3) return false
+  const [nonce, issuedAtRaw, signature] = parts
+
+  const issuedAtMs = Number(issuedAtRaw)
+  if (!Number.isFinite(issuedAtMs) || Date.now() - issuedAtMs > STATE_MAX_AGE_MS) return false
+
+  const secret = Deno.env.get('OAUTH_STATE_HMAC_SECRET')
+  if (!secret) return false
+
+  const expectedSignature = await hmacSha256Hex(`${nonce}.${issuedAtRaw}`, secret)
+  return timingSafeEqual(signature, expectedSignature)
 }
 
 function serviceClient() {
@@ -39,7 +54,7 @@ Deno.serve(async (req) => {
     return htmlResponse('<h1>Conectare eșuată</h1><p>Microsoft a returnat o eroare de consimțământ.</p>', 400)
   }
 
-  if (!code || !isValidState(state)) {
+  if (!code || !(await isValidState(state))) {
     return htmlResponse('<h1>Cerere invalidă</h1><p>Parametrii code/state lipsesc sau sunt invalizi.</p>', 400)
   }
 
@@ -61,7 +76,7 @@ Deno.serve(async (req) => {
         client_secret: clientSecret,
         grant_type: 'authorization_code',
         code,
-        redirect_uri: REDIRECT_URI,
+        redirect_uri: OAUTH_REDIRECT_URI,
         scope: GRAPH_SCOPES,
       }),
     })

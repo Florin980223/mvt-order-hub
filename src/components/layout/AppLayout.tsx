@@ -9,12 +9,13 @@ const navItems = [
   { to: '/pending-orders', label: 'Comenzi in asteptare' },
   { to: '/sent-orders', label: 'Comenzi transmise/importate' },
   { to: '/reports', label: 'Rapoarte' },
-  { to: '/settings', label: 'Setari' },
+  { to: '/settings', label: 'Setari', adminOnly: true },
 ]
 
 export function AppLayout() {
   const navigate = useNavigate()
-  const { user } = useAuth()
+  const { user, role } = useAuth()
+  const visibleNavItems = navItems.filter((item) => !item.adminOnly || role === 'admin')
 
   async function handleLogout() {
     await supabase.auth.signOut()
@@ -27,7 +28,7 @@ export function AppLayout() {
         <p className="app-sidebar-brand">MVT Order Hub</p>
         <nav>
           <ul className="app-sidebar-nav">
-            {navItems.map((item) => (
+            {visibleNavItems.map((item) => (
               <li key={item.to}>
                 <NavLink
                   to={item.to}

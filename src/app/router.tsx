@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { AppLayout } from '../components/layout/AppLayout'
 import { ProtectedRoute } from '../components/auth/ProtectedRoute'
+import { RequireAdmin } from '../components/auth/RequireAdmin'
 import { LoginPage } from '../pages/auth/LoginPage'
 import { RegisterPage } from '../pages/auth/RegisterPage'
 import { ForgotPasswordPage } from '../pages/auth/ForgotPasswordPage'
@@ -30,7 +31,9 @@ export function AppRouter() {
           <Route path="/pending-orders" element={<PendingOrdersPage />} />
           <Route path="/sent-orders" element={<SentOrdersPage />} />
           <Route path="/reports" element={<ReportsPage />} />
-          <Route path="/settings" element={<SettingsPage />} />
+          <Route element={<RequireAdmin />}>
+            <Route path="/settings" element={<SettingsPage />} />
+          </Route>
         </Route>
       </Route>
 
