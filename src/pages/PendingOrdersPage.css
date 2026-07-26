@@ -1,0 +1,380 @@
+.pending-orders-page {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.pending-orders-page__header {
+  margin-bottom: 16px;
+}
+
+.pending-orders-page__header h1 {
+  margin: 0;
+}
+
+.pending-orders-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 48px 16px;
+  color: var(--text);
+  text-align: center;
+}
+
+.pending-orders-state--error {
+  color: var(--color-error);
+}
+
+.pending-orders-state--error button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border: 1px solid var(--color-error);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--color-error);
+  font: inherit;
+  cursor: pointer;
+}
+
+.pending-orders-state__spinner {
+  animation: pending-orders-spin 1s linear infinite;
+  color: var(--color-primary);
+}
+
+@keyframes pending-orders-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.pending-orders-split {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  gap: 16px;
+}
+
+.pending-orders-split__left {
+  width: 420px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  overflow-y: auto;
+}
+
+.pending-orders-split__right {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--color-surface);
+}
+
+/* Workflow card */
+
+.pending-orders-workflow {
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--color-surface);
+}
+
+.pending-orders-workflow__title {
+  margin: 0 0 12px;
+  font-size: 14px;
+}
+
+.pending-orders-workflow__steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pending-orders-workflow__step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text);
+}
+
+.pending-orders-workflow__step--current {
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+.pending-orders-workflow__marker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.pending-orders-workflow__step--done .pending-orders-workflow__marker {
+  background: color-mix(in srgb, var(--color-success) 18%, white);
+  color: var(--color-success);
+}
+
+.pending-orders-workflow__step--current .pending-orders-workflow__marker {
+  background: color-mix(in srgb, var(--color-primary) 18%, white);
+  color: var(--color-primary);
+}
+
+/* Pending emails card + table */
+
+.pending-orders-card {
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--color-surface);
+}
+
+.pending-orders-card__title {
+  margin: 0 0 12px;
+  font-size: 14px;
+}
+
+.pending-orders-card__link {
+  margin-top: 12px;
+  font-size: 13px;
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+.pending-orders-card__link:hover {
+  text-decoration: underline;
+}
+
+.pending-orders-table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.pending-orders-table th {
+  padding: 6px 4px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+  font-size: 11px;
+  font-weight: 500;
+  text-align: left;
+}
+
+.pending-orders-table td {
+  padding: 6px 4px;
+  border-bottom: 1px solid var(--border);
+  color: var(--color-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pending-orders-table th:nth-child(1),
+.pending-orders-table td:nth-child(1) {
+  width: 15%;
+}
+
+.pending-orders-table th:nth-child(2),
+.pending-orders-table td:nth-child(2) {
+  width: 28%;
+}
+
+.pending-orders-table th:nth-child(3),
+.pending-orders-table td:nth-child(3) {
+  width: 27%;
+}
+
+.pending-orders-table th:nth-child(4),
+.pending-orders-table td:nth-child(4) {
+  width: 12%;
+}
+
+.pending-orders-table th:nth-child(5),
+.pending-orders-table td:nth-child(5) {
+  width: 18%;
+}
+
+.pending-orders-table__row {
+  cursor: pointer;
+}
+
+.pending-orders-table__row--selected {
+  background: color-mix(in srgb, var(--color-primary) 8%, transparent);
+}
+
+.pending-orders-table-empty {
+  padding: 16px;
+  color: var(--text);
+  text-align: center;
+}
+
+/* Detail panel */
+
+.pending-orders-detail {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.pending-orders-detail__scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+.pending-orders-detail__heading {
+  margin: 16px 0 0;
+  font-size: 16px;
+}
+
+.pending-orders-detail__body {
+  display: flex;
+  gap: 24px;
+  margin-top: 16px;
+}
+
+/* Top bar */
+
+.pending-orders-topbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.pending-orders-topbar__btn {
+  padding: 8px 14px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.pending-orders-topbar__warning {
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--color-warning) 18%, white);
+  color: var(--color-warning);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* Grouped fields */
+
+.pending-orders-fields {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.pending-orders-fields__section h3 {
+  margin: 0 0 8px;
+  color: var(--text);
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.pending-orders-fields__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 20px;
+}
+
+.pending-orders-fields__item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.pending-orders-fields__label {
+  font-size: 12px;
+  color: var(--text);
+}
+
+.pending-orders-fields__value {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+.pending-orders-fields__confidence {
+  font-weight: 400;
+  font-size: 12px;
+  color: var(--text);
+}
+
+/* Attachments side list */
+
+.pending-orders-attachments {
+  width: 220px;
+  flex-shrink: 0;
+  padding-left: 20px;
+  border-left: 1px solid var(--border);
+}
+
+.pending-orders-attachments h3 {
+  margin: 0 0 12px;
+  color: var(--text);
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.pending-orders-attachments ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pending-orders-attachments__row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--color-text);
+}
+
+.pending-orders-attachments__name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pending-orders-attachments__size {
+  color: var(--text);
+  font-size: 11px;
+}
+
+.pending-orders-attachments__empty {
+  color: var(--text);
+  font-size: 13px;
+}
