@@ -101,7 +101,7 @@ export function PendingOrdersPage() {
                     <PendingOrderAttachments attachments={selectedItem.email.email_attachments} />
                   </div>
                 </div>
-                <ActionBar />
+                <ActionBar order={selectedItem.order} />
               </div>
             )}
           </div>

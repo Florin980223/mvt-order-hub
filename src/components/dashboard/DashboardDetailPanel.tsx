@@ -31,7 +31,7 @@ export function DashboardDetailPanel({ email }: DashboardDetailPanelProps) {
           <div className="emails-detail__not-processed">Comanda nu a fost încă extrasă.</div>
         )}
       </div>
-      <ActionBar />
+      <ActionBar order={order} />
     </div>
   )
 }

@@ -1,20 +1,64 @@
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { supabase } from '../../lib/supabaseClient'
+import { formatOrderStatus } from '../../lib/orders/format'
+import type { OrderRow } from '../../lib/emails/types'
+
 const DISABLED_TITLE = 'Disponibil din Faza 6'
 
+// Mirrors submit-order's ELIGIBLE_STATUSES (supabase/functions/submit-order/index.ts)
+// so the button reflects the same rule the server enforces.
+const ELIGIBLE_STATUSES = ['needs_validation', 'ready_to_import', 'import_failed']
+
+interface ActionBarProps {
+  order: OrderRow | null
+}
+
+interface SubmitOrderResult {
+  status: string
+  external_id: string
+}
+
 /**
- * All 4 buttons are visually specified by the brief's mockup but their
- * real behavior is Phase 6 — disabled here rather than omitted, since the
- * brief requires this exact action bar to always be present.
+ * All 4 buttons are visually specified by the brief's mockup. Phase 6b
+ * wires only the primary button — the other 3 stay disabled exactly as
+ * before, their real behavior is a later phase.
  */
-export function ActionBar() {
+export function ActionBar({ order }: ActionBarProps) {
+  const queryClient = useQueryClient()
+
+  const submitMutation = useMutation({
+    mutationFn: async (orderId: string) => {
+      const { data, error } = await supabase.functions.invoke<SubmitOrderResult>('submit-order', {
+        body: { order_id: orderId },
+      })
+      if (error) throw error
+      return data
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['emails', 'list'] })
+    },
+  })
+
+  const isEligible = order !== null && ELIGIBLE_STATUSES.includes(order.status)
+  const isSubmitting = submitMutation.isPending
+  const primaryDisabled = !isEligible || isSubmitting
+
+  const primaryTitle = !order
+    ? 'Comanda nu a fost încă extrasă'
+    : !isEligible
+      ? `Comanda are statusul „${formatOrderStatus(order.status)}” — nu poate fi importată`
+      : undefined
+
   return (
     <div className="emails-action-bar">
       <button
         type="button"
         className="emails-action-bar__btn emails-action-bar__btn--primary"
-        disabled
-        title={DISABLED_TITLE}
+        disabled={primaryDisabled}
+        title={primaryTitle}
+        onClick={() => order && submitMutation.mutate(order.id)}
       >
-        Salvează &amp; Importă în AscendTMS
+        {isSubmitting ? 'Se importă...' : 'Salvează & Importă în AscendTMS'}
       </button>
       <button
         type="button"
@@ -35,6 +79,11 @@ export function ActionBar() {
       >
         Trimite confirmare client
       </button>
+      {submitMutation.isError && (
+        <p className="emails-action-bar__error" role="alert">
+          {submitMutation.error instanceof Error ? submitMutation.error.message : 'Import eșuat.'}
+        </p>
+      )}
     </div>
   )
 }

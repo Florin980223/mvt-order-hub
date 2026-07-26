@@ -464,8 +464,19 @@
   border-radius: 6px;
   font: inherit;
   font-weight: 600;
+  cursor: pointer;
+}
+
+.emails-action-bar__btn:disabled {
   cursor: not-allowed;
   opacity: 0.6;
+}
+
+.emails-action-bar__error {
+  flex-basis: 100%;
+  margin: 0;
+  color: var(--color-error);
+  font-size: 0.875rem;
 }
 
 .emails-action-bar__btn--primary {
