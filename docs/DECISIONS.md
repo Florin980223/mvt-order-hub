@@ -24,3 +24,7 @@ A running log of decisions made for MVT Order Hub. Newer entries at the bottom.
 - **Query client**: a single shared `QueryClient` instance (`src/lib/queryClient.ts`) with default configuration; no devtools installed yet.
 - **Auth guard**: not implemented in Phase 1. A `ProtectedRoute` wrapper around the `AppLayout` route group is planned for the next phase.
 - **Styling**: `src/index.css` kept minimal and neutral in Phase 1 — only the Vite demo styling was removed. No final dashboard/sidebar/brand design has been implemented.
+
+## Phase 6 technical decisions
+
+- **Outbound API URL editing**: the non-secret outbound API URL seeded into `app_settings` (Phase 6b) is now admin-editable from Settings ("API extern" section). Reads stay a direct client-side `select` (already permitted by the `app_settings_select_admin` RLS policy); writes go through a new `update-outbound-api-setting` Edge Function using the service-role client, since `app_settings` has no client-writable RLS policy. The outbound API credential remains an Edge Function secret (`OUTBOUND_API_KEY`) and is never exposed in this UI.
