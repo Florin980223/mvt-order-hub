@@ -55,8 +55,7 @@ Deno.serve(async (req) => {
       throw new Error(emailError?.message ?? 'failed to upsert emails row')
     }
 
-    // body_text (plain-text extraction) is intentionally left null here —
-    // HTML sanitization/parsing is Phase 5's job, not this ingestion step.
+    await supabase.from('emails').update({ status: 'processing' }).eq('id', email.id)
 
     if (message.hasAttachments) {
       const downloadResponse = await fetch(`${FUNCTION_BASE_URL}/download-attachments`, {
@@ -75,6 +74,19 @@ Deno.serve(async (req) => {
       if (!downloadResponse.ok) {
         console.error('download-attachments returned', downloadResponse.status)
       }
+    }
+
+    const extractionResponse = await fetch(`${FUNCTION_BASE_URL}/process-email-job`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: req.headers.get('Authorization') ?? '',
+      },
+      body: JSON.stringify({ email_id: email.id }),
+    })
+
+    if (!extractionResponse.ok) {
+      console.error('process-email-job returned', extractionResponse.status)
     }
 
     await supabase.from('email_ingest_queue').update({ status: 'done' }).eq('id', payload.queue_id)
