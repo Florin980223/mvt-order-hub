@@ -4,6 +4,7 @@ import { PendingOrderFields } from '../pendingOrders/PendingOrderFields'
 import { PendingOrderTopBar } from '../pendingOrders/PendingOrderTopBar'
 import type { EmailRow } from '../../lib/emails/types'
 import { formatOrderStatus } from '../../lib/orders/format'
+import { useOrderCorrection } from '../../lib/orders/useOrderCorrection'
 
 interface DashboardDetailPanelProps {
   email: EmailRow
@@ -12,6 +13,7 @@ interface DashboardDetailPanelProps {
 /** Structurally mirrors PendingOrdersPage's right column — same components, same classes, same heading style. */
 export function DashboardDetailPanel({ email }: DashboardDetailPanelProps) {
   const order = email.orders[0] ?? null
+  const correction = useOrderCorrection(order)
 
   return (
     <div className="pending-orders-detail">
@@ -23,7 +25,7 @@ export function DashboardDetailPanel({ email }: DashboardDetailPanelProps) {
               Comandă #{order.client_order_number ?? order.id} — Status: {formatOrderStatus(order.status)}
             </h2>
             <div className="pending-orders-detail__body">
-              <PendingOrderFields order={order} />
+              <PendingOrderFields order={order} correction={correction} />
               <PendingOrderAttachments attachments={email.email_attachments} />
             </div>
           </>
@@ -31,7 +33,7 @@ export function DashboardDetailPanel({ email }: DashboardDetailPanelProps) {
           <div className="emails-detail__not-processed">Comanda nu a fost încă extrasă.</div>
         )}
       </div>
-      <ActionBar order={order} />
+      <ActionBar order={order} emailId={email.id} emailStatus={email.status} correction={correction} />
     </div>
   )
 }

@@ -101,7 +101,7 @@ export function EmailDetailPanel({ email }: EmailDetailPanelProps) {
         )}
       </div>
 
-      <ActionBar order={order} />
+      <ActionBar order={order} emailId={email.id} emailStatus={email.status} />
     </div>
   )
 }

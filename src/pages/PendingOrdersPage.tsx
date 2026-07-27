@@ -10,6 +10,7 @@ import { WorkflowProgressCard } from '../components/pendingOrders/WorkflowProgre
 import { useEmailsQuery } from '../lib/emails/useEmailsQuery'
 import type { EmailRow, OrderRow } from '../lib/emails/types'
 import { formatOrderStatus } from '../lib/orders/format'
+import { useOrderCorrection } from '../lib/orders/useOrderCorrection'
 // ActionBar/ConfidenceBadge/AttachmentBadge (reused from Phase 5b) are styled
 // by EmailsPage.css, not colocated with the components themselves — import
 // it here too so this page renders them correctly even if /emails was never
@@ -38,6 +39,7 @@ export function PendingOrdersPage() {
 
   // Derived rather than effect-driven, same pattern as EmailsPage.
   const selectedItem = pendingItems.find((item) => item.order.id === selectedOrderId) ?? pendingItems[0] ?? null
+  const correction = useOrderCorrection(selectedItem?.order ?? null)
 
   return (
     <div className="pending-orders-page">
@@ -97,11 +99,16 @@ export function PendingOrdersPage() {
                     {formatOrderStatus(selectedItem.order.status)}
                   </h2>
                   <div className="pending-orders-detail__body">
-                    <PendingOrderFields order={selectedItem.order} />
+                    <PendingOrderFields order={selectedItem.order} correction={correction} />
                     <PendingOrderAttachments attachments={selectedItem.email.email_attachments} />
                   </div>
                 </div>
-                <ActionBar order={selectedItem.order} />
+                <ActionBar
+                  order={selectedItem.order}
+                  emailId={selectedItem.email.id}
+                  emailStatus={selectedItem.email.status}
+                  correction={correction}
+                />
               </div>
             )}
           </div>

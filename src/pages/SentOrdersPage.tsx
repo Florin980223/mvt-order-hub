@@ -8,6 +8,7 @@ import { PendingOrdersTable } from '../components/pendingOrders/PendingOrdersTab
 import { useEmailsQuery } from '../lib/emails/useEmailsQuery'
 import type { EmailRow, OrderRow } from '../lib/emails/types'
 import { formatOrderStatus } from '../lib/orders/format'
+import { useOrderCorrection } from '../lib/orders/useOrderCorrection'
 // Reused from PendingOrdersPage — same components, same classes.
 import './EmailsPage.css'
 import './PendingOrdersPage.css'
@@ -40,6 +41,7 @@ export function SentOrdersPage() {
   )
 
   const selectedItem = sentItems.find((item) => item.order.id === selectedOrderId) ?? sentItems[0] ?? null
+  const correction = useOrderCorrection(selectedItem?.order ?? null)
 
   return (
     <div className="pending-orders-page">
@@ -96,11 +98,16 @@ export function SentOrdersPage() {
                     {formatOrderStatus(selectedItem.order.status)}
                   </h2>
                   <div className="pending-orders-detail__body">
-                    <PendingOrderFields order={selectedItem.order} />
+                    <PendingOrderFields order={selectedItem.order} correction={correction} />
                     <PendingOrderAttachments attachments={selectedItem.email.email_attachments} />
                   </div>
                 </div>
-                <ActionBar order={selectedItem.order} />
+                <ActionBar
+                  order={selectedItem.order}
+                  emailId={selectedItem.email.id}
+                  emailStatus={selectedItem.email.status}
+                  correction={correction}
+                />
               </div>
             )}
           </div>

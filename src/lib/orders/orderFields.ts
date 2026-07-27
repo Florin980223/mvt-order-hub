@@ -1,6 +1,33 @@
 import { formatDate } from '../emails/format.ts'
 import type { OrderFieldSourceRow, OrderRow } from '../emails/types.ts'
 
+function pad2(value: number): string {
+  return String(value).padStart(2, '0')
+}
+
+/**
+ * ISO timestamptz -> `datetime-local` input value, in the browser's local
+ * timezone (that input type has no timezone concept of its own). Not a
+ * lossless round-trip of the original source's offset — acceptable for
+ * MVP, not pretending otherwise.
+ */
+export function toDatetimeLocalValue(isoString: string | null): string {
+  if (!isoString) return ''
+  const date = new Date(isoString)
+  if (Number.isNaN(date.getTime())) return ''
+  return `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(date.getDate())}T${pad2(date.getHours())}:${pad2(date.getMinutes())}`
+}
+
+/** `datetime-local` input value -> ISO timestamptz (local timezone), or null if empty/invalid. */
+export function fromDatetimeLocalValue(localValue: string): string | null {
+  if (!localValue) return null
+  const date = new Date(localValue)
+  if (Number.isNaN(date.getTime())) return null
+  return date.toISOString()
+}
+
+export type FieldInputType = 'text' | 'number' | 'datetime'
+
 export interface OrderFieldDef {
   label: string
   fieldName: string
@@ -9,6 +36,16 @@ export interface OrderFieldDef {
   // set by submit-order on import) — excluded from countLowConfidenceFields
   // below, which otherwise assumes every field has a confidence source.
   trackConfidence?: boolean
+  // Present only on fields correctable via useOrderCorrection — controls
+  // which <input> type PendingOrderFields renders in edit mode.
+  // external_reference_id (trackConfidence: false) has none, since it's
+  // submission metadata, not something an operator corrects.
+  inputType?: FieldInputType
+  // Plain editable representation for the input's value while in edit
+  // mode — distinct from `value()`, which returns a formatted display
+  // string (e.g. "15 paleți") unsuitable for round-tripping through an
+  // <input>.
+  rawValue?: (order: OrderRow) => string
 }
 
 export interface OrderFieldSection {
@@ -27,8 +64,20 @@ export const ORDER_FIELD_SECTIONS: OrderFieldSection[] = [
   {
     title: 'Date comandă',
     fields: [
-      { label: 'Nr. comandă', fieldName: 'client_order_number', value: (order) => order.client_order_number ?? '—' },
-      { label: 'Client / Expeditor', fieldName: 'client_name', value: (order) => order.client_name ?? '—' },
+      {
+        label: 'Nr. comandă',
+        fieldName: 'client_order_number',
+        value: (order) => order.client_order_number ?? '—',
+        inputType: 'text',
+        rawValue: (order) => order.client_order_number ?? '',
+      },
+      {
+        label: 'Client / Expeditor',
+        fieldName: 'client_name',
+        value: (order) => order.client_name ?? '—',
+        inputType: 'text',
+        rawValue: (order) => order.client_name ?? '',
+      },
       {
         label: 'ID extern',
         fieldName: 'external_reference_id',
@@ -40,36 +89,72 @@ export const ORDER_FIELD_SECTIONS: OrderFieldSection[] = [
   {
     title: 'Rute',
     fields: [
-      { label: 'Adresă ridicare', fieldName: 'pickup_address', value: (order) => order.pickup_address ?? '—' },
-      { label: 'Adresă livrare', fieldName: 'delivery_address', value: (order) => order.delivery_address ?? '—' },
+      {
+        label: 'Adresă ridicare',
+        fieldName: 'pickup_address',
+        value: (order) => order.pickup_address ?? '—',
+        inputType: 'text',
+        rawValue: (order) => order.pickup_address ?? '',
+      },
+      {
+        label: 'Adresă livrare',
+        fieldName: 'delivery_address',
+        value: (order) => order.delivery_address ?? '—',
+        inputType: 'text',
+        rawValue: (order) => order.delivery_address ?? '',
+      },
     ],
   },
   {
     title: 'Programare',
     fields: [
-      { label: 'Data ridicare', fieldName: 'pickup_at', value: (order) => formatDate(order.pickup_at) },
-      { label: 'Data livrare', fieldName: 'delivery_at', value: (order) => formatDate(order.delivery_at) },
+      {
+        label: 'Data ridicare',
+        fieldName: 'pickup_at',
+        value: (order) => formatDate(order.pickup_at),
+        inputType: 'datetime',
+        rawValue: (order) => toDatetimeLocalValue(order.pickup_at),
+      },
+      {
+        label: 'Data livrare',
+        fieldName: 'delivery_at',
+        value: (order) => formatDate(order.delivery_at),
+        inputType: 'datetime',
+        rawValue: (order) => toDatetimeLocalValue(order.delivery_at),
+      },
     ],
   },
   {
     title: 'Marfă',
     fields: [
-      { label: 'Tip marfă', fieldName: 'cargo_type', value: (order) => order.cargo_type ?? '—' },
+      {
+        label: 'Tip marfă',
+        fieldName: 'cargo_type',
+        value: (order) => order.cargo_type ?? '—',
+        inputType: 'text',
+        rawValue: (order) => order.cargo_type ?? '',
+      },
       {
         label: 'Cantitate',
         fieldName: 'quantity',
         value: (order) =>
           order.quantity !== null ? `${order.quantity}${order.quantity_unit ? ` ${order.quantity_unit}` : ''}` : '—',
+        inputType: 'number',
+        rawValue: (order) => (order.quantity !== null ? String(order.quantity) : ''),
       },
       {
         label: 'Greutate',
         fieldName: 'weight_kg',
         value: (order) => (order.weight_kg !== null ? `${order.weight_kg} kg` : '—'),
+        inputType: 'number',
+        rawValue: (order) => (order.weight_kg !== null ? String(order.weight_kg) : ''),
       },
       {
         label: 'Volum',
         fieldName: 'volume_m3',
         value: (order) => (order.volume_m3 !== null ? `${order.volume_m3} m³` : '—'),
+        inputType: 'number',
+        rawValue: (order) => (order.volume_m3 !== null ? String(order.volume_m3) : ''),
       },
     ],
   },
@@ -80,13 +165,23 @@ export const ORDER_FIELD_SECTIONS: OrderFieldSection[] = [
         label: 'Valoare transport',
         fieldName: 'transport_amount',
         value: (order) => (order.transport_amount !== null ? `${order.transport_amount} ${order.currency}` : '—'),
+        inputType: 'number',
+        rawValue: (order) => (order.transport_amount !== null ? String(order.transport_amount) : ''),
       },
       {
         label: 'Transportator propus',
         fieldName: 'carrier_proposed',
         value: (order) => order.carrier_proposed ?? '—',
+        inputType: 'text',
+        rawValue: (order) => order.carrier_proposed ?? '',
       },
-      { label: 'Observații', fieldName: 'notes', value: (order) => order.notes ?? '—' },
+      {
+        label: 'Observații',
+        fieldName: 'notes',
+        value: (order) => order.notes ?? '—',
+        inputType: 'text',
+        rawValue: (order) => order.notes ?? '',
+      },
     ],
   },
 ]
