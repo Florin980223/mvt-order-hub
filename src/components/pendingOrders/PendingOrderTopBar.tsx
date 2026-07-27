@@ -1,6 +1,7 @@
 import { ConfidenceBadge } from '../emails/ConfidenceBadge'
 import type { OrderRow } from '../../lib/emails/types'
 import { countLowConfidenceFields } from '../../lib/orders/orderFields'
+import { useConfidenceThresholdQuery, DEFAULT_CONFIDENCE_THRESHOLD } from '../../lib/settings/useConfidenceThresholdQuery'
 
 interface PendingOrderTopBarProps {
   order: OrderRow
@@ -13,7 +14,9 @@ interface PendingOrderTopBarProps {
  * accurate, phase-neutral tooltips instead.
  */
 export function PendingOrderTopBar({ order }: PendingOrderTopBarProps) {
-  const lowConfidenceCount = countLowConfidenceFields(order)
+  const { data: confidenceThresholdSetting } = useConfidenceThresholdQuery()
+  const confidenceThreshold = confidenceThresholdSetting?.value_json.threshold ?? DEFAULT_CONFIDENCE_THRESHOLD
+  const lowConfidenceCount = countLowConfidenceFields(order, confidenceThreshold)
 
   return (
     <div className="pending-orders-topbar">

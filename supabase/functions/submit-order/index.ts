@@ -1,7 +1,10 @@
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { CORS_HEADERS, handleCorsPreflight } from '../_shared/cors.ts'
+import { checkImportReadiness } from '../../../src/lib/orders/importReadiness.ts'
+import type { OrderRow } from '../../../src/lib/emails/types.ts'
 
 const ELIGIBLE_STATUSES = ['needs_validation', 'ready_to_import', 'import_failed']
+const DEFAULT_CONFIDENCE_THRESHOLD = 0.85
 
 interface SubmitOrderPayload {
   order_id: string
@@ -68,7 +71,8 @@ Deno.serve(async (req) => {
       .select(
         `id, status, client_order_number, client_name, pickup_address, pickup_at,
          delivery_address, delivery_at, cargo_type, quantity, quantity_unit,
-         weight_kg, volume_m3, transport_amount, currency, carrier_proposed, notes`,
+         weight_kg, volume_m3, transport_amount, currency, carrier_proposed, notes,
+         order_field_sources (field_name, source_type, source_ref, confidence, created_at)`,
       )
       .eq('id', payload.order_id)
       .maybeSingle()
@@ -79,6 +83,26 @@ Deno.serve(async (req) => {
 
     if (!ELIGIBLE_STATUSES.includes(order.status)) {
       return jsonResponse({ error: `order status '${order.status}' is not eligible for submission` }, 409)
+    }
+
+    const { data: thresholdSetting } = await supabase
+      .from('app_settings')
+      .select('value_json')
+      .eq('key', 'confidence_threshold')
+      .maybeSingle()
+    const confidenceThreshold =
+      (thresholdSetting?.value_json as { threshold?: number } | null)?.threshold ?? DEFAULT_CONFIDENCE_THRESHOLD
+
+    const readiness = checkImportReadiness(order as unknown as OrderRow, confidenceThreshold)
+    if (!readiness.ready) {
+      return jsonResponse(
+        {
+          error: 'order data is not valid for import',
+          missing_required_fields: readiness.missingRequiredFields,
+          low_confidence_fields: readiness.lowConfidenceFields,
+        },
+        409,
+      )
     }
 
     const { data: inFlightJob, error: inFlightError } = await supabase

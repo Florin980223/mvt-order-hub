@@ -4,6 +4,7 @@ import { Loader2, RefreshCw, TriangleAlert } from 'lucide-react'
 import { supabase } from '../lib/supabaseClient'
 import { useMailConnectionQuery } from '../lib/settings/useMailConnectionQuery'
 import { useOutboundApiQuery } from '../lib/settings/useOutboundApiQuery'
+import { useConfidenceThresholdQuery } from '../lib/settings/useConfidenceThresholdQuery'
 import { formatConnectionStatus } from '../lib/settings/format'
 import { formatDateTime } from '../lib/emails/format'
 
@@ -17,6 +18,10 @@ interface UpdateOutboundApiResult {
   url: string
 }
 
+interface UpdateConfidenceThresholdResult {
+  threshold: number
+}
+
 function isValidHttpUrl(value: string): boolean {
   try {
     const parsed = new URL(value)
@@ -24,6 +29,10 @@ function isValidHttpUrl(value: string): boolean {
   } catch {
     return false
   }
+}
+
+function isValidPercent(value: number): boolean {
+  return Number.isFinite(value) && value >= 0 && value <= 100
 }
 
 export function SettingsPage() {
@@ -76,6 +85,35 @@ export function SettingsPage() {
   const resolvedUrl = urlInput ?? currentUrl
   const isUrlValid = isValidHttpUrl(resolvedUrl)
   const saveDisabled = !isUrlValid || resolvedUrl === currentUrl || updateOutboundApiMutation.isPending
+
+  const {
+    data: confidenceThresholdSetting,
+    isLoading: isConfidenceThresholdLoading,
+    isError: isConfidenceThresholdError,
+    error: confidenceThresholdError,
+  } = useConfidenceThresholdQuery()
+
+  const [thresholdPercentInput, setThresholdPercentInput] = useState<number | null>(null)
+
+  const updateConfidenceThresholdMutation = useMutation({
+    mutationFn: async (threshold: number) => {
+      const { data, error } = await supabase.functions.invoke<UpdateConfidenceThresholdResult>(
+        'update-confidence-threshold-setting',
+        { body: { threshold } },
+      )
+      if (error) throw error
+      return data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['settings', 'confidence-threshold'] })
+    },
+  })
+
+  const currentThresholdPercent = Math.round((confidenceThresholdSetting?.value_json.threshold ?? 0.85) * 100)
+  const resolvedThresholdPercent = thresholdPercentInput ?? currentThresholdPercent
+  const isThresholdValid = isValidPercent(resolvedThresholdPercent)
+  const thresholdSaveDisabled =
+    !isThresholdValid || resolvedThresholdPercent === currentThresholdPercent || updateConfidenceThresholdMutation.isPending
 
   return (
     <div>
@@ -172,6 +210,57 @@ export function SettingsPage() {
             )}
 
             {updateOutboundApiMutation.isSuccess && <p>Salvat.</p>}
+          </>
+        )}
+      </section>
+
+      <section>
+        <h2>Prag de încredere</h2>
+
+        {isConfidenceThresholdLoading && (
+          <p>
+            <Loader2 aria-hidden="true" size={16} /> Se încarcă pragul de încredere...
+          </p>
+        )}
+
+        {isConfidenceThresholdError && (
+          <p>
+            <TriangleAlert aria-hidden="true" size={16} /> Pragul nu a putut fi încărcat
+            {confidenceThresholdError instanceof Error ? `: ${confidenceThresholdError.message}` : '.'}
+          </p>
+        )}
+
+        {!isConfidenceThresholdLoading && !isConfidenceThresholdError && (
+          <>
+            <label htmlFor="confidence-threshold">Prag minim de încredere pentru import (%)</label>
+            <input
+              id="confidence-threshold"
+              type="number"
+              min={0}
+              max={100}
+              value={resolvedThresholdPercent}
+              onChange={(e) => setThresholdPercentInput(e.target.valueAsNumber)}
+            />
+
+            <button
+              type="button"
+              onClick={() => updateConfidenceThresholdMutation.mutate(resolvedThresholdPercent / 100)}
+              disabled={thresholdSaveDisabled}
+            >
+              {updateConfidenceThresholdMutation.isPending ? 'Se salvează...' : 'Salvează'}
+            </button>
+
+            {!isThresholdValid && <p role="alert">Valoare invalidă — introduceți un număr între 0 și 100.</p>}
+
+            {updateConfidenceThresholdMutation.isError && (
+              <p role="alert">
+                {updateConfidenceThresholdMutation.error instanceof Error
+                  ? updateConfidenceThresholdMutation.error.message
+                  : 'Salvarea a eșuat.'}
+              </p>
+            )}
+
+            {updateConfidenceThresholdMutation.isSuccess && <p>Salvat.</p>}
           </>
         )}
       </section>

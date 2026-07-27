@@ -1,5 +1,5 @@
-import { formatDate } from '../emails/format'
-import type { OrderFieldSourceRow, OrderRow } from '../emails/types'
+import { formatDate } from '../emails/format.ts'
+import type { OrderFieldSourceRow, OrderRow } from '../emails/types.ts'
 
 export interface OrderFieldDef {
   label: string
@@ -97,15 +97,13 @@ export function latestSourceFor(sources: OrderFieldSourceRow[], fieldName: strin
   return matches.reduce((latest, current) => (current.created_at > latest.created_at ? current : latest))
 }
 
-/** Same red-boundary threshold ConfidenceBadge already uses, for consistency. */
-const LOW_CONFIDENCE_THRESHOLD = 0.6
-
-export function countLowConfidenceFields(order: OrderRow): number {
+/** Informational count across every tracked field (not just import-required ones) — the admin-configurable threshold now comes from app_settings, read by the caller. See src/lib/orders/importReadiness.ts for the stricter, import-blocking check. */
+export function countLowConfidenceFields(order: OrderRow, confidenceThreshold: number): number {
   const allFields = ORDER_FIELD_SECTIONS.flatMap((section) => section.fields).filter(
     (field) => field.trackConfidence !== false,
   )
   return allFields.filter((field) => {
     const source = latestSourceFor(order.order_field_sources, field.fieldName)
-    return source?.confidence == null || source.confidence < LOW_CONFIDENCE_THRESHOLD
+    return source?.confidence == null || source.confidence < confidenceThreshold
   }).length
 }
