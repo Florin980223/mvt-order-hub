@@ -39,6 +39,9 @@ export function LoginPage() {
       return
     }
 
+    // Best-effort audit log — never blocks navigation on a logging hiccup.
+    void supabase.functions.invoke('log-login').catch(() => {})
+
     navigate('/dashboard')
   }
 

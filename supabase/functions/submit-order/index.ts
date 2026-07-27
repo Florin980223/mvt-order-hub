@@ -220,6 +220,19 @@ Deno.serve(async (req) => {
       user_id: userId,
     })
 
+    try {
+      await supabase.from('audit_logs').insert({
+        actor_id: userId,
+        action: 'import',
+        entity: 'orders',
+        entity_id: order.id,
+        old_data: { status: order.status },
+        new_data: { status: 'imported', external_reference_id: externalId },
+      })
+    } catch (auditErr) {
+      console.error('submit-order audit log error:', (auditErr as Error).message)
+    }
+
     return jsonResponse({ status: 'imported', external_id: externalId }, 200)
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : String(err)
