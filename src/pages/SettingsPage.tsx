@@ -2,9 +2,11 @@ import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Loader2, RefreshCw, TriangleAlert } from 'lucide-react'
 import { supabase } from '../lib/supabaseClient'
+import { useAuth } from '../lib/auth/useAuth'
 import { useMailConnectionQuery } from '../lib/settings/useMailConnectionQuery'
 import { useOutboundApiQuery } from '../lib/settings/useOutboundApiQuery'
 import { useConfidenceThresholdQuery } from '../lib/settings/useConfidenceThresholdQuery'
+import { useProfilesQuery, type ProfileRow } from '../lib/settings/useProfilesQuery'
 import { formatConnectionStatus } from '../lib/settings/format'
 import { formatDateTime } from '../lib/emails/format'
 
@@ -20,6 +22,13 @@ interface UpdateOutboundApiResult {
 
 interface UpdateConfidenceThresholdResult {
   threshold: number
+}
+
+interface UpdateProfileResult {
+  id: string
+  full_name: string | null
+  role: string
+  active: boolean
 }
 
 function isValidHttpUrl(value: string): boolean {
@@ -114,6 +123,31 @@ export function SettingsPage() {
   const isThresholdValid = isValidPercent(resolvedThresholdPercent)
   const thresholdSaveDisabled =
     !isThresholdValid || resolvedThresholdPercent === currentThresholdPercent || updateConfidenceThresholdMutation.isPending
+
+  const { user } = useAuth()
+  const {
+    data: profiles,
+    isLoading: isProfilesLoading,
+    isError: isProfilesError,
+    error: profilesError,
+  } = useProfilesQuery()
+
+  const updateProfileMutation = useMutation({
+    mutationFn: async (update: { profile_id: string; active?: boolean; role?: string }) => {
+      const { data, error } = await supabase.functions.invoke<UpdateProfileResult>('update-profile', {
+        body: update,
+      })
+      if (error) throw error
+      return data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['settings', 'profiles'] })
+    },
+  })
+
+  function isSelf(profile: ProfileRow): boolean {
+    return profile.id === user?.id
+  }
 
   return (
     <div>
@@ -262,6 +296,76 @@ export function SettingsPage() {
 
             {updateConfidenceThresholdMutation.isSuccess && <p>Salvat.</p>}
           </>
+        )}
+      </section>
+
+      <section>
+        <h2>Utilizatori</h2>
+
+        {isProfilesLoading && (
+          <p>
+            <Loader2 aria-hidden="true" size={16} /> Se încarcă utilizatorii...
+          </p>
+        )}
+
+        {isProfilesError && (
+          <p>
+            <TriangleAlert aria-hidden="true" size={16} /> Utilizatorii nu au putut fi încărcați
+            {profilesError instanceof Error ? `: ${profilesError.message}` : '.'}
+          </p>
+        )}
+
+        {!isProfilesLoading && !isProfilesError && (
+          <table>
+            <thead>
+              <tr>
+                <th>Nume</th>
+                <th>Rol</th>
+                <th>Activ</th>
+                <th />
+              </tr>
+            </thead>
+            <tbody>
+              {(profiles ?? []).map((profile) => (
+                <tr key={profile.id}>
+                  <td>{profile.full_name ?? '—'}</td>
+                  <td>
+                    <select
+                      value={profile.role}
+                      disabled={isSelf(profile) || updateProfileMutation.isPending}
+                      onChange={(e) =>
+                        updateProfileMutation.mutate({ profile_id: profile.id, role: e.target.value })
+                      }
+                    >
+                      <option value="operator">Operator</option>
+                      <option value="admin">Administrator</option>
+                    </select>
+                  </td>
+                  <td>{profile.active ? 'Da' : 'Nu'}</td>
+                  <td>
+                    <button
+                      type="button"
+                      disabled={isSelf(profile) || updateProfileMutation.isPending}
+                      title={isSelf(profile) ? 'Nu vă puteți dezactiva propriul cont' : undefined}
+                      onClick={() =>
+                        updateProfileMutation.mutate({ profile_id: profile.id, active: !profile.active })
+                      }
+                    >
+                      {profile.active ? 'Dezactivează' : 'Activează'}
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+
+        {updateProfileMutation.isError && (
+          <p role="alert">
+            {updateProfileMutation.error instanceof Error
+              ? updateProfileMutation.error.message
+              : 'Actualizarea utilizatorului a eșuat.'}
+          </p>
         )}
       </section>
     </div>

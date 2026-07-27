@@ -9,6 +9,7 @@ const navItems = [
   { to: '/pending-orders', label: 'Comenzi in asteptare' },
   { to: '/sent-orders', label: 'Comenzi transmise/importate' },
   { to: '/reports', label: 'Rapoarte' },
+  { to: '/technical-logs', label: 'Jurnal tehnic' },
   { to: '/settings', label: 'Setari', adminOnly: true },
 ]
 

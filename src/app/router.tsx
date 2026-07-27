@@ -12,6 +12,7 @@ import { PendingOrdersPage } from '../pages/PendingOrdersPage'
 import { SentOrdersPage } from '../pages/SentOrdersPage'
 import { ReportsPage } from '../pages/ReportsPage'
 import { SettingsPage } from '../pages/SettingsPage'
+import { TechnicalLogsPage } from '../pages/TechnicalLogsPage'
 import { NotFoundPage } from '../pages/NotFoundPage'
 
 export function AppRouter() {
@@ -31,6 +32,7 @@ export function AppRouter() {
           <Route path="/pending-orders" element={<PendingOrdersPage />} />
           <Route path="/sent-orders" element={<SentOrdersPage />} />
           <Route path="/reports" element={<ReportsPage />} />
+          <Route path="/technical-logs" element={<TechnicalLogsPage />} />
           <Route element={<RequireAdmin />}>
             <Route path="/settings" element={<SettingsPage />} />
           </Route>
