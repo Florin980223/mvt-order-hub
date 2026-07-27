@@ -1,9 +1,10 @@
 import DOMPurify from 'dompurify'
-import { Check, File as FileIcon, FileSpreadsheet, FileText } from 'lucide-react'
+import { Check, Download, File as FileIcon, FileSpreadsheet, FileText } from 'lucide-react'
 import { formatDateTime, formatFileSize } from '../../lib/emails/format'
 import type { EmailRow } from '../../lib/emails/types'
 import { usePrimaryMailboxAddress } from '../../lib/emails/useEmailsQuery'
 import { getFileTypeMeta } from '../../lib/emails/fileType'
+import { useOpenAttachment } from '../../lib/emails/useOpenAttachment'
 import { ActionBar } from './ActionBar'
 import { ConfidenceBadge } from './ConfidenceBadge'
 import { OrderFieldsSummary } from './OrderFieldsSummary'
@@ -22,6 +23,7 @@ function FileTypeIcon({ mimeType, filename }: { mimeType: string; filename: stri
 
 export function EmailDetailPanel({ email }: EmailDetailPanelProps) {
   const { data: mailboxAddress } = usePrimaryMailboxAddress()
+  const openAttachment = useOpenAttachment()
   const order = email.orders[0] ?? null
 
   const sanitizedBody = email.body_html
@@ -65,9 +67,22 @@ export function EmailDetailPanel({ email }: EmailDetailPanelProps) {
                   <span className="emails-attachment-row__name">{attachment.filename}</span>
                   <span className="emails-attachment-row__size">{formatFileSize(attachment.size)}</span>
                   <Check aria-hidden="true" size={16} className="emails-attachment-row__check" />
+                  <button
+                    type="button"
+                    onClick={() => openAttachment.mutate(attachment.id)}
+                    disabled={openAttachment.isPending && openAttachment.variables === attachment.id}
+                    title="Deschide"
+                  >
+                    <Download aria-hidden="true" size={16} />
+                  </button>
                 </li>
               ))}
             </ul>
+            {openAttachment.isError && (
+              <p role="alert">
+                {openAttachment.error instanceof Error ? openAttachment.error.message : 'Deschiderea atașamentului a eșuat.'}
+              </p>
+            )}
           </section>
         )}
 

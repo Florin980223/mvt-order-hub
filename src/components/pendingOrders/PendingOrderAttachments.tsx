@@ -1,6 +1,7 @@
-import { File as FileIcon, FileSpreadsheet, FileText } from 'lucide-react'
+import { Download, File as FileIcon, FileSpreadsheet, FileText } from 'lucide-react'
 import { formatFileSize } from '../../lib/emails/format'
 import { getFileTypeMeta } from '../../lib/emails/fileType'
+import { useOpenAttachment } from '../../lib/emails/useOpenAttachment'
 import type { EmailAttachmentRow } from '../../lib/emails/types'
 
 interface PendingOrderAttachmentsProps {
@@ -15,6 +16,8 @@ function FileTypeIcon({ mimeType, filename }: { mimeType: string; filename: stri
 }
 
 export function PendingOrderAttachments({ attachments }: PendingOrderAttachmentsProps) {
+  const openAttachment = useOpenAttachment()
+
   return (
     <div className="pending-orders-attachments">
       <h3>Atașamente detectate</h3>
@@ -27,9 +30,22 @@ export function PendingOrderAttachments({ attachments }: PendingOrderAttachments
               <FileTypeIcon mimeType={attachment.mime_type} filename={attachment.filename} />
               <span className="pending-orders-attachments__name">{attachment.filename}</span>
               <span className="pending-orders-attachments__size">{formatFileSize(attachment.size)}</span>
+              <button
+                type="button"
+                onClick={() => openAttachment.mutate(attachment.id)}
+                disabled={openAttachment.isPending && openAttachment.variables === attachment.id}
+                title="Deschide"
+              >
+                <Download aria-hidden="true" size={16} />
+              </button>
             </li>
           ))}
         </ul>
+      )}
+      {openAttachment.isError && (
+        <p role="alert">
+          {openAttachment.error instanceof Error ? openAttachment.error.message : 'Deschiderea atașamentului a eșuat.'}
+        </p>
       )}
     </div>
   )
