@@ -4,7 +4,7 @@ const GRAPH_BASE_URL = 'https://graph.microsoft.com/v1.0'
 const TOKEN_REFRESH_MARGIN_MS = 5 * 60 * 1000
 
 export const GRAPH_SCOPES =
-  'https://graph.microsoft.com/Mail.Read https://graph.microsoft.com/Mail.ReadWrite https://graph.microsoft.com/User.Read offline_access'
+  'https://graph.microsoft.com/Mail.Read https://graph.microsoft.com/Mail.ReadWrite https://graph.microsoft.com/Mail.Send https://graph.microsoft.com/User.Read offline_access'
 
 interface StoredTokens {
   access_token: string

@@ -209,7 +209,12 @@ Deno.serve(async (req) => {
 
     const { error: importedError } = await supabase
       .from('orders')
-      .update({ status: 'imported', external_reference_id: externalId, updated_by: userId })
+      .update({
+        status: 'imported',
+        external_reference_id: externalId,
+        updated_by: userId,
+        imported_at: new Date().toISOString(),
+      })
       .eq('id', order.id)
     if (importedError) throw new Error(importedError.message)
 

@@ -6,7 +6,6 @@ import { useConfidenceThresholdQuery, DEFAULT_CONFIDENCE_THRESHOLD } from '../..
 import type { OrderCorrection } from '../../lib/orders/useOrderCorrection'
 import type { OrderRow } from '../../lib/emails/types'
 
-const DISABLED_TITLE = 'Disponibil din Faza 6'
 const CORRECTION_UNAVAILABLE_TITLE = 'Disponibil din Comenzi în așteptare'
 
 // Mirrors submit-order's ELIGIBLE_STATUSES (supabase/functions/submit-order/index.ts)
@@ -40,7 +39,11 @@ interface RetryExtractionResult {
   status: string
 }
 
-/** All 4 buttons are visually specified by the brief's mockup. "Trimite confirmare client" stays disabled — a later phase. */
+interface SendClientConfirmationResult {
+  status: string
+}
+
+/** All buttons are visually specified by the brief's mockup. */
 export function ActionBar({ order, emailId, emailStatus, latestExtractionJobStatus, correction }: ActionBarProps) {
   const queryClient = useQueryClient()
 
@@ -75,6 +78,20 @@ export function ActionBar({ order, emailId, emailStatus, latestExtractionJobStat
       const { data, error } = await supabase.functions.invoke<RetryExtractionResult>('retry-extraction', {
         body: { email_id: id },
       })
+      if (error) throw error
+      return data
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['emails', 'list'] })
+    },
+  })
+
+  const sendConfirmationMutation = useMutation({
+    mutationFn: async (orderId: string) => {
+      const { data, error } = await supabase.functions.invoke<SendClientConfirmationResult>(
+        'send-client-confirmation',
+        { body: { order_id: orderId } },
+      )
       if (error) throw error
       return data
     },
@@ -131,6 +148,14 @@ export function ActionBar({ order, emailId, emailStatus, latestExtractionJobStat
     ? 'Emailul nu a fost încă identificat'
     : latestExtractionJobStatus !== 'failed'
       ? 'Disponibil doar când ultima extragere a eșuat'
+      : undefined
+
+  const canSendConfirmation = order !== null && order.status === 'imported'
+  const sendConfirmationDisabled = !canSendConfirmation || sendConfirmationMutation.isPending || isEditing
+  const sendConfirmationTitle = !order
+    ? 'Comanda nu a fost încă extrasă'
+    : order.status !== 'imported'
+      ? `Comanda are statusul „${formatOrderStatus(order.status)}” — nu poate fi trimisă confirmarea`
       : undefined
 
   function handleRejectClick() {
@@ -198,10 +223,11 @@ export function ActionBar({ order, emailId, emailStatus, latestExtractionJobStat
       <button
         type="button"
         className="emails-action-bar__btn emails-action-bar__btn--blue"
-        disabled
-        title={DISABLED_TITLE}
+        disabled={sendConfirmationDisabled}
+        title={sendConfirmationTitle}
+        onClick={() => order && sendConfirmationMutation.mutate(order.id)}
       >
-        Trimite confirmare client
+        {sendConfirmationMutation.isPending ? 'Se trimite...' : 'Trimite confirmare client'}
       </button>
       {submitMutation.isError && (
         <p className="emails-action-bar__error" role="alert">
@@ -225,6 +251,13 @@ export function ActionBar({ order, emailId, emailStatus, latestExtractionJobStat
           {retryExtractionMutation.error instanceof Error
             ? retryExtractionMutation.error.message
             : 'Reîncercarea extragerii a eșuat.'}
+        </p>
+      )}
+      {sendConfirmationMutation.isError && (
+        <p className="emails-action-bar__error" role="alert">
+          {sendConfirmationMutation.error instanceof Error
+            ? sendConfirmationMutation.error.message
+            : 'Trimiterea confirmării a eșuat.'}
         </p>
       )}
     </div>
