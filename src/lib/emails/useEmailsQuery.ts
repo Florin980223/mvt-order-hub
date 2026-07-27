@@ -17,6 +17,7 @@ export function useEmailsQuery() {
           `
           id, graph_message_id, sender, subject, body_html, received_at, status,
           email_attachments (id, filename, mime_type, size, storage_path, created_at),
+          extraction_jobs (id, status, error, created_at),
           orders (
             id, client_order_number, client_name, pickup_address, pickup_at,
             delivery_address, delivery_at, cargo_type, quantity, quantity_unit,

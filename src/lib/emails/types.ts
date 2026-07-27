@@ -45,6 +45,13 @@ export interface EmailAttachmentRow {
   created_at: string
 }
 
+export interface ExtractionJobRow {
+  id: string
+  status: string
+  error: string | null
+  created_at: string
+}
+
 export interface EmailRow {
   id: string
   graph_message_id: string
@@ -55,4 +62,5 @@ export interface EmailRow {
   status: string
   email_attachments: EmailAttachmentRow[]
   orders: OrderRow[]
+  extraction_jobs: ExtractionJobRow[]
 }

@@ -22,6 +22,7 @@ interface ActionBarProps {
   order: OrderRow | null
   emailId: string | null
   emailStatus?: string
+  latestExtractionJobStatus?: string | null
   correction?: OrderCorrection
 }
 
@@ -35,8 +36,12 @@ interface RejectEmailResult {
   cascaded_order_ids: string[]
 }
 
+interface RetryExtractionResult {
+  status: string
+}
+
 /** All 4 buttons are visually specified by the brief's mockup. "Trimite confirmare client" stays disabled — a later phase. */
-export function ActionBar({ order, emailId, emailStatus, correction }: ActionBarProps) {
+export function ActionBar({ order, emailId, emailStatus, latestExtractionJobStatus, correction }: ActionBarProps) {
   const queryClient = useQueryClient()
 
   const submitMutation = useMutation({
@@ -55,6 +60,19 @@ export function ActionBar({ order, emailId, emailStatus, correction }: ActionBar
   const rejectMutation = useMutation({
     mutationFn: async (id: string) => {
       const { data, error } = await supabase.functions.invoke<RejectEmailResult>('reject-email', {
+        body: { email_id: id },
+      })
+      if (error) throw error
+      return data
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['emails', 'list'] })
+    },
+  })
+
+  const retryExtractionMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { data, error } = await supabase.functions.invoke<RetryExtractionResult>('retry-extraction', {
         body: { email_id: id },
       })
       if (error) throw error
@@ -107,6 +125,14 @@ export function ActionBar({ order, emailId, emailStatus, correction }: ActionBar
       ? 'Emailul este deja respins'
       : undefined
 
+  const canRetryExtraction = emailId !== null && latestExtractionJobStatus === 'failed'
+  const retryExtractionDisabled = !canRetryExtraction || retryExtractionMutation.isPending || isEditing
+  const retryExtractionTitle = !emailId
+    ? 'Emailul nu a fost încă identificat'
+    : latestExtractionJobStatus !== 'failed'
+      ? 'Disponibil doar când ultima extragere a eșuat'
+      : undefined
+
   function handleRejectClick() {
     if (!emailId) return
     if (!window.confirm('Sigur respingeți acest email? Comenzile asociate, dacă nu au fost deja importate, vor fi respinse și ele.')) {
@@ -153,6 +179,15 @@ export function ActionBar({ order, emailId, emailStatus, correction }: ActionBar
       )}
       <button
         type="button"
+        className="emails-action-bar__btn"
+        disabled={retryExtractionDisabled}
+        title={retryExtractionTitle}
+        onClick={() => emailId && retryExtractionMutation.mutate(emailId)}
+      >
+        {retryExtractionMutation.isPending ? 'Se reîncearcă...' : 'Reîncearcă extragerea'}
+      </button>
+      <button
+        type="button"
         className="emails-action-bar__btn emails-action-bar__btn--red"
         disabled={rejectDisabled}
         title={rejectTitle}
@@ -183,6 +218,13 @@ export function ActionBar({ order, emailId, emailStatus, correction }: ActionBar
       {rejectMutation.isError && (
         <p className="emails-action-bar__error" role="alert">
           {rejectMutation.error instanceof Error ? rejectMutation.error.message : 'Respingerea a eșuat.'}
+        </p>
+      )}
+      {retryExtractionMutation.isError && (
+        <p className="emails-action-bar__error" role="alert">
+          {retryExtractionMutation.error instanceof Error
+            ? retryExtractionMutation.error.message
+            : 'Reîncercarea extragerii a eșuat.'}
         </p>
       )}
     </div>

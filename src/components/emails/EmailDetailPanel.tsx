@@ -25,6 +25,9 @@ export function EmailDetailPanel({ email }: EmailDetailPanelProps) {
   const { data: mailboxAddress } = usePrimaryMailboxAddress()
   const openAttachment = useOpenAttachment()
   const order = email.orders[0] ?? null
+  const latestExtractionJob = [...email.extraction_jobs].sort(
+    (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+  )[0]
 
   const sanitizedBody = email.body_html
     ? DOMPurify.sanitize(email.body_html, { FORBID_TAGS: ['style', 'script'] })
@@ -101,7 +104,12 @@ export function EmailDetailPanel({ email }: EmailDetailPanelProps) {
         )}
       </div>
 
-      <ActionBar order={order} emailId={email.id} emailStatus={email.status} />
+      <ActionBar
+        order={order}
+        emailId={email.id}
+        emailStatus={email.status}
+        latestExtractionJobStatus={latestExtractionJob?.status ?? null}
+      />
     </div>
   )
 }

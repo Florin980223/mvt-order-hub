@@ -85,19 +85,58 @@ async function refreshTokens(refreshToken: string): Promise<StoredTokens> {
   }
 }
 
-export async function graphFetch(accessToken: string, path: string, init: RequestInit = {}): Promise<Response> {
-  const response = await fetch(`${GRAPH_BASE_URL}${path}`, {
-    ...init,
-    headers: {
-      ...init.headers,
-      Authorization: `Bearer ${accessToken}`,
-    },
-  })
+const GRAPH_FETCH_MAX_ATTEMPTS = 4
+const GRAPH_FETCH_BASE_DELAY_MS = 500
+const GRAPH_FETCH_MAX_RETRY_AFTER_MS = 30 * 1000
 
-  if (!response.ok) {
-    const text = await response.text()
-    throw new Error(`Graph request failed (${response.status}): ${text}`)
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
+/** Retry-After is documented as seconds, but tolerate an HTTP-date value too. */
+function parseRetryAfterMs(header: string | null): number | null {
+  if (!header) return null
+
+  const seconds = Number(header)
+  if (Number.isFinite(seconds)) return Math.max(0, seconds * 1000)
+
+  const dateMs = Date.parse(header)
+  if (!Number.isNaN(dateMs)) return Math.max(0, dateMs - Date.now())
+
+  return null
+}
+
+export async function graphFetch(accessToken: string, path: string, init: RequestInit = {}): Promise<Response> {
+  let lastResponse: Response | null = null
+
+  for (let attempt = 1; attempt <= GRAPH_FETCH_MAX_ATTEMPTS; attempt++) {
+    const response = await fetch(`${GRAPH_BASE_URL}${path}`, {
+      ...init,
+      headers: {
+        ...init.headers,
+        Authorization: `Bearer ${accessToken}`,
+      },
+    })
+
+    if (response.ok) return response
+
+    const isRetryable = response.status === 429 || response.status >= 500
+    if (!isRetryable || attempt === GRAPH_FETCH_MAX_ATTEMPTS) {
+      const text = await response.text()
+      throw new Error(`Graph request failed (${response.status}): ${text}`)
+    }
+
+    lastResponse = response
+
+    const retryAfterMs = response.status === 429 ? parseRetryAfterMs(response.headers.get('Retry-After')) : null
+    const delayMs =
+      retryAfterMs !== null
+        ? Math.min(retryAfterMs, GRAPH_FETCH_MAX_RETRY_AFTER_MS)
+        : GRAPH_FETCH_BASE_DELAY_MS * 2 ** (attempt - 1)
+
+    await sleep(delayMs)
   }
 
-  return response
+  // Unreachable — the loop always returns or throws — but keeps the type checker happy.
+  throw new Error(`Graph request failed (${lastResponse?.status ?? 'unknown'}): exhausted retries`)
 }
