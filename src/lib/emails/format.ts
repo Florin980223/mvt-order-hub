@@ -28,3 +28,18 @@ export function formatFileSize(bytes: number): string {
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
 }
+
+/** Covers every emails.status CHECK-constraint value — StatusBadge only maps 3 of these for its colored-badge use case. */
+const EMAIL_STATUS_LABELS: Record<string, string> = {
+  new: 'Nou',
+  queued: 'În coadă',
+  processing: 'În procesare',
+  extracted: 'Extras',
+  needs_validation: 'Necesită validare',
+  rejected: 'Respins',
+  archived: 'Arhivat',
+}
+
+export function formatEmailStatus(status: string): string {
+  return EMAIL_STATUS_LABELS[status] ?? status
+}
