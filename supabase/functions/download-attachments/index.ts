@@ -2,8 +2,40 @@ import { createClient } from 'npm:@supabase/supabase-js@2'
 import { getValidAccessToken, graphFetch } from '../_shared/graphClient.ts'
 import { sha256Hex } from '../_shared/security.ts'
 
+// Brief 11.2: "25 MB/fișier, configurabilă" — hardcoded for this phase
+// rather than a new app_settings entry (unlike confidence_threshold,
+// nothing suggests operators need to tune this at runtime yet; can be
+// promoted to app_settings later using that exact same pattern).
+const MAX_ATTACHMENT_SIZE_BYTES = 25 * 1024 * 1024
+
+// Brief 11.1: "validare MIME/size" — a security allow-list, not just the
+// narrower parsing-eligibility check in process-email-job (isCsv/isXlsx/
+// isPdf). Without this, an .exe/.html/etc. attachment would be stored and
+// made downloadable to any admin.
+const SAFE_ATTACHMENT_EXTENSIONS = [
+  '.csv',
+  '.xlsx',
+  '.xls',
+  '.pdf',
+  '.docx',
+  '.doc',
+  '.jpg',
+  '.jpeg',
+  '.png',
+  '.gif',
+  '.bmp',
+  '.webp',
+  '.txt',
+]
+
 function serviceClient() {
   return createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!)
+}
+
+/** Lowercased, including the dot (e.g. ".pdf") — empty string if the filename has no extension. */
+function extensionOf(filename: string): string {
+  const match = filename.match(/\.[^./\\]+$/)
+  return match ? match[0].toLowerCase() : ''
 }
 
 interface DispatchPayload {
@@ -58,9 +90,29 @@ Deno.serve(async (req) => {
           continue
         }
 
+        // Checked against Graph's own reported size, before decoding the
+        // (much larger, base64) contentBytes payload — no point paying
+        // the decode cost for something we're about to reject anyway.
+        // Skipped exactly like an unparseable/non-file attachment: logged,
+        // no email_attachments row, doesn't fail the rest of the email.
+        if (attachment.size > MAX_ATTACHMENT_SIZE_BYTES) {
+          console.error(
+            `download-attachments: skipping oversized attachment ${attachment.name} (${attachment.size} bytes > ${MAX_ATTACHMENT_SIZE_BYTES})`,
+          )
+          continue
+        }
+
+        const extension = extensionOf(attachment.name)
+        if (!SAFE_ATTACHMENT_EXTENSIONS.includes(extension)) {
+          console.error(`download-attachments: skipping disallowed attachment type ${attachment.name} (extension "${extension}")`)
+          continue
+        }
+
         const bytes = base64ToBytes(attachment.contentBytes)
         const sha256 = await sha256Hex(bytes)
-        const storagePath = `${payload.email_id}/${attachment.name}`
+        // Content-addressed, randomized key (brief 11.1: "denumiri
+        // randomizate") — never the sender-controlled filename.
+        const storagePath = `${payload.email_id}/${sha256}${extension}`
 
         const { error: uploadError } = await supabase.storage
           .from('email-attachments')

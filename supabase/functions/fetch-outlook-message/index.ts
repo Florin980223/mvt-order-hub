@@ -40,13 +40,14 @@ Deno.serve(async (req) => {
       .upsert(
         {
           graph_message_id: payload.graph_message_id,
+          connection_id: payload.connection_id,
           sender,
           subject: message.subject ?? null,
           body_html: bodyHtml,
           received_at: message.receivedDateTime,
           status: 'new',
         },
-        { onConflict: 'graph_message_id' },
+        { onConflict: 'graph_message_id,connection_id' },
       )
       .select('id')
       .single()

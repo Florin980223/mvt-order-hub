@@ -105,6 +105,30 @@ Deno.serve(async (req) => {
       )
     }
 
+    // Brief 6.4 hard block: same client_order_number + client_name already
+    // imported/importing means this is the same order being submitted
+    // twice, not a legitimate repeat order — client_order_number/
+    // client_name are guaranteed non-null here since checkImportReadiness
+    // above already requires them.
+    const { data: duplicateOrder, error: duplicateOrderError } = await supabase
+      .from('orders')
+      .select('id, status')
+      .eq('client_order_number', order.client_order_number)
+      .eq('client_name', order.client_name)
+      .in('status', ['imported', 'importing'])
+      .neq('id', order.id)
+      .maybeSingle()
+    if (duplicateOrderError) throw new Error(duplicateOrderError.message)
+    if (duplicateOrder) {
+      return jsonResponse(
+        {
+          error: `an order with the same client order number and client is already ${duplicateOrder.status}`,
+          duplicate_order_id: duplicateOrder.id,
+        },
+        409,
+      )
+    }
+
     const { data: inFlightJob, error: inFlightError } = await supabase
       .from('submission_jobs')
       .select('id')

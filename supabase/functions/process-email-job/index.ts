@@ -25,6 +25,7 @@ interface AttachmentRow {
   filename: string
   mime_type: string
   storage_path: string
+  sha256: string
 }
 
 /** Unrecognized attachment types (images, .docx, etc.) return null rather than throwing — a single unparseable attachment must not abort the whole job. */
@@ -95,7 +96,7 @@ Deno.serve(async (req) => {
 
     const { data: attachments, error: attachmentsError } = await supabase
       .from('email_attachments')
-      .select('filename, mime_type, storage_path')
+      .select('filename, mime_type, storage_path, sha256')
       .eq('email_id', payload.email_id)
     if (attachmentsError) {
       throw new Error(attachmentsError.message)
@@ -120,6 +121,37 @@ Deno.serve(async (req) => {
         value: 'PDF pare scanat (fără strat de text) — necesită introducere manuală sau OCR.',
         confidence: 1,
         sourceType: 'pdf',
+      }
+    }
+
+    // Brief 6.4 duplicate-detection signal: an identical attachment (by
+    // content hash) already belonging to an imported/importing order is a
+    // soft warning, not a block — a supplier legitimately resending the
+    // same PDF for a follow-up order is a real, non-error case. The hard
+    // block (same client_order_number + client_name already
+    // imported/importing) lives in submit-order instead.
+    const attachmentShas = ((attachments ?? []) as AttachmentRow[]).map((a) => a.sha256)
+    if (attachmentShas.length > 0) {
+      const { data: shaMatches } = await supabase
+        .from('email_attachments')
+        .select('email_id')
+        .in('sha256', attachmentShas)
+        .neq('email_id', payload.email_id)
+
+      const otherEmailIds = [...new Set((shaMatches ?? []).map((m) => m.email_id as string))]
+      const { data: matchingOrders } = otherEmailIds.length
+        ? await supabase.from('orders').select('id').in('email_id', otherEmailIds).in('status', ['imported', 'importing'])
+        : { data: [] as { id: string }[] }
+
+      if ((matchingOrders ?? []).length > 0) {
+        const warning =
+          'Atenție: unul dintre atașamente este identic (după conținut) cu un atașament dintr-o comandă deja importată — verificați posibilul duplicat.'
+        merged.fields.notes = {
+          value: merged.fields.notes.value ? `${merged.fields.notes.value}\n${warning}` : warning,
+          confidence: merged.fields.notes.value !== null ? merged.fields.notes.confidence : 1,
+          sourceType: merged.fields.notes.sourceType,
+          sourceRef: merged.fields.notes.sourceRef,
+        }
       }
     }
 
