@@ -1,9 +1,10 @@
 import DOMPurify from 'dompurify'
-import { MoreVertical, Reply, Star } from 'lucide-react'
+import { Calendar, Flag, MoreVertical, Reply, Star } from 'lucide-react'
 import { formatDateTime } from '../../lib/emails/format'
 import type { EmailRow } from '../../lib/emails/types'
 import { usePrimaryMailboxAddress } from '../../lib/emails/useEmailsQuery'
 import { useOrderCorrection } from '../../lib/orders/useOrderCorrection'
+import { useTogglePriorityMutation } from '../../lib/orders/useTogglePriorityMutation'
 import { PendingOrderAttachments } from '../pendingOrders/PendingOrderAttachments'
 import { PendingOrderFields } from '../pendingOrders/PendingOrderFields'
 import { PendingOrderTopBar } from '../pendingOrders/PendingOrderTopBar'
@@ -20,6 +21,7 @@ export function EmailDetailPanel({ email, isFavorite, onToggleFavorite }: EmailD
   const { data: mailboxAddress } = usePrimaryMailboxAddress()
   const order = email.orders[0] ?? null
   const correction = useOrderCorrection(order)
+  const togglePriority = useTogglePriorityMutation(order)
 
   const sanitizedBody = email.body_html
     ? DOMPurify.sanitize(email.body_html, { FORBID_TAGS: ['style', 'script'] })
@@ -32,6 +34,17 @@ export function EmailDetailPanel({ email, isFavorite, onToggleFavorite }: EmailD
           <h2 className="emails-detail__subject">{email.subject ?? '(fără subiect)'}</h2>
           <div className="emails-detail__header-actions">
             <StatusBadge status={email.status} />
+            {order && (
+              <button
+                type="button"
+                className={`emails-detail__icon-btn${order.is_priority ? ' emails-detail__icon-btn--priority' : ''}`}
+                onClick={() => togglePriority.mutate()}
+                disabled={togglePriority.isPending}
+                aria-label={order.is_priority ? 'Elimină prioritatea' : 'Marchează ca prioritară'}
+              >
+                <Flag aria-hidden="true" size={16} fill={order.is_priority ? 'currentColor' : 'none'} />
+              </button>
+            )}
             {onToggleFavorite && (
               <button
                 type="button"
@@ -50,7 +63,10 @@ export function EmailDetailPanel({ email, isFavorite, onToggleFavorite }: EmailD
             </button>
           </div>
         </div>
-        <div className="emails-detail__received">{formatDateTime(email.received_at)}</div>
+        <div className="emails-detail__received">
+          <Calendar aria-hidden="true" size={14} />
+          {formatDateTime(email.received_at)}
+        </div>
 
         <dl className="emails-detail__addresses">
           <div>

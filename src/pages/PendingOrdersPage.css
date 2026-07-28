@@ -283,6 +283,13 @@
   background: color-mix(in srgb, var(--color-primary) 8%, transparent);
 }
 
+.pending-orders-detail__icon-btn--priority {
+  /* Existing "needs attention" token (matches .pending-orders-topbar__warning) —
+     distinct from --active's primary blue, so favorite and priority never look
+     like the same toggle. */
+  color: var(--color-warning);
+}
+
 .pending-orders-detail__icon-btn--active {
   color: var(--color-primary);
 }

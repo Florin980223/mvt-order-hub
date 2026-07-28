@@ -32,6 +32,7 @@ export interface OrderRow {
   notes: string | null
   confidence_overall: number | null
   status: string
+  is_priority: boolean
   external_reference_id: string | null
   order_field_sources: OrderFieldSourceRow[]
 }

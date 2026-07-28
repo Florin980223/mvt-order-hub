@@ -1,21 +1,10 @@
 import { useMemo, useState } from 'react'
-import {
-  ArrowDownWideNarrow,
-  ChevronLeft,
-  ChevronRight,
-  Filter,
-  Inbox,
-  Loader2,
-  RefreshCw,
-  Search,
-  SlidersHorizontal,
-  TriangleAlert,
-} from 'lucide-react'
+import { ArrowDownWideNarrow, Filter, Inbox, Loader2, RefreshCw, Search, SlidersHorizontal, TriangleAlert } from 'lucide-react'
 import { DashboardDetailPanel } from '../components/dashboard/DashboardDetailPanel'
 import { EmailList } from '../components/emails/EmailList'
+import { ListFooter } from '../components/emails/ListFooter'
 import { useEmailsQuery } from '../lib/emails/useEmailsQuery'
 import { matchesSearch } from '../lib/emails/search'
-import { formatUpdatedRelative } from '../lib/emails/format'
 
 const PAGE_SIZE = 6
 // EmailList/ActionBar/ConfidenceBadge styles live in EmailsPage.css, and
@@ -164,36 +153,16 @@ export function DashboardPage() {
               />
             </div>
 
-            <div className="dashboard-list-footer">
-              <span className="dashboard-list-footer__updated">
-                <RefreshCw aria-hidden="true" size={13} />
-                {formatUpdatedRelative(dataUpdatedAt)}
-              </span>
-              <div className="dashboard-list-footer__pagination">
-                <span>
-                  {visibleEmails.length === 0 ? 0 : pageStart + 1}-{Math.min(pageStart + PAGE_SIZE, visibleEmails.length)} din{' '}
-                  {visibleEmails.length}
-                </span>
-                <button
-                  type="button"
-                  className="dashboard-list-footer__page-btn"
-                  aria-label="Pagina anterioară"
-                  disabled={currentPage === 0}
-                  onClick={() => setPage(currentPage - 1)}
-                >
-                  <ChevronLeft aria-hidden="true" size={16} />
-                </button>
-                <button
-                  type="button"
-                  className="dashboard-list-footer__page-btn"
-                  aria-label="Pagina următoare"
-                  disabled={currentPage >= totalPages - 1}
-                  onClick={() => setPage(currentPage + 1)}
-                >
-                  <ChevronRight aria-hidden="true" size={16} />
-                </button>
-              </div>
-            </div>
+            <ListFooter
+              dataUpdatedAt={dataUpdatedAt}
+              rangeStart={pageStart + 1}
+              rangeEnd={Math.min(pageStart + PAGE_SIZE, visibleEmails.length)}
+              total={visibleEmails.length}
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPrevPage={() => setPage(currentPage - 1)}
+              onNextPage={() => setPage(currentPage + 1)}
+            />
           </div>
           <div className="dashboard-split__detail">
             {selectedEmail && (

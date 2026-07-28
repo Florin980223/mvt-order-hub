@@ -5,16 +5,19 @@
   min-height: 0;
 }
 
-.emails-page__header {
+.emails-list-heading {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 16px;
+  gap: 12px;
+  padding: 0 16px;
+  margin-bottom: 12px;
 }
 
-.emails-page__header h1 {
+.emails-list-heading__title {
   margin: 0;
+  font-size: 16px;
+  color: var(--color-text);
 }
 
 .emails-page__header-controls {
@@ -72,6 +75,9 @@
   background: transparent;
   color: var(--text);
   font: inherit;
+  /* All tabs bold now, not just --active — active is still distinguished
+     by its blue color + underline on top of this. */
+  font-weight: 600;
   cursor: pointer;
 }
 
@@ -128,12 +134,95 @@
 }
 
 .emails-split__list {
-  width: 360px;
+  /* Wider than Dashboard's 420px column (which only needs 3 tabs) —
+     EmailsPage's tab row has a 4th (Prioritare) tab, and at full,
+     unshrunk tab sizing (matching Dashboard's) that row needs ~505px.
+     Widened rather than shrinking tab font/padding to force a fit. */
+  width: 525px;
   flex-shrink: 0;
-  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: 16px 0 0;
   border: 1px solid var(--border);
   border-radius: 8px;
   background: var(--color-surface);
+}
+
+.emails-split__list .emails-page__header-controls,
+.emails-split__list .emails-tabs {
+  padding: 0 16px;
+}
+
+.emails-split__list .emails-tabs {
+  gap: 4px;
+}
+
+.emails-split__list .emails-tabs__tab {
+  white-space: nowrap;
+}
+
+.emails-split__list .emails-search {
+  flex: 1;
+  min-width: 0;
+}
+
+.emails-split__list .emails-filter-button {
+  flex-shrink: 0;
+}
+
+.emails-split__list-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  margin-top: 8px;
+}
+
+.emails-list-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-shrink: 0;
+  padding: 10px 16px;
+  border-top: 1px solid var(--border);
+  color: var(--text);
+  font-size: 12px;
+}
+
+.emails-list-footer__updated {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.emails-list-footer__pagination {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.emails-list-footer__page-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+.emails-list-footer__page-btn:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--color-primary) 8%, var(--color-surface));
+}
+
+.emails-list-footer__page-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 .emails-split__detail {
@@ -258,7 +347,9 @@
   padding: 2px 10px;
   border-radius: 999px;
   font-size: 12px;
-  font-weight: 500;
+  /* Matches the weight already used for other emphasized labels in this
+     file (.emails-tabs__tab--active, .emails-list-item__sender). */
+  font-weight: 600;
 }
 
 .emails-status-badge--neutral {
@@ -350,7 +441,9 @@
   border: none;
   background: transparent;
   border-radius: 6px;
-  color: var(--text);
+  /* Fixed brand-palette token, not --text: same dark-mode wash-out reasoning
+     as the pending-orders-detail__icon-btn fix (Dashboard's star/"..." icons). */
+  color: var(--color-text);
   cursor: pointer;
 }
 
@@ -358,14 +451,30 @@
   background: color-mix(in srgb, var(--color-primary) 8%, transparent);
 }
 
+.emails-detail__icon-btn--priority {
+  /* Same token as PendingOrdersPage.css's priority-flag fix — distinct from
+     --active's primary blue, so favorite and priority never look like the
+     same toggle. */
+  color: var(--color-warning);
+}
+
 .emails-detail__icon-btn--active {
   color: var(--color-primary);
 }
 
 .emails-detail__received {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   margin-top: 4px;
   color: var(--text);
   font-size: 13px;
+}
+
+.emails-detail__received svg {
+  /* Matches .pending-orders-fields__calendar-btn's icon exactly (size 14,
+     same color token) — this one isn't a button, just an inline icon. */
+  color: var(--color-text);
 }
 
 .emails-detail__addresses {
@@ -384,12 +493,16 @@
 .emails-detail__addresses dt {
   width: 56px;
   flex-shrink: 0;
-  color: var(--text);
+  /* Same treatment as the field labels earlier this phase: fixed dark
+     token + matching weight, not the muted --text token. */
+  color: var(--color-text);
+  font-weight: 500;
 }
 
 .emails-detail__addresses dd {
   margin: 0;
   color: var(--color-text);
+  font-weight: 500;
 }
 
 .emails-detail__body {
@@ -398,6 +511,8 @@
   border: 1px solid var(--border);
   border-radius: 8px;
   background: var(--color-bg);
+  color: var(--color-text);
+  font-weight: 500;
   line-height: 1.5;
   overflow-wrap: break-word;
 }
@@ -508,8 +623,8 @@
 
 .emails-action-bar {
   display: flex;
-  gap: 12px;
-  padding: 16px 20px;
+  gap: 6px;
+  padding: 16px;
   border-top: 1px solid var(--border);
   flex-wrap: wrap;
 }
@@ -517,8 +632,8 @@
 .emails-action-bar__btn {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px 16px;
+  gap: 6px;
+  padding: 10px 12px;
   border-radius: 6px;
   font: inherit;
   font-weight: 600;

@@ -2,18 +2,22 @@ import { useMemo, useState } from 'react'
 import { Inbox, Loader2, RefreshCw, Search, SlidersHorizontal, TriangleAlert } from 'lucide-react'
 import { EmailDetailPanel } from '../components/emails/EmailDetailPanel'
 import { EmailList } from '../components/emails/EmailList'
+import { ListFooter } from '../components/emails/ListFooter'
 import { useEmailsQuery } from '../lib/emails/useEmailsQuery'
 import { matchesSearch } from '../lib/emails/search'
 import './EmailsPage.css'
 
-type TabKey = 'all' | 'needs_validation' | 'with_attachments'
+const PAGE_SIZE = 6
+
+type TabKey = 'all' | 'needs_validation' | 'with_attachments' | 'priority'
 
 export function EmailsPage() {
-  const { data, isLoading, isError, error, refetch } = useEmailsQuery()
+  const { data, dataUpdatedAt, isLoading, isError, error, refetch } = useEmailsQuery()
   const [activeTab, setActiveTab] = useState<TabKey>('all')
   const [searchText, setSearchText] = useState('')
   const [selectedEmailId, setSelectedEmailId] = useState<string | null>(null)
   const [favoriteEmailIds, setFavoriteEmailIds] = useState<Set<string>>(new Set())
+  const [page, setPage] = useState(0)
 
   const emails = useMemo(() => data ?? [], [data])
 
@@ -22,6 +26,7 @@ export function EmailsPage() {
       all: emails.length,
       needsValidation: emails.filter((email) => email.status === 'needs_validation').length,
       withAttachments: emails.filter((email) => email.email_attachments.length > 0).length,
+      priority: emails.filter((email) => email.orders.some((order) => order.is_priority)).length,
     }),
     [emails],
   )
@@ -30,10 +35,17 @@ export function EmailsPage() {
     const byTab = emails.filter((email) => {
       if (activeTab === 'needs_validation') return email.status === 'needs_validation'
       if (activeTab === 'with_attachments') return email.email_attachments.length > 0
+      if (activeTab === 'priority') return email.orders.some((order) => order.is_priority)
       return true
     })
     return byTab.filter((email) => matchesSearch(email, searchText))
   }, [emails, activeTab, searchText])
+
+  // Clamped rather than reset via effect, same pattern as DashboardPage.
+  const totalPages = Math.max(1, Math.ceil(visibleEmails.length / PAGE_SIZE))
+  const currentPage = Math.min(page, totalPages - 1)
+  const pageStart = currentPage * PAGE_SIZE
+  const pagedEmails = visibleEmails.slice(pageStart, pageStart + PAGE_SIZE)
 
   // Derived rather than effect-driven: defaults to the first email until the
   // user clicks a different row, with no synchronous setState-in-effect step.
@@ -50,49 +62,6 @@ export function EmailsPage() {
 
   return (
     <div className="emails-page">
-      <header className="emails-page__header">
-        <h1>Emailuri noi</h1>
-        <div className="emails-page__header-controls">
-          <div className="emails-search">
-            <Search aria-hidden="true" size={16} />
-            <input
-              type="text"
-              placeholder="Caută după expeditor sau subiect..."
-              value={searchText}
-              onChange={(event) => setSearchText(event.target.value)}
-            />
-          </div>
-          <button type="button" className="emails-filter-button">
-            <SlidersHorizontal aria-hidden="true" size={16} />
-            Filtrează
-          </button>
-        </div>
-      </header>
-
-      <nav className="emails-tabs">
-        <button
-          type="button"
-          className={`emails-tabs__tab${activeTab === 'all' ? ' emails-tabs__tab--active' : ''}`}
-          onClick={() => setActiveTab('all')}
-        >
-          Toate ({counts.all})
-        </button>
-        <button
-          type="button"
-          className={`emails-tabs__tab${activeTab === 'needs_validation' ? ' emails-tabs__tab--active' : ''}`}
-          onClick={() => setActiveTab('needs_validation')}
-        >
-          Necesită validare ({counts.needsValidation})
-        </button>
-        <button
-          type="button"
-          className={`emails-tabs__tab${activeTab === 'with_attachments' ? ' emails-tabs__tab--active' : ''}`}
-          onClick={() => setActiveTab('with_attachments')}
-        >
-          Cu atașamente ({counts.withAttachments})
-        </button>
-      </nav>
-
       {isLoading && (
         <div className="emails-state emails-state--loading">
           <Loader2 aria-hidden="true" size={24} className="emails-state__spinner" />
@@ -121,13 +90,76 @@ export function EmailsPage() {
       {!isLoading && !isError && emails.length > 0 && (
         <div className="emails-split">
           <div className="emails-split__list">
-            <EmailList
-              emails={visibleEmails}
-              selectedId={selectedEmail?.id ?? null}
-              onSelect={setSelectedEmailId}
-              favoriteIds={favoriteEmailIds}
-              onToggleFavorite={toggleFavorite}
-              starVisibility="selected"
+            <div className="emails-list-heading">
+              <h3 className="emails-list-heading__title">Emailuri noi</h3>
+            </div>
+            <div className="emails-page__header-controls">
+              <div className="emails-search">
+                <Search aria-hidden="true" size={16} />
+                <input
+                  type="text"
+                  placeholder="Caută după expeditor sau subiect..."
+                  value={searchText}
+                  onChange={(event) => setSearchText(event.target.value)}
+                />
+              </div>
+              <button type="button" className="emails-filter-button">
+                <SlidersHorizontal aria-hidden="true" size={16} />
+                Filtrează
+              </button>
+            </div>
+
+            <nav className="emails-tabs">
+              <button
+                type="button"
+                className={`emails-tabs__tab${activeTab === 'all' ? ' emails-tabs__tab--active' : ''}`}
+                onClick={() => setActiveTab('all')}
+              >
+                Toate {counts.all}
+              </button>
+              <button
+                type="button"
+                className={`emails-tabs__tab${activeTab === 'needs_validation' ? ' emails-tabs__tab--active' : ''}`}
+                onClick={() => setActiveTab('needs_validation')}
+              >
+                Necesită validare {counts.needsValidation}
+              </button>
+              <button
+                type="button"
+                className={`emails-tabs__tab${activeTab === 'with_attachments' ? ' emails-tabs__tab--active' : ''}`}
+                onClick={() => setActiveTab('with_attachments')}
+              >
+                Cu atașamente {counts.withAttachments}
+              </button>
+              <button
+                type="button"
+                className={`emails-tabs__tab${activeTab === 'priority' ? ' emails-tabs__tab--active' : ''}`}
+                onClick={() => setActiveTab('priority')}
+              >
+                Prioritare {counts.priority}
+              </button>
+            </nav>
+
+            <div className="emails-split__list-scroll">
+              <EmailList
+                emails={pagedEmails}
+                selectedId={selectedEmail?.id ?? null}
+                onSelect={setSelectedEmailId}
+                favoriteIds={favoriteEmailIds}
+                onToggleFavorite={toggleFavorite}
+                starVisibility="selected"
+              />
+            </div>
+
+            <ListFooter
+              dataUpdatedAt={dataUpdatedAt}
+              rangeStart={pageStart + 1}
+              rangeEnd={Math.min(pageStart + PAGE_SIZE, visibleEmails.length)}
+              total={visibleEmails.length}
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPrevPage={() => setPage(currentPage - 1)}
+              onNextPage={() => setPage(currentPage + 1)}
             />
           </div>
           <div className="emails-split__detail">

@@ -22,7 +22,7 @@ export function useEmailsQuery() {
             id, client_order_number, client_name, pickup_address, pickup_at,
             delivery_address, delivery_at, cargo_type, quantity, quantity_unit,
             weight_kg, volume_m3, transport_amount, currency, carrier_proposed,
-            notes, confidence_overall, status, external_reference_id,
+            notes, confidence_overall, status, is_priority, external_reference_id,
             order_field_sources (field_name, source_type, source_ref, confidence, created_at)
           )
         `,
