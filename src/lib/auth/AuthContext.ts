@@ -7,6 +7,7 @@ export interface AuthContextValue {
   user: User | null
   session: Session | null
   role: UserRole | null
+  fullName: string | null
   loading: boolean
 }
 

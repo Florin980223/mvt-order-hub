@@ -3,16 +3,25 @@ import type { Session, User } from '@supabase/supabase-js'
 import { supabase } from '../supabaseClient'
 import { AuthContext, type AuthContextValue, type UserRole } from './AuthContext'
 
-async function fetchRole(userId: string): Promise<UserRole | null> {
-  const { data } = await supabase.from('profiles').select('role').eq('id', userId).single()
+interface ProfileFetchResult {
+  role: UserRole | null
+  fullName: string | null
+}
 
-  return (data?.role as UserRole | undefined) ?? null
+async function fetchProfile(userId: string): Promise<ProfileFetchResult> {
+  const { data } = await supabase.from('profiles').select('role, full_name').eq('id', userId).single()
+
+  return {
+    role: (data?.role as UserRole | undefined) ?? null,
+    fullName: data?.full_name ?? null,
+  }
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null)
   const [user, setUser] = useState<User | null>(null)
   const [role, setRole] = useState<UserRole | null>(null)
+  const [fullName, setFullName] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -24,12 +33,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (!nextSession?.user) {
         setRole(null)
+        setFullName(null)
         return
       }
 
-      const nextRole = await fetchRole(nextSession.user.id)
+      const profile = await fetchProfile(nextSession.user.id)
       if (active) {
-        setRole(nextRole)
+        setRole(profile.role)
+        setFullName(profile.fullName)
       }
     }
 
@@ -52,7 +63,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
-  const value: AuthContextValue = { user, session, role, loading }
+  const value: AuthContextValue = { user, session, role, fullName, loading }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
