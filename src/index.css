@@ -1,6 +1,5 @@
 :root {
   --text: #6b6375;
-  --text-h: #08060d;
   --bg: #fff;
   --border: #e5e4e7;
 
@@ -29,7 +28,6 @@
 @media (prefers-color-scheme: dark) {
   :root {
     --text: #9ca3af;
-    --text-h: #f3f4f6;
     --bg: #16171d;
     --border: #2e303a;
   }
@@ -43,5 +41,9 @@ h1,
 h2 {
   font-family: var(--sans);
   font-weight: 500;
-  color: var(--text-h);
+  /* Fixed brand palette token, not --text-h: every surface in this app
+     (--color-surface/--color-bg) is pinned light regardless of OS
+     preference, so heading text must be too, or it washes out to
+     near-invisible under prefers-color-scheme: dark. */
+  color: var(--color-text);
 }

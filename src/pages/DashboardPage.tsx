@@ -1,7 +1,6 @@
 import { useMemo, useState } from 'react'
-import { Inbox, Loader2, RefreshCw, Search, SlidersHorizontal, TriangleAlert } from 'lucide-react'
+import { ArrowDownWideNarrow, Filter, Inbox, Loader2, RefreshCw, Search, SlidersHorizontal, TriangleAlert } from 'lucide-react'
 import { DashboardDetailPanel } from '../components/dashboard/DashboardDetailPanel'
-import { SummaryTiles } from '../components/dashboard/SummaryTiles'
 import { EmailList } from '../components/emails/EmailList'
 import { useEmailsQuery } from '../lib/emails/useEmailsQuery'
 import { matchesSearch } from '../lib/emails/search'
@@ -54,8 +53,6 @@ export function DashboardPage() {
 
   return (
     <div className="dashboard-page">
-      <SummaryTiles total={summary.total} needsValidation={summary.needsValidation} imported={summary.imported} />
-
       {isLoading && (
         <div className="dashboard-state dashboard-state--loading">
           <Loader2 aria-hidden="true" size={24} className="dashboard-state__spinner" />
@@ -84,6 +81,17 @@ export function DashboardPage() {
       {!isLoading && !isError && emails.length > 0 && (
         <div className="dashboard-split">
           <div className="dashboard-split__list">
+            <div className="dashboard-list-heading">
+              <h3 className="dashboard-list-heading__title">Inbox comenzi</h3>
+              <div className="dashboard-list-heading__actions">
+                <button type="button" className="dashboard-list-heading__icon-btn" aria-label="Sortează">
+                  <ArrowDownWideNarrow aria-hidden="true" size={16} />
+                </button>
+                <button type="button" className="dashboard-list-heading__icon-btn" aria-label="Filtrează">
+                  <Filter aria-hidden="true" size={16} />
+                </button>
+              </div>
+            </div>
             <div className="emails-page__header-controls">
               <div className="emails-search">
                 <Search aria-hidden="true" size={16} />

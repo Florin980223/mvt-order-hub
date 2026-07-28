@@ -1,7 +1,8 @@
-import { Sparkles } from 'lucide-react'
+import { CheckCircle2, Sparkles } from 'lucide-react'
 import { ConfidenceBadge } from '../emails/ConfidenceBadge'
 import type { EmailAttachmentRow, OrderRow } from '../../lib/emails/types'
 import { countLowConfidenceFields } from '../../lib/orders/orderFields'
+import { checkImportReadiness } from '../../lib/orders/importReadiness'
 import { useConfidenceThresholdQuery, DEFAULT_CONFIDENCE_THRESHOLD } from '../../lib/settings/useConfidenceThresholdQuery'
 import { PendingOrderAttachments } from './PendingOrderAttachments'
 
@@ -11,6 +12,11 @@ interface PendingOrderTopBarProps {
   // "Istoric AI" button's slot, matching figura1-dashboard.png. Omitted
   // elsewhere (PendingOrdersPage) preserves today's layout exactly.
   attachments?: EmailAttachmentRow[]
+  // EmailsPage only (figura2-emailuri-noi.png): when true and `attachments`
+  // isn't passed (EmailsPage renders its own attachments section above this
+  // component instead), the trailing slot shows a readiness pill instead of
+  // the "Istoric AI" button.
+  showReadiness?: boolean
 }
 
 /**
@@ -19,11 +25,12 @@ interface PendingOrderTopBarProps {
  * here would assert something the docs don't support, so these use
  * accurate, phase-neutral tooltips instead.
  */
-export function PendingOrderTopBar({ order, attachments }: PendingOrderTopBarProps) {
+export function PendingOrderTopBar({ order, attachments, showReadiness }: PendingOrderTopBarProps) {
   const { data: confidenceThresholdSetting } = useConfidenceThresholdQuery()
   const confidenceThreshold = confidenceThresholdSetting?.value_json.threshold ?? DEFAULT_CONFIDENCE_THRESHOLD
   const lowConfidenceCount = countLowConfidenceFields(order, confidenceThreshold)
   const overallPercent = order.confidence_overall != null ? Math.round(order.confidence_overall * 100) : null
+  const readiness = checkImportReadiness(order, confidenceThreshold)
 
   return (
     <div className="pending-orders-topbar">
@@ -53,6 +60,13 @@ export function PendingOrderTopBar({ order, attachments }: PendingOrderTopBarPro
 
       {attachments ? (
         <PendingOrderAttachments attachments={attachments} variant="inline" />
+      ) : showReadiness ? (
+        readiness.ready && (
+          <span className="pending-orders-topbar__readiness">
+            <CheckCircle2 aria-hidden="true" size={14} />
+            Date pregătite pentru validare
+          </span>
+        )
       ) : (
         <button
           type="button"

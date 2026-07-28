@@ -1,4 +1,4 @@
-import { Download, File as FileIcon, FileSpreadsheet, FileText } from 'lucide-react'
+import { CheckCircle2, Download, File as FileIcon, FileSpreadsheet, FileText } from 'lucide-react'
 import { formatFileSize } from '../../lib/emails/format'
 import { getFileTypeMeta } from '../../lib/emails/fileType'
 import { useOpenAttachment } from '../../lib/emails/useOpenAttachment'
@@ -11,6 +11,10 @@ interface PendingOrderAttachmentsProps {
   // 'inline' is Dashboard's side-by-side card row (figura1-dashboard.png),
   // rendered inside PendingOrderTopBar in place of the "Istoric AI" button.
   variant?: 'sidebar' | 'inline'
+  // 'inline' only: adds a green checkmark badge to each card, matching
+  // figura2-emailuri-noi.png. Off by default so Dashboard's cards (which
+  // figura1 doesn't show this on) stay unchanged.
+  showProcessedBadge?: boolean
 }
 
 function FileTypeIcon({ mimeType, filename }: { mimeType: string; filename: string }) {
@@ -20,7 +24,11 @@ function FileTypeIcon({ mimeType, filename }: { mimeType: string; filename: stri
   return <FileIcon aria-hidden="true" size={16} />
 }
 
-export function PendingOrderAttachments({ attachments, variant = 'sidebar' }: PendingOrderAttachmentsProps) {
+export function PendingOrderAttachments({
+  attachments,
+  variant = 'sidebar',
+  showProcessedBadge = false,
+}: PendingOrderAttachmentsProps) {
   const openAttachment = useOpenAttachment()
 
   if (variant === 'inline') {
@@ -31,6 +39,13 @@ export function PendingOrderAttachments({ attachments, variant = 'sidebar' }: Pe
           <div className="pending-orders-attachments--inline__cards">
             {attachments.map((attachment) => (
               <div key={attachment.id} className="pending-orders-attachments--inline__card">
+                {showProcessedBadge && (
+                  <CheckCircle2
+                    aria-hidden="true"
+                    size={16}
+                    className="pending-orders-attachments--inline__processed-badge"
+                  />
+                )}
                 <span className="pending-orders-attachments--inline__icon">
                   <FileTypeIcon mimeType={attachment.mime_type} filename={attachment.filename} />
                 </span>

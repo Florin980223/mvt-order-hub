@@ -1,34 +1,25 @@
 import DOMPurify from 'dompurify'
-import { Check, Download, File as FileIcon, FileSpreadsheet, FileText } from 'lucide-react'
-import { formatDateTime, formatFileSize } from '../../lib/emails/format'
+import { MoreVertical, Reply, Star } from 'lucide-react'
+import { formatDateTime } from '../../lib/emails/format'
 import type { EmailRow } from '../../lib/emails/types'
 import { usePrimaryMailboxAddress } from '../../lib/emails/useEmailsQuery'
-import { getFileTypeMeta } from '../../lib/emails/fileType'
-import { useOpenAttachment } from '../../lib/emails/useOpenAttachment'
+import { useOrderCorrection } from '../../lib/orders/useOrderCorrection'
+import { PendingOrderAttachments } from '../pendingOrders/PendingOrderAttachments'
+import { PendingOrderFields } from '../pendingOrders/PendingOrderFields'
+import { PendingOrderTopBar } from '../pendingOrders/PendingOrderTopBar'
 import { ActionBar } from './ActionBar'
-import { AttachmentBadge } from './AttachmentBadge'
-import { ConfidenceBadge } from './ConfidenceBadge'
-import { OrderFieldsSummary } from './OrderFieldsSummary'
 import { StatusBadge } from './StatusBadge'
 
 interface EmailDetailPanelProps {
   email: EmailRow
+  isFavorite?: boolean
+  onToggleFavorite?: () => void
 }
 
-function FileTypeIcon({ mimeType, filename }: { mimeType: string; filename: string }) {
-  const { kind } = getFileTypeMeta(mimeType, filename)
-  if (kind === 'pdf') return <FileText aria-hidden="true" size={16} />
-  if (kind === 'xlsx' || kind === 'csv') return <FileSpreadsheet aria-hidden="true" size={16} />
-  return <FileIcon aria-hidden="true" size={16} />
-}
-
-export function EmailDetailPanel({ email }: EmailDetailPanelProps) {
+export function EmailDetailPanel({ email, isFavorite, onToggleFavorite }: EmailDetailPanelProps) {
   const { data: mailboxAddress } = usePrimaryMailboxAddress()
-  const openAttachment = useOpenAttachment()
   const order = email.orders[0] ?? null
-  const latestExtractionJob = [...email.extraction_jobs].sort(
-    (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
-  )[0]
+  const correction = useOrderCorrection(order)
 
   const sanitizedBody = email.body_html
     ? DOMPurify.sanitize(email.body_html, { FORBID_TAGS: ['style', 'script'] })
@@ -39,7 +30,25 @@ export function EmailDetailPanel({ email }: EmailDetailPanelProps) {
       <div className="emails-detail__scroll">
         <div className="emails-detail__header">
           <h2 className="emails-detail__subject">{email.subject ?? '(fără subiect)'}</h2>
-          <StatusBadge status={email.status} />
+          <div className="emails-detail__header-actions">
+            <StatusBadge status={email.status} />
+            {onToggleFavorite && (
+              <button
+                type="button"
+                className={`emails-detail__icon-btn${isFavorite ? ' emails-detail__icon-btn--active' : ''}`}
+                onClick={onToggleFavorite}
+                aria-label={isFavorite ? 'Elimină de la favorite' : 'Adaugă la favorite'}
+              >
+                <Star aria-hidden="true" size={16} fill={isFavorite ? 'currentColor' : 'none'} />
+              </button>
+            )}
+            <button type="button" className="emails-detail__icon-btn" aria-label="Răspunde">
+              <Reply aria-hidden="true" size={16} />
+            </button>
+            <button type="button" className="emails-detail__icon-btn" aria-label="Mai multe opțiuni">
+              <MoreVertical aria-hidden="true" size={16} />
+            </button>
+          </div>
         </div>
         <div className="emails-detail__received">{formatDateTime(email.received_at)}</div>
 
@@ -61,51 +70,13 @@ export function EmailDetailPanel({ email }: EmailDetailPanelProps) {
         {/* body_html comes from Microsoft Graph and is untrusted — sanitize before rendering, never on raw HTML. */}
         <div className="emails-detail__body" dangerouslySetInnerHTML={{ __html: sanitizedBody }} />
 
-        {email.email_attachments.length > 0 && (
-          <section className="emails-detail__attachments">
-            <h3>Atașamente</h3>
-            <ul>
-              {email.email_attachments.map((attachment) => (
-                <li key={attachment.id} className="emails-attachment-row">
-                  <FileTypeIcon mimeType={attachment.mime_type} filename={attachment.filename} />
-                  <span className="emails-attachment-row__name">{attachment.filename}</span>
-                  <span className="emails-attachment-row__size">{formatFileSize(attachment.size)}</span>
-                  <AttachmentBadge mimeType={attachment.mime_type} filename={attachment.filename} />
-                  <Check aria-hidden="true" size={16} className="emails-attachment-row__check" />
-                  <button
-                    type="button"
-                    onClick={() => openAttachment.mutate(attachment.id)}
-                    disabled={openAttachment.isPending && openAttachment.variables === attachment.id}
-                    title="Deschide"
-                  >
-                    <Download aria-hidden="true" size={16} />
-                  </button>
-                </li>
-              ))}
-            </ul>
-            {openAttachment.isError && (
-              <p role="alert">
-                {openAttachment.error instanceof Error ? openAttachment.error.message : 'Deschiderea atașamentului a eșuat.'}
-              </p>
-            )}
-          </section>
-        )}
+        <PendingOrderAttachments attachments={email.email_attachments} variant="inline" showProcessedBadge />
 
         {order ? (
           <>
-            <section className="emails-detail__confidence">
-              <ConfidenceBadge confidence={order.confidence_overall} />
-              <div className="confidence-label">
-                <span className="confidence-label__heading">Încredere extragere</span>
-                <span className="confidence-label__detail">
-                  {order.confidence_overall != null
-                    ? `${Math.round(order.confidence_overall * 100)}% date recunoscute`
-                    : '—'}
-                </span>
-              </div>
-            </section>
+            <PendingOrderTopBar order={order} showReadiness />
             <section className="emails-detail__fields">
-              <OrderFieldsSummary order={order} />
+              <PendingOrderFields order={order} correction={correction} variant="preview" />
             </section>
           </>
         ) : (
@@ -117,7 +88,8 @@ export function EmailDetailPanel({ email }: EmailDetailPanelProps) {
         order={order}
         emailId={email.id}
         emailStatus={email.status}
-        latestExtractionJobStatus={latestExtractionJob?.status ?? null}
+        correction={correction}
+        showRetryExtraction={false}
       />
     </div>
   )

@@ -5,9 +5,8 @@ interface FieldConfidenceIndicatorProps {
   threshold: number
 }
 
-/** Shared by PendingOrderFields and OrderFieldsSummary — a green check for
- * fields at/above the admin-configured threshold, an amber warning for
- * fields below it, replacing the raw "(NN%)" text both used to show. */
+/** Used by PendingOrderFields — a green check for fields at/above the
+ * admin-configured threshold, an amber warning for fields below it. */
 export function FieldConfidenceIndicator({ confidence, threshold }: FieldConfidenceIndicatorProps) {
   if (confidence == null) return null
 

@@ -13,9 +13,20 @@ interface EmailListProps {
   // EmailsPage's list renders unchanged without them.
   favoriteIds?: Set<string>
   onToggleFavorite?: (id: string) => void
+  // 'all' (default) shows the star on every row, matching figura1-dashboard.png
+  // (Dashboard). 'selected' shows it only on the currently-selected row,
+  // matching figura2-emailuri-noi.png (EmailsPage).
+  starVisibility?: 'all' | 'selected'
 }
 
-export function EmailList({ emails, selectedId, onSelect, favoriteIds, onToggleFavorite }: EmailListProps) {
+export function EmailList({
+  emails,
+  selectedId,
+  onSelect,
+  favoriteIds,
+  onToggleFavorite,
+  starVisibility = 'all',
+}: EmailListProps) {
   if (emails.length === 0) {
     return <div className="emails-list-empty">Niciun email găsit.</div>
   }
@@ -46,7 +57,7 @@ export function EmailList({ emails, selectedId, onSelect, favoriteIds, onToggleF
                 ))}
                 <StatusBadge status={email.status} />
               </div>
-              {onToggleFavorite && (
+              {onToggleFavorite && (starVisibility === 'all' || email.id === selectedId) && (
                 <button
                   type="button"
                   className={`emails-list-item__favorite${isFavorite ? ' emails-list-item__favorite--active' : ''}`}

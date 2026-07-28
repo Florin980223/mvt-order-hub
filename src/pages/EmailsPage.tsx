@@ -13,6 +13,7 @@ export function EmailsPage() {
   const [activeTab, setActiveTab] = useState<TabKey>('all')
   const [searchText, setSearchText] = useState('')
   const [selectedEmailId, setSelectedEmailId] = useState<string | null>(null)
+  const [favoriteEmailIds, setFavoriteEmailIds] = useState<Set<string>>(new Set())
 
   const emails = useMemo(() => data ?? [], [data])
 
@@ -37,6 +38,15 @@ export function EmailsPage() {
   // Derived rather than effect-driven: defaults to the first email until the
   // user clicks a different row, with no synchronous setState-in-effect step.
   const selectedEmail = emails.find((email) => email.id === selectedEmailId) ?? emails[0] ?? null
+
+  function toggleFavorite(emailId: string) {
+    setFavoriteEmailIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(emailId)) next.delete(emailId)
+      else next.add(emailId)
+      return next
+    })
+  }
 
   return (
     <div className="emails-page">
@@ -111,11 +121,22 @@ export function EmailsPage() {
       {!isLoading && !isError && emails.length > 0 && (
         <div className="emails-split">
           <div className="emails-split__list">
-            <EmailList emails={visibleEmails} selectedId={selectedEmail?.id ?? null} onSelect={setSelectedEmailId} />
+            <EmailList
+              emails={visibleEmails}
+              selectedId={selectedEmail?.id ?? null}
+              onSelect={setSelectedEmailId}
+              favoriteIds={favoriteEmailIds}
+              onToggleFavorite={toggleFavorite}
+              starVisibility="selected"
+            />
           </div>
           <div className="emails-split__detail">
             {selectedEmail ? (
-              <EmailDetailPanel email={selectedEmail} />
+              <EmailDetailPanel
+                email={selectedEmail}
+                isFavorite={favoriteEmailIds.has(selectedEmail.id)}
+                onToggleFavorite={() => toggleFavorite(selectedEmail.id)}
+              />
             ) : (
               <div className="emails-state emails-state--empty">
                 <p>Selectează un email din listă.</p>

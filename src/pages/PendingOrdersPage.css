@@ -330,6 +330,18 @@
   font-weight: 500;
 }
 
+.pending-orders-topbar__readiness {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--color-success) 15%, white);
+  color: var(--color-success);
+  font-size: 12px;
+  font-weight: 500;
+}
+
 /* Grouped fields */
 
 .pending-orders-fields {
@@ -373,8 +385,11 @@
 
 /* Flat variant (Dashboard, figura1-dashboard.png) — ungrouped rows, no
    section subheadings. Each row is a flex row so it naturally handles
-   1/2/4 cells per row without per-row grid-column overrides. */
-.pending-orders-fields--flat {
+   1/2/4 cells per row without per-row grid-column overrides. Preview
+   variant (EmailsPage, figura2-emailuri-noi.png) reuses the exact same
+   flex-row/cell classes for its own 3-then-5-column rows. */
+.pending-orders-fields--flat,
+.pending-orders-fields--preview {
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -507,6 +522,7 @@
 }
 
 .pending-orders-attachments--inline__card {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -514,6 +530,17 @@
   border: 1px solid var(--border);
   border-radius: 8px;
   background: var(--color-surface);
+}
+
+/* EmailsPage only (figura2-emailuri-noi.png) — off by default, see
+   showProcessedBadge on PendingOrderAttachments. */
+.pending-orders-attachments--inline__processed-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  color: var(--color-success);
+  background: var(--color-surface);
+  border-radius: 999px;
 }
 
 .pending-orders-attachments--inline__icon {
