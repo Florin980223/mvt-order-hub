@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
-import { Bell, Headset } from 'lucide-react'
+import { Bell, ChevronDown, Headset } from 'lucide-react'
 import { supabase } from '../../lib/supabaseClient'
 import { useAuth } from '../../lib/auth/useAuth'
 import { useEmailsQuery } from '../../lib/emails/useEmailsQuery'
@@ -35,9 +35,11 @@ export function AppLayout() {
   const location = useLocation()
   const { user, role, fullName } = useAuth()
   const [notificationsOpen, setNotificationsOpen] = useState(false)
+  const [userMenuOpen, setUserMenuOpen] = useState(false)
 
   const visibleNavItems = navItems.filter((item) => !item.adminOnly || role === 'admin')
-  const currentPageTitle = navItems.find((item) => item.to === location.pathname)?.label ?? 'MVT Order Hub'
+  const currentNavItem = navItems.find((item) => item.to === location.pathname)
+  const currentPageTitle = currentNavItem?.headerTitle ?? currentNavItem?.label ?? 'MVT Order Hub'
 
   const { data: emailsData } = useEmailsQuery()
   const { data: connection } = useMailConnectionQuery()
@@ -128,6 +130,7 @@ export function AppLayout() {
             {connection && connectionVariant && (
               <span className={`app-connection-pill app-connection-pill--${connectionVariant}`}>
                 {formatConnectionStatus(connection.status)}
+                {connection.status === 'connected' ? ' la Outlook' : ''}
               </span>
             )}
 
@@ -161,18 +164,30 @@ export function AppLayout() {
             </div>
 
             {user && (
-              <div className="app-header-user">
-                <span className="app-header-avatar">{initialsOf(fullName, user.email ?? null)}</span>
-                <span className="app-header-user__text">
-                  <span className="app-header-user__name">{fullName ?? user.email}</span>
-                  <span className="app-header-user__role">{role === 'admin' ? 'Administrator' : 'Operator'}</span>
-                </span>
+              <div className="app-user-menu">
+                <button
+                  type="button"
+                  className="app-header-user"
+                  onClick={() => setUserMenuOpen((open) => !open)}
+                  aria-label="Meniu utilizator"
+                >
+                  <span className="app-header-avatar">{initialsOf(fullName, user.email ?? null)}</span>
+                  <span className="app-header-user__text">
+                    <span className="app-header-user__name">{fullName ?? user.email}</span>
+                    <span className="app-header-user__role">{role === 'admin' ? 'Administrator' : 'Operator'}</span>
+                  </span>
+                  <ChevronDown aria-hidden="true" size={16} className="app-header-user__chevron" />
+                </button>
+
+                {userMenuOpen && (
+                  <div className="app-user-menu-panel">
+                    <button type="button" className="app-user-menu-item" onClick={handleLogout}>
+                      Deconectare
+                    </button>
+                  </div>
+                )}
               </div>
             )}
-
-            <button className="app-header-logout" type="button" onClick={handleLogout}>
-              Deconectare
-            </button>
           </div>
         </header>
         <main className="app-main">

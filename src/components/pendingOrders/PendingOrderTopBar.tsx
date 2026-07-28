@@ -1,11 +1,16 @@
 import { Sparkles } from 'lucide-react'
 import { ConfidenceBadge } from '../emails/ConfidenceBadge'
-import type { OrderRow } from '../../lib/emails/types'
+import type { EmailAttachmentRow, OrderRow } from '../../lib/emails/types'
 import { countLowConfidenceFields } from '../../lib/orders/orderFields'
 import { useConfidenceThresholdQuery, DEFAULT_CONFIDENCE_THRESHOLD } from '../../lib/settings/useConfidenceThresholdQuery'
+import { PendingOrderAttachments } from './PendingOrderAttachments'
 
 interface PendingOrderTopBarProps {
   order: OrderRow
+  // When passed (Dashboard only), attachments render inline here, in the
+  // "Istoric AI" button's slot, matching figura1-dashboard.png. Omitted
+  // elsewhere (PendingOrdersPage) preserves today's layout exactly.
+  attachments?: EmailAttachmentRow[]
 }
 
 /**
@@ -14,7 +19,7 @@ interface PendingOrderTopBarProps {
  * here would assert something the docs don't support, so these use
  * accurate, phase-neutral tooltips instead.
  */
-export function PendingOrderTopBar({ order }: PendingOrderTopBarProps) {
+export function PendingOrderTopBar({ order, attachments }: PendingOrderTopBarProps) {
   const { data: confidenceThresholdSetting } = useConfidenceThresholdQuery()
   const confidenceThreshold = confidenceThresholdSetting?.value_json.threshold ?? DEFAULT_CONFIDENCE_THRESHOLD
   const lowConfidenceCount = countLowConfidenceFields(order, confidenceThreshold)
@@ -45,14 +50,19 @@ export function PendingOrderTopBar({ order }: PendingOrderTopBarProps) {
       {lowConfidenceCount > 0 && (
         <span className="pending-orders-topbar__warning">{lowConfidenceCount} câmpuri sub prag de încredere</span>
       )}
-      <button
-        type="button"
-        className="pending-orders-topbar__btn"
-        disabled
-        title="Istoricul comenzii nu este încă disponibil"
-      >
-        Istoric AI
-      </button>
+
+      {attachments ? (
+        <PendingOrderAttachments attachments={attachments} variant="inline" />
+      ) : (
+        <button
+          type="button"
+          className="pending-orders-topbar__btn"
+          disabled
+          title="Istoricul comenzii nu este încă disponibil"
+        >
+          Istoric AI
+        </button>
+      )}
     </div>
   )
 }

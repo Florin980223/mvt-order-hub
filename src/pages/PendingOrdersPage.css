@@ -246,6 +246,39 @@
   font-size: 16px;
 }
 
+.pending-orders-detail__heading-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pending-orders-detail__heading-row .pending-orders-detail__heading {
+  flex: 1;
+  min-width: 0;
+}
+
+.pending-orders-detail__icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  border: none;
+  background: transparent;
+  border-radius: 6px;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.pending-orders-detail__icon-btn:hover {
+  background: color-mix(in srgb, var(--color-primary) 8%, transparent);
+}
+
+.pending-orders-detail__icon-btn--active {
+  color: var(--color-primary);
+}
+
 .pending-orders-detail__body {
   display: flex;
   gap: 24px;
@@ -338,6 +371,69 @@
   color: var(--color-text);
 }
 
+/* Flat variant (Dashboard, figura1-dashboard.png) — ungrouped rows, no
+   section subheadings. Each row is a flex row so it naturally handles
+   1/2/4 cells per row without per-row grid-column overrides. */
+.pending-orders-fields--flat {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.pending-orders-fields__flat-row {
+  display: flex;
+  gap: 20px;
+}
+
+.pending-orders-fields__flat-cell {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.pending-orders-fields__flat-cell .pending-orders-fields__item {
+  flex: 1;
+  min-width: 0;
+}
+
+.pending-orders-fields__map-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: 12px;
+  text-decoration: none;
+}
+
+.pending-orders-fields__map-btn:hover {
+  background: color-mix(in srgb, var(--color-primary) 6%, var(--color-surface));
+}
+
+.pending-orders-fields__calendar-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+.pending-orders-fields__calendar-btn:hover {
+  background: color-mix(in srgb, var(--color-primary) 6%, var(--color-surface));
+}
+
 
 /* Attachments side list */
 
@@ -388,4 +484,89 @@
 .pending-orders-attachments__empty {
   color: var(--text);
   font-size: 13px;
+}
+
+/* Inline variant (Dashboard, figura1-dashboard.png) — side-by-side cards
+   in PendingOrderTopBar's row, replacing the sidebar column above. */
+.pending-orders-attachments--inline {
+  flex: 1;
+  min-width: 0;
+}
+
+.pending-orders-attachments--inline__heading {
+  margin: 0 0 6px;
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.pending-orders-attachments--inline__cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pending-orders-attachments--inline__card {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--color-surface);
+}
+
+.pending-orders-attachments--inline__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  border-radius: 6px;
+  background: var(--color-bg);
+  color: var(--text);
+}
+
+.pending-orders-attachments--inline__info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.pending-orders-attachments--inline__name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 160px;
+}
+
+.pending-orders-attachments--inline__meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--text);
+}
+
+.pending-orders-attachments--inline__download {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.pending-orders-attachments--inline__download:hover {
+  background: color-mix(in srgb, var(--color-primary) 8%, transparent);
 }

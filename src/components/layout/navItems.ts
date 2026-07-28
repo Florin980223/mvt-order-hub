@@ -5,6 +5,10 @@ export type BadgeKey = 'needsValidationEmails' | 'pendingOrders' | 'importedOrde
 export interface NavItem {
   to: string
   label: string
+  // Header page title, when it differs from the sidebar link text (e.g.
+  // Dashboard's header reads "Centralizator Comenzi" while its sidebar
+  // link stays "Dashboard") — falls back to `label` when unset.
+  headerTitle?: string
   icon: LucideIcon
   badgeKey?: BadgeKey
   adminOnly?: boolean
@@ -15,7 +19,7 @@ export interface NavItem {
 // /technical-logs isn't part of the mockup's 6-item spec (brief 10.1) —
 // it's a later addition (Phase 7a-10), kept in its existing position.
 export const navItems: NavItem[] = [
-  { to: '/dashboard', label: 'Dashboard', icon: Home },
+  { to: '/dashboard', label: 'Dashboard', headerTitle: 'Centralizator Comenzi', icon: Home },
   { to: '/emails', label: 'Emailuri Noi', icon: Mail, badgeKey: 'needsValidationEmails' },
   { to: '/pending-orders', label: 'Comenzi în Așteptare', icon: Clock, badgeKey: 'pendingOrders' },
   { to: '/sent-orders', label: 'Comenzi Importate', icon: Inbox, badgeKey: 'importedOrders' },

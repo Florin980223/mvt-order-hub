@@ -1,9 +1,10 @@
 import { useMemo, useState } from 'react'
-import { Inbox, Loader2, RefreshCw, TriangleAlert } from 'lucide-react'
+import { Inbox, Loader2, RefreshCw, Search, SlidersHorizontal, TriangleAlert } from 'lucide-react'
 import { DashboardDetailPanel } from '../components/dashboard/DashboardDetailPanel'
 import { SummaryTiles } from '../components/dashboard/SummaryTiles'
 import { EmailList } from '../components/emails/EmailList'
 import { useEmailsQuery } from '../lib/emails/useEmailsQuery'
+import { matchesSearch } from '../lib/emails/search'
 // EmailList/ActionBar/ConfidenceBadge styles live in EmailsPage.css, and
 // PendingOrderTopBar/PendingOrderFields/PendingOrderAttachments (reused via
 // DashboardDetailPanel) live in PendingOrdersPage.css — neither is
@@ -12,9 +13,14 @@ import './EmailsPage.css'
 import './PendingOrdersPage.css'
 import './DashboardPage.css'
 
+type TabKey = 'all' | 'needs_validation' | 'imported'
+
 export function DashboardPage() {
   const { data, isLoading, isError, error, refetch } = useEmailsQuery()
   const [selectedEmailId, setSelectedEmailId] = useState<string | null>(null)
+  const [activeTab, setActiveTab] = useState<TabKey>('all')
+  const [searchText, setSearchText] = useState('')
+  const [favoriteEmailIds, setFavoriteEmailIds] = useState<Set<string>>(new Set())
 
   const emails = useMemo(() => data ?? [], [data])
 
@@ -25,15 +31,29 @@ export function DashboardPage() {
     return { total, needsValidation, imported }
   }, [emails])
 
+  const visibleEmails = useMemo(() => {
+    const byTab = emails.filter((email) => {
+      if (activeTab === 'needs_validation') return email.status === 'needs_validation'
+      if (activeTab === 'imported') return email.orders.some((order) => order.status === 'imported')
+      return true
+    })
+    return byTab.filter((email) => matchesSearch(email, searchText))
+  }, [emails, activeTab, searchText])
+
   // Derived rather than effect-driven, same pattern as EmailsPage/PendingOrdersPage.
   const selectedEmail = emails.find((email) => email.id === selectedEmailId) ?? emails[0] ?? null
 
+  function toggleFavorite(emailId: string) {
+    setFavoriteEmailIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(emailId)) next.delete(emailId)
+      else next.add(emailId)
+      return next
+    })
+  }
+
   return (
     <div className="dashboard-page">
-      <header className="dashboard-page__header">
-        <h1>Dashboard</h1>
-      </header>
-
       <SummaryTiles total={summary.total} needsValidation={summary.needsValidation} imported={summary.imported} />
 
       {isLoading && (
@@ -64,10 +84,64 @@ export function DashboardPage() {
       {!isLoading && !isError && emails.length > 0 && (
         <div className="dashboard-split">
           <div className="dashboard-split__list">
-            <EmailList emails={emails} selectedId={selectedEmail?.id ?? null} onSelect={setSelectedEmailId} />
+            <div className="emails-page__header-controls">
+              <div className="emails-search">
+                <Search aria-hidden="true" size={16} />
+                <input
+                  type="text"
+                  placeholder="Caută după expeditor sau subiect..."
+                  value={searchText}
+                  onChange={(event) => setSearchText(event.target.value)}
+                />
+              </div>
+              <button type="button" className="emails-filter-button">
+                <SlidersHorizontal aria-hidden="true" size={16} />
+                Filtrează
+              </button>
+            </div>
+
+            <nav className="emails-tabs">
+              <button
+                type="button"
+                className={`emails-tabs__tab${activeTab === 'all' ? ' emails-tabs__tab--active' : ''}`}
+                onClick={() => setActiveTab('all')}
+              >
+                Toate {summary.total}
+              </button>
+              <button
+                type="button"
+                className={`emails-tabs__tab${activeTab === 'needs_validation' ? ' emails-tabs__tab--active' : ''}`}
+                onClick={() => setActiveTab('needs_validation')}
+              >
+                Necesită validare {summary.needsValidation}
+              </button>
+              <button
+                type="button"
+                className={`emails-tabs__tab${activeTab === 'imported' ? ' emails-tabs__tab--active' : ''}`}
+                onClick={() => setActiveTab('imported')}
+              >
+                Importate {summary.imported}
+              </button>
+            </nav>
+
+            <div className="dashboard-split__list-scroll">
+              <EmailList
+                emails={visibleEmails}
+                selectedId={selectedEmail?.id ?? null}
+                onSelect={setSelectedEmailId}
+                favoriteIds={favoriteEmailIds}
+                onToggleFavorite={toggleFavorite}
+              />
+            </div>
           </div>
           <div className="dashboard-split__detail">
-            {selectedEmail && <DashboardDetailPanel email={selectedEmail} />}
+            {selectedEmail && (
+              <DashboardDetailPanel
+                email={selectedEmail}
+                isFavorite={favoriteEmailIds.has(selectedEmail.id)}
+                onToggleFavorite={() => toggleFavorite(selectedEmail.id)}
+              />
+            )}
           </div>
         </div>
       )}

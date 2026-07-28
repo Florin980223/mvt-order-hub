@@ -3,16 +3,10 @@ import { Inbox, Loader2, RefreshCw, Search, SlidersHorizontal, TriangleAlert } f
 import { EmailDetailPanel } from '../components/emails/EmailDetailPanel'
 import { EmailList } from '../components/emails/EmailList'
 import { useEmailsQuery } from '../lib/emails/useEmailsQuery'
-import type { EmailRow } from '../lib/emails/types'
+import { matchesSearch } from '../lib/emails/search'
 import './EmailsPage.css'
 
 type TabKey = 'all' | 'needs_validation' | 'with_attachments'
-
-function matchesSearch(email: EmailRow, searchText: string): boolean {
-  if (searchText.trim().length === 0) return true
-  const needle = searchText.trim().toLowerCase()
-  return email.sender.toLowerCase().includes(needle) || (email.subject ?? '').toLowerCase().includes(needle)
-}
 
 export function EmailsPage() {
   const { data, isLoading, isError, error, refetch } = useEmailsQuery()

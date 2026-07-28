@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../supabaseClient'
 import { ORDER_FIELD_SECTIONS } from './orderFields.ts'
@@ -31,16 +31,16 @@ export function useOrderCorrection(order: OrderRow | null) {
   const [isEditing, setIsEditing] = useState(false)
   const [draftValues, setDraftValues] = useState<Record<string, string>>({})
 
-  // A different order got selected mid-edit — don't leak stale edits onto
-  // it. Adjusting state during render (React's recommended pattern for
-  // "reset state when a prop changes") rather than an effect, which would
-  // cause an extra commit.
-  const [lastOrderId, setLastOrderId] = useState(order?.id ?? null)
-  if (order?.id !== lastOrderId) {
-    setLastOrderId(order?.id ?? null)
+  // A different order got selected mid-edit — don't leak stale edits onto it.
+  const orderId = order?.id ?? null
+  useEffect(() => {
     setIsEditing(false)
     setDraftValues({})
-  }
+    // Only reset when the selected order actually changes, not on every
+    // render — orderId is a stable primitive (string | null), safe as the
+    // sole dependency.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [orderId])
 
   function startEditing() {
     if (!order) return

@@ -24,6 +24,10 @@ interface ActionBarProps {
   emailStatus?: string
   latestExtractionJobStatus?: string | null
   correction?: OrderCorrection
+  // Dashboard hides this button — figura1-dashboard.png's action bar has
+  // only 4 buttons, and this one is already permanently disabled there
+  // anyway since latestExtractionJobStatus is never passed from that page.
+  showRetryExtraction?: boolean
 }
 
 interface SubmitOrderResult {
@@ -45,7 +49,14 @@ interface SendClientConfirmationResult {
 }
 
 /** All buttons are visually specified by the brief's mockup. */
-export function ActionBar({ order, emailId, emailStatus, latestExtractionJobStatus, correction }: ActionBarProps) {
+export function ActionBar({
+  order,
+  emailId,
+  emailStatus,
+  latestExtractionJobStatus,
+  correction,
+  showRetryExtraction = true,
+}: ActionBarProps) {
   const queryClient = useQueryClient()
 
   const submitMutation = useMutation({
@@ -205,15 +216,17 @@ export function ActionBar({ order, emailId, emailStatus, latestExtractionJobStat
           Anulează
         </button>
       )}
-      <button
-        type="button"
-        className="emails-action-bar__btn"
-        disabled={retryExtractionDisabled}
-        title={retryExtractionTitle}
-        onClick={() => emailId && retryExtractionMutation.mutate(emailId)}
-      >
-        {retryExtractionMutation.isPending ? 'Se reîncearcă...' : 'Reîncearcă extragerea'}
-      </button>
+      {showRetryExtraction && (
+        <button
+          type="button"
+          className="emails-action-bar__btn"
+          disabled={retryExtractionDisabled}
+          title={retryExtractionTitle}
+          onClick={() => emailId && retryExtractionMutation.mutate(emailId)}
+        >
+          {retryExtractionMutation.isPending ? 'Se reîncearcă...' : 'Reîncearcă extragerea'}
+        </button>
+      )}
       <button
         type="button"
         className="emails-action-bar__btn emails-action-bar__btn--red"
@@ -226,7 +239,7 @@ export function ActionBar({ order, emailId, emailStatus, latestExtractionJobStat
       </button>
       <button
         type="button"
-        className="emails-action-bar__btn emails-action-bar__btn--blue"
+        className="emails-action-bar__btn emails-action-bar__btn--outline"
         disabled={sendConfirmationDisabled}
         title={sendConfirmationTitle}
         onClick={() => order && sendConfirmationMutation.mutate(order.id)}

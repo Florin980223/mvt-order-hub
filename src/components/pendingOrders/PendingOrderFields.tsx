@@ -1,4 +1,5 @@
-import { ORDER_FIELD_SECTIONS, latestSourceFor } from '../../lib/orders/orderFields'
+import { Calendar, MapPin } from 'lucide-react'
+import { ORDER_FIELD_SECTIONS, latestSourceFor, type OrderFieldDef } from '../../lib/orders/orderFields'
 import type { OrderCorrection } from '../../lib/orders/useOrderCorrection'
 import type { OrderRow } from '../../lib/emails/types'
 import { FieldConfidenceIndicator } from '../emails/FieldConfidenceIndicator'
@@ -7,12 +8,128 @@ import { useConfidenceThresholdQuery, DEFAULT_CONFIDENCE_THRESHOLD } from '../..
 interface PendingOrderFieldsProps {
   order: OrderRow
   correction?: OrderCorrection
+  // 'sectioned' (default) is PendingOrdersPage's grouped layout with
+  // section subheadings. 'flat' is Dashboard's ungrouped mockup layout
+  // (figura1-dashboard.png), with a 4-column "Marfă" row and Hartă/
+  // calendar buttons on address/date fields.
+  variant?: 'sectioned' | 'flat'
 }
 
-export function PendingOrderFields({ order, correction }: PendingOrderFieldsProps) {
+// Mockup-specific label text for the flat variant only — the sectioned
+// variant (PendingOrdersPage) keeps its existing Romanian labels from
+// ORDER_FIELD_SECTIONS unchanged.
+const FLAT_LABELS: Record<string, string> = {
+  client_order_number: 'Număr comandă client',
+  client_name: 'Client / Expeditor',
+  pickup_address: 'Adresă Pickup',
+  delivery_address: 'Adresă Delivery',
+  pickup_at: 'Dată & Ora Pickup',
+  delivery_at: 'Dată & Ora Delivery',
+  cargo_type: 'Tip marfă',
+  quantity: 'Cantitate',
+  weight_kg: 'Greutate',
+  volume_m3: 'Volum',
+  transport_amount: 'Valoare transport',
+  carrier_proposed: 'Carrier propus',
+  notes: 'Note',
+}
+
+const FLAT_ROWS: string[][] = [
+  ['client_order_number', 'client_name'],
+  ['pickup_address', 'delivery_address'],
+  ['pickup_at', 'delivery_at'],
+  ['cargo_type', 'quantity', 'weight_kg', 'volume_m3'],
+  ['transport_amount', 'carrier_proposed'],
+  ['notes'],
+]
+
+const ALL_FIELDS = ORDER_FIELD_SECTIONS.flatMap((section) => section.fields)
+
+function fieldByName(fieldName: string): OrderFieldDef {
+  const field = ALL_FIELDS.find((f) => f.fieldName === fieldName)
+  if (!field) throw new Error(`Unknown order field: ${fieldName}`)
+  return field
+}
+
+export function PendingOrderFields({ order, correction, variant = 'sectioned' }: PendingOrderFieldsProps) {
   const isEditing = correction?.isEditing ?? false
   const { data: confidenceThresholdSetting } = useConfidenceThresholdQuery()
   const confidenceThreshold = confidenceThresholdSetting?.value_json.threshold ?? DEFAULT_CONFIDENCE_THRESHOLD
+
+  function renderField(field: OrderFieldDef, label: string) {
+    const source = latestSourceFor(order.order_field_sources, field.fieldName)
+
+    if (isEditing && field.inputType && correction) {
+      return (
+        <div className="pending-orders-fields__item" key={field.fieldName}>
+          <label className="pending-orders-fields__label" htmlFor={`correct-${field.fieldName}`}>
+            {label}
+          </label>
+          <input
+            id={`correct-${field.fieldName}`}
+            type={field.inputType === 'datetime' ? 'datetime-local' : field.inputType}
+            value={correction.draftValues[field.fieldName] ?? ''}
+            onChange={(e) => correction.updateDraftField(field.fieldName, e.target.value)}
+          />
+        </div>
+      )
+    }
+
+    return (
+      <div className="pending-orders-fields__item" key={field.fieldName}>
+        <span className="pending-orders-fields__label">{label}</span>
+        <span className="pending-orders-fields__value">
+          {field.value(order)}
+          <FieldConfidenceIndicator confidence={source?.confidence ?? null} threshold={confidenceThreshold} />
+        </span>
+      </div>
+    )
+  }
+
+  if (variant === 'flat') {
+    return (
+      <div className="pending-orders-fields pending-orders-fields--flat">
+        {FLAT_ROWS.map((fieldNames, rowIndex) => (
+          <div key={rowIndex} className="pending-orders-fields__flat-row">
+            {fieldNames.map((fieldName) => {
+              const field = fieldByName(fieldName)
+              const label = FLAT_LABELS[fieldName] ?? field.label
+              const isAddress = fieldName === 'pickup_address' || fieldName === 'delivery_address'
+              const isDate = fieldName === 'pickup_at' || fieldName === 'delivery_at'
+              const value = field.value(order)
+
+              return (
+                <div className="pending-orders-fields__flat-cell" key={fieldName}>
+                  {renderField(field, label)}
+                  {!isEditing && isAddress && value !== '—' && (
+                    <a
+                      className="pending-orders-fields__map-btn"
+                      href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(value)}`}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      <MapPin aria-hidden="true" size={14} />
+                      Hartă
+                    </a>
+                  )}
+                  {!isEditing && isDate && (
+                    <button
+                      type="button"
+                      className="pending-orders-fields__calendar-btn"
+                      onClick={() => correction?.startEditing()}
+                      aria-label="Editează data"
+                    >
+                      <Calendar aria-hidden="true" size={14} />
+                    </button>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        ))}
+      </div>
+    )
+  }
 
   return (
     <div className="pending-orders-fields">
@@ -20,35 +137,7 @@ export function PendingOrderFields({ order, correction }: PendingOrderFieldsProp
         <section key={section.title} className="pending-orders-fields__section">
           <h3>{section.title}</h3>
           <div className="pending-orders-fields__grid">
-            {section.fields.map((field) => {
-              const source = latestSourceFor(order.order_field_sources, field.fieldName)
-
-              if (isEditing && field.inputType && correction) {
-                return (
-                  <div className="pending-orders-fields__item" key={field.fieldName}>
-                    <label className="pending-orders-fields__label" htmlFor={`correct-${field.fieldName}`}>
-                      {field.label}
-                    </label>
-                    <input
-                      id={`correct-${field.fieldName}`}
-                      type={field.inputType === 'datetime' ? 'datetime-local' : field.inputType}
-                      value={correction.draftValues[field.fieldName] ?? ''}
-                      onChange={(e) => correction.updateDraftField(field.fieldName, e.target.value)}
-                    />
-                  </div>
-                )
-              }
-
-              return (
-                <div className="pending-orders-fields__item" key={field.fieldName}>
-                  <span className="pending-orders-fields__label">{field.label}</span>
-                  <span className="pending-orders-fields__value">
-                    {field.value(order)}
-                    <FieldConfidenceIndicator confidence={source?.confidence ?? null} threshold={confidenceThreshold} />
-                  </span>
-                </div>
-              )
-            })}
+            {section.fields.map((field) => renderField(field, field.label))}
           </div>
         </section>
       ))}

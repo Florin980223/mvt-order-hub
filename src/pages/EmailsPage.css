@@ -160,9 +160,11 @@
 }
 
 .emails-list-item {
+  position: relative;
   display: block;
+  box-sizing: border-box;
   width: 100%;
-  padding: 12px 16px;
+  padding: 12px 40px 12px 16px;
   border: none;
   border-bottom: 1px solid var(--border);
   background: transparent;
@@ -170,6 +172,22 @@
   text-align: left;
   font: inherit;
   cursor: pointer;
+}
+
+.emails-list-item__favorite {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  border: none;
+  background: transparent;
+  padding: 2px;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.emails-list-item__favorite--active {
+  color: var(--color-primary);
 }
 
 .emails-list-item--selected {
@@ -183,10 +201,15 @@
 }
 
 .emails-list-item__sender {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   font-weight: 600;
 }
 
 .emails-list-item__time {
+  flex-shrink: 0;
   color: var(--text);
   font-size: 12px;
   white-space: nowrap;
@@ -555,15 +578,18 @@
   color: white;
 }
 
-.emails-action-bar__btn--blue {
-  border: none;
-  background: var(--color-primary);
-  color: white;
+.emails-action-bar__btn--outline {
+  border: 1px solid var(--border);
+  background: var(--color-surface);
+  color: var(--color-text);
 }
 
 .emails-action-bar__btn--primary:not(:disabled):hover,
 .emails-action-bar__btn--amber:not(:disabled):hover,
-.emails-action-bar__btn--red:not(:disabled):hover,
-.emails-action-bar__btn--blue:not(:disabled):hover {
+.emails-action-bar__btn--red:not(:disabled):hover {
   filter: brightness(0.92);
+}
+
+.emails-action-bar__btn--outline:not(:disabled):hover {
+  background: color-mix(in srgb, var(--color-primary) 6%, var(--color-surface));
 }
