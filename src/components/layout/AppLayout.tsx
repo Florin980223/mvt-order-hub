@@ -72,11 +72,10 @@ export function AppLayout() {
     <div className="app-layout">
       <aside className="app-sidebar">
         <div className="app-sidebar-brand">
-          <span className="app-sidebar-brand__mvt">MVT</span>
-          <span className="app-sidebar-brand__logistics">LOGISTICS</span>
-          <span className="app-sidebar-brand__city">TIMIȘOARA</span>
+          <img src="/logo-mvt.png" alt="MVT Logistics Timișoara" className="app-sidebar-brand__logo" />
         </div>
 
+        <div className="app-sidebar-body">
         <nav>
           <ul className="app-sidebar-nav">
             {visibleNavItems.map((item) => {
@@ -112,7 +111,12 @@ export function AppLayout() {
 
         <div className="app-sidebar-footer">
           <Headset aria-hidden="true" size={16} />
-          <span>Suport</span>
+          <div className="app-sidebar-footer__text">
+            <span className="app-sidebar-footer__label">Suport</span>
+            <span>help@mvtlogistics.ro</span>
+            <span>+40 336 100 200</span>
+          </div>
+        </div>
         </div>
       </aside>
 
