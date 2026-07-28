@@ -250,11 +250,16 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  margin-top: 16px;
 }
 
 .pending-orders-detail__heading-row .pending-orders-detail__heading {
   flex: 1;
   min-width: 0;
+  /* Row already carries the top margin; keeping it on the heading too
+     inflates the flex line's cross size and throws off align-items: center
+     against the icon buttons (heading text renders ~8px below their center). */
+  margin: 0;
 }
 
 .pending-orders-detail__icon-btn {
@@ -267,7 +272,10 @@
   border: none;
   background: transparent;
   border-radius: 6px;
-  color: var(--text);
+  /* Fixed brand-palette token, not --text: same dark-mode wash-out reasoning
+     as the h1/h2 and field-label fixes. Matches .app-notifications-bell,
+     which uses --color-text for the same white-surface icon-button case. */
+  color: var(--color-text);
   cursor: pointer;
 }
 
@@ -374,13 +382,27 @@
 
 .pending-orders-fields__label {
   font-size: 12px;
-  color: var(--text);
+  /* Fixed brand-palette token, not --text: same reasoning as the h1/h2 fix
+     in index.css — surfaces here are pinned light regardless of OS
+     preference, so --text's dark-mode override (#9ca3af) washes these out. */
+  color: #6b6375;
 }
 
 .pending-orders-fields__value {
   font-size: 14px;
   font-weight: 500;
   color: var(--color-text);
+}
+
+/* Dark + bold labels for flat/preview only — figura1/figura2 want labels
+   matching .pending-orders-fields__value's color and weight exactly, but
+   figura3 (PendingOrdersPage's own sectioned mockup) keeps its labels
+   light, so this can't go on the shared base .pending-orders-fields__label
+   rule. */
+.pending-orders-fields--flat .pending-orders-fields__label,
+.pending-orders-fields--preview .pending-orders-fields__label {
+  color: var(--color-text);
+  font-weight: 500;
 }
 
 /* Flat variant (Dashboard, figura1-dashboard.png) — ungrouped rows, no

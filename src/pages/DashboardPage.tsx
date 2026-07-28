@@ -1,9 +1,23 @@
 import { useMemo, useState } from 'react'
-import { ArrowDownWideNarrow, Filter, Inbox, Loader2, RefreshCw, Search, SlidersHorizontal, TriangleAlert } from 'lucide-react'
+import {
+  ArrowDownWideNarrow,
+  ChevronLeft,
+  ChevronRight,
+  Filter,
+  Inbox,
+  Loader2,
+  RefreshCw,
+  Search,
+  SlidersHorizontal,
+  TriangleAlert,
+} from 'lucide-react'
 import { DashboardDetailPanel } from '../components/dashboard/DashboardDetailPanel'
 import { EmailList } from '../components/emails/EmailList'
 import { useEmailsQuery } from '../lib/emails/useEmailsQuery'
 import { matchesSearch } from '../lib/emails/search'
+import { formatUpdatedRelative } from '../lib/emails/format'
+
+const PAGE_SIZE = 6
 // EmailList/ActionBar/ConfidenceBadge styles live in EmailsPage.css, and
 // PendingOrderTopBar/PendingOrderFields/PendingOrderAttachments (reused via
 // DashboardDetailPanel) live in PendingOrdersPage.css — neither is
@@ -15,11 +29,12 @@ import './DashboardPage.css'
 type TabKey = 'all' | 'needs_validation' | 'imported'
 
 export function DashboardPage() {
-  const { data, isLoading, isError, error, refetch } = useEmailsQuery()
+  const { data, dataUpdatedAt, isLoading, isError, error, refetch } = useEmailsQuery()
   const [selectedEmailId, setSelectedEmailId] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState<TabKey>('all')
   const [searchText, setSearchText] = useState('')
   const [favoriteEmailIds, setFavoriteEmailIds] = useState<Set<string>>(new Set())
+  const [page, setPage] = useState(0)
 
   const emails = useMemo(() => data ?? [], [data])
 
@@ -38,6 +53,13 @@ export function DashboardPage() {
     })
     return byTab.filter((email) => matchesSearch(email, searchText))
   }, [emails, activeTab, searchText])
+
+  // Clamped rather than reset via effect: filters changing shouldn't need a
+  // setState round-trip just to keep the page in range.
+  const totalPages = Math.max(1, Math.ceil(visibleEmails.length / PAGE_SIZE))
+  const currentPage = Math.min(page, totalPages - 1)
+  const pageStart = currentPage * PAGE_SIZE
+  const pagedEmails = visibleEmails.slice(pageStart, pageStart + PAGE_SIZE)
 
   // Derived rather than effect-driven, same pattern as EmailsPage/PendingOrdersPage.
   const selectedEmail = emails.find((email) => email.id === selectedEmailId) ?? emails[0] ?? null
@@ -134,12 +156,43 @@ export function DashboardPage() {
 
             <div className="dashboard-split__list-scroll">
               <EmailList
-                emails={visibleEmails}
+                emails={pagedEmails}
                 selectedId={selectedEmail?.id ?? null}
                 onSelect={setSelectedEmailId}
                 favoriteIds={favoriteEmailIds}
                 onToggleFavorite={toggleFavorite}
               />
+            </div>
+
+            <div className="dashboard-list-footer">
+              <span className="dashboard-list-footer__updated">
+                <RefreshCw aria-hidden="true" size={13} />
+                {formatUpdatedRelative(dataUpdatedAt)}
+              </span>
+              <div className="dashboard-list-footer__pagination">
+                <span>
+                  {visibleEmails.length === 0 ? 0 : pageStart + 1}-{Math.min(pageStart + PAGE_SIZE, visibleEmails.length)} din{' '}
+                  {visibleEmails.length}
+                </span>
+                <button
+                  type="button"
+                  className="dashboard-list-footer__page-btn"
+                  aria-label="Pagina anterioară"
+                  disabled={currentPage === 0}
+                  onClick={() => setPage(currentPage - 1)}
+                >
+                  <ChevronLeft aria-hidden="true" size={16} />
+                </button>
+                <button
+                  type="button"
+                  className="dashboard-list-footer__page-btn"
+                  aria-label="Pagina următoare"
+                  disabled={currentPage >= totalPages - 1}
+                  onClick={() => setPage(currentPage + 1)}
+                >
+                  <ChevronRight aria-hidden="true" size={16} />
+                </button>
+              </div>
             </div>
           </div>
           <div className="dashboard-split__detail">

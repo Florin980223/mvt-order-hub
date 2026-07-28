@@ -94,7 +94,9 @@
   border: none;
   background: transparent;
   border-radius: 6px;
-  color: var(--text);
+  /* Fixed brand-palette token, not --text: same dark-mode wash-out reasoning
+     as the pending-orders-detail__icon-btn fix (star/"..." icons). */
+  color: var(--color-text);
   cursor: pointer;
 }
 
@@ -129,6 +131,53 @@
   min-height: 0;
   overflow-y: auto;
   margin-top: 8px;
+}
+
+.dashboard-list-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-shrink: 0;
+  padding: 10px 16px;
+  border-top: 1px solid var(--border);
+  color: var(--text);
+  font-size: 12px;
+}
+
+.dashboard-list-footer__updated {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dashboard-list-footer__pagination {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dashboard-list-footer__page-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+.dashboard-list-footer__page-btn:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--color-primary) 8%, var(--color-surface));
+}
+
+.dashboard-list-footer__page-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 .dashboard-split__detail {

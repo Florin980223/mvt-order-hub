@@ -43,3 +43,11 @@ const EMAIL_STATUS_LABELS: Record<string, string> = {
 export function formatEmailStatus(status: string): string {
   return EMAIL_STATUS_LABELS[status] ?? status
 }
+
+/** "Actualizat acum X minute" / "Actualizat acum un minut" / "Actualizat chiar acum". */
+export function formatUpdatedRelative(timestampMs: number): string {
+  const minutes = Math.floor((Date.now() - timestampMs) / 60000)
+  if (minutes < 1) return 'Actualizat chiar acum'
+  if (minutes === 1) return 'Actualizat acum un minut'
+  return `Actualizat acum ${minutes} minute`
+}

@@ -1,4 +1,4 @@
-import { Star } from 'lucide-react'
+import { Mail, Star } from 'lucide-react'
 import { formatTime } from '../../lib/emails/format'
 import type { EmailRow } from '../../lib/emails/types'
 import { AttachmentBadge } from './AttachmentBadge'
@@ -46,16 +46,21 @@ export function EmailList({
                 if (event.key === 'Enter' || event.key === ' ') onSelect(email.id)
               }}
             >
-              <div className="emails-list-item__row">
-                <span className="emails-list-item__sender">{email.sender}</span>
-                <span className="emails-list-item__time">{formatTime(email.received_at)}</span>
-              </div>
-              <div className="emails-list-item__subject">{email.subject ?? '(fără subiect)'}</div>
-              <div className="emails-list-item__meta">
-                {email.email_attachments.map((attachment) => (
-                  <AttachmentBadge key={attachment.id} mimeType={attachment.mime_type} filename={attachment.filename} />
-                ))}
-                <StatusBadge status={email.status} />
+              <span className="emails-list-item__source-icon" aria-hidden="true">
+                <Mail size={14} />
+              </span>
+              <div className="emails-list-item__content">
+                <div className="emails-list-item__row">
+                  <span className="emails-list-item__sender">{email.sender}</span>
+                  <span className="emails-list-item__time">{formatTime(email.received_at)}</span>
+                </div>
+                <div className="emails-list-item__subject">{email.subject ?? '(fără subiect)'}</div>
+                <div className="emails-list-item__meta">
+                  {email.email_attachments.map((attachment) => (
+                    <AttachmentBadge key={attachment.id} mimeType={attachment.mime_type} filename={attachment.filename} />
+                  ))}
+                  <StatusBadge status={email.status} />
+                </div>
               </div>
               {onToggleFavorite && (starVisibility === 'all' || email.id === selectedId) && (
                 <button
