@@ -1,6 +1,8 @@
 import { ORDER_FIELD_SECTIONS, latestSourceFor } from '../../lib/orders/orderFields'
 import type { OrderCorrection } from '../../lib/orders/useOrderCorrection'
 import type { OrderRow } from '../../lib/emails/types'
+import { FieldConfidenceIndicator } from '../emails/FieldConfidenceIndicator'
+import { useConfidenceThresholdQuery, DEFAULT_CONFIDENCE_THRESHOLD } from '../../lib/settings/useConfidenceThresholdQuery'
 
 interface PendingOrderFieldsProps {
   order: OrderRow
@@ -9,6 +11,8 @@ interface PendingOrderFieldsProps {
 
 export function PendingOrderFields({ order, correction }: PendingOrderFieldsProps) {
   const isEditing = correction?.isEditing ?? false
+  const { data: confidenceThresholdSetting } = useConfidenceThresholdQuery()
+  const confidenceThreshold = confidenceThresholdSetting?.value_json.threshold ?? DEFAULT_CONFIDENCE_THRESHOLD
 
   return (
     <div className="pending-orders-fields">
@@ -40,12 +44,7 @@ export function PendingOrderFields({ order, correction }: PendingOrderFieldsProp
                   <span className="pending-orders-fields__label">{field.label}</span>
                   <span className="pending-orders-fields__value">
                     {field.value(order)}
-                    {source?.confidence != null && (
-                      <span className="pending-orders-fields__confidence">
-                        {' '}
-                        ({Math.round(source.confidence * 100)}%)
-                      </span>
-                    )}
+                    <FieldConfidenceIndicator confidence={source?.confidence ?? null} threshold={confidenceThreshold} />
                   </span>
                 </div>
               )

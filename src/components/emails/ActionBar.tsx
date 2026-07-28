@@ -1,4 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { Check, Pencil, Send, Trash2 } from 'lucide-react'
 import { supabase } from '../../lib/supabaseClient'
 import { formatOrderStatus } from '../../lib/orders/format'
 import { checkImportReadiness } from '../../lib/orders/importReadiness'
@@ -175,6 +176,7 @@ export function ActionBar({ order, emailId, emailStatus, latestExtractionJobStat
         title={primaryTitle}
         onClick={() => order && submitMutation.mutate(order.id)}
       >
+        <Check aria-hidden="true" size={16} />
         {isSubmitting ? 'Se importă...' : 'Salvează & Importă în AscendTMS'}
       </button>
       <button
@@ -191,6 +193,7 @@ export function ActionBar({ order, emailId, emailStatus, latestExtractionJobStat
           }
         }}
       >
+        <Pencil aria-hidden="true" size={16} />
         {isEditing
           ? correction?.saveMutation.isPending
             ? 'Se salvează...'
@@ -218,6 +221,7 @@ export function ActionBar({ order, emailId, emailStatus, latestExtractionJobStat
         title={rejectTitle}
         onClick={handleRejectClick}
       >
+        <Trash2 aria-hidden="true" size={16} />
         {rejectMutation.isPending ? 'Se respinge...' : 'Respinge email'}
       </button>
       <button
@@ -227,6 +231,7 @@ export function ActionBar({ order, emailId, emailStatus, latestExtractionJobStat
         title={sendConfirmationTitle}
         onClick={() => order && sendConfirmationMutation.mutate(order.id)}
       >
+        <Send aria-hidden="true" size={16} />
         {sendConfirmationMutation.isPending ? 'Se trimite...' : 'Trimite confirmare client'}
       </button>
       {submitMutation.isError && (

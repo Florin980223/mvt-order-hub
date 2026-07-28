@@ -6,6 +6,7 @@ import { usePrimaryMailboxAddress } from '../../lib/emails/useEmailsQuery'
 import { getFileTypeMeta } from '../../lib/emails/fileType'
 import { useOpenAttachment } from '../../lib/emails/useOpenAttachment'
 import { ActionBar } from './ActionBar'
+import { AttachmentBadge } from './AttachmentBadge'
 import { ConfidenceBadge } from './ConfidenceBadge'
 import { OrderFieldsSummary } from './OrderFieldsSummary'
 import { StatusBadge } from './StatusBadge'
@@ -69,6 +70,7 @@ export function EmailDetailPanel({ email }: EmailDetailPanelProps) {
                   <FileTypeIcon mimeType={attachment.mime_type} filename={attachment.filename} />
                   <span className="emails-attachment-row__name">{attachment.filename}</span>
                   <span className="emails-attachment-row__size">{formatFileSize(attachment.size)}</span>
+                  <AttachmentBadge mimeType={attachment.mime_type} filename={attachment.filename} />
                   <Check aria-hidden="true" size={16} className="emails-attachment-row__check" />
                   <button
                     type="button"
@@ -93,7 +95,14 @@ export function EmailDetailPanel({ email }: EmailDetailPanelProps) {
           <>
             <section className="emails-detail__confidence">
               <ConfidenceBadge confidence={order.confidence_overall} />
-              <span>Scor de încredere</span>
+              <div className="confidence-label">
+                <span className="confidence-label__heading">Încredere extragere</span>
+                <span className="confidence-label__detail">
+                  {order.confidence_overall != null
+                    ? `${Math.round(order.confidence_overall * 100)}% date recunoscute`
+                    : '—'}
+                </span>
+              </div>
             </section>
             <section className="emails-detail__fields">
               <OrderFieldsSummary order={order} />

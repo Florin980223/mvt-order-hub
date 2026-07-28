@@ -3,6 +3,7 @@ import { formatFileSize } from '../../lib/emails/format'
 import { getFileTypeMeta } from '../../lib/emails/fileType'
 import { useOpenAttachment } from '../../lib/emails/useOpenAttachment'
 import type { EmailAttachmentRow } from '../../lib/emails/types'
+import { AttachmentBadge } from '../emails/AttachmentBadge'
 
 interface PendingOrderAttachmentsProps {
   attachments: EmailAttachmentRow[]
@@ -30,6 +31,7 @@ export function PendingOrderAttachments({ attachments }: PendingOrderAttachments
               <FileTypeIcon mimeType={attachment.mime_type} filename={attachment.filename} />
               <span className="pending-orders-attachments__name">{attachment.filename}</span>
               <span className="pending-orders-attachments__size">{formatFileSize(attachment.size)}</span>
+              <AttachmentBadge mimeType={attachment.mime_type} filename={attachment.filename} />
               <button
                 type="button"
                 onClick={() => openAttachment.mutate(attachment.id)}

@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react'
 import { useConfidenceThresholdQuery, DEFAULT_CONFIDENCE_THRESHOLD } from '../../lib/settings/useConfidenceThresholdQuery'
 
 interface ConfidenceBadgeProps {
@@ -10,15 +11,26 @@ export function ConfidenceBadge({ confidence }: ConfidenceBadgeProps) {
   const threshold = confidenceThresholdSetting?.value_json.threshold ?? DEFAULT_CONFIDENCE_THRESHOLD
 
   if (confidence === null) {
-    return <div className="emails-confidence-badge emails-confidence-badge--neutral">—</div>
+    return (
+      <div className="emails-confidence-badge emails-confidence-badge--neutral">
+        <span className="emails-confidence-badge__text">—</span>
+      </div>
+    )
   }
 
   const percent = Math.round(confidence * 100)
   const className = confidence >= threshold ? 'emails-confidence-badge--high' : 'emails-confidence-badge--low'
 
   return (
-    <div className={`emails-confidence-badge ${className}`} title={`${percent}% încredere`}>
-      {percent}%
+    <div
+      className={`emails-confidence-badge ${className}`}
+      style={{ '--confidence-percent': percent } as CSSProperties}
+      title={`${percent}% încredere`}
+    >
+      <span className="emails-confidence-badge__text">
+        <span className="emails-confidence-badge__percent">{percent}%</span>
+        <span className="emails-confidence-badge__label">match</span>
+      </span>
     </div>
   )
 }

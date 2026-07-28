@@ -1,5 +1,7 @@
 import { formatDate } from '../../lib/emails/format'
 import type { OrderFieldSourceRow, OrderRow } from '../../lib/emails/types'
+import { FieldConfidenceIndicator } from './FieldConfidenceIndicator'
+import { useConfidenceThresholdQuery, DEFAULT_CONFIDENCE_THRESHOLD } from '../../lib/settings/useConfidenceThresholdQuery'
 
 interface OrderFieldsSummaryProps {
   order: OrderRow
@@ -18,6 +20,9 @@ function latestSourceFor(sources: OrderFieldSourceRow[], fieldName: string): Ord
 }
 
 export function OrderFieldsSummary({ order }: OrderFieldsSummaryProps) {
+  const { data: confidenceThresholdSetting } = useConfidenceThresholdQuery()
+  const confidenceThreshold = confidenceThresholdSetting?.value_json.threshold ?? DEFAULT_CONFIDENCE_THRESHOLD
+
   const fields: FieldDef[] = [
     { label: 'Client / Expeditor', fieldName: 'client_name', value: order.client_name ?? '—' },
     { label: 'Adresă ridicare', fieldName: 'pickup_address', value: order.pickup_address ?? '—' },
@@ -43,9 +48,7 @@ export function OrderFieldsSummary({ order }: OrderFieldsSummaryProps) {
             <span className="emails-fields-grid__label">{field.label}</span>
             <span className="emails-fields-grid__value">
               {field.value}
-              {source?.confidence != null && (
-                <span className="emails-fields-grid__confidence"> ({Math.round(source.confidence * 100)}%)</span>
-              )}
+              <FieldConfidenceIndicator confidence={source?.confidence ?? null} threshold={confidenceThreshold} />
             </span>
           </div>
         )
