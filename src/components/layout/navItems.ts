@@ -21,7 +21,16 @@ export interface NavItem {
 export const navItems: NavItem[] = [
   { to: '/dashboard', label: 'Dashboard', headerTitle: 'Centralizator Comenzi', icon: Home },
   { to: '/emails', label: 'Emailuri Noi', icon: Mail, badgeKey: 'needsValidationEmails' },
-  { to: '/pending-orders', label: 'Comenzi în Așteptare', icon: Clock, badgeKey: 'pendingOrders' },
+  {
+    to: '/pending-orders',
+    label: 'Comenzi în Așteptare',
+    // figura3-comenzi-asteptare.png's header reads "Centralizator Comenzi",
+    // same override as Dashboard's — the 6-mockup tally splits 2 (Dashboard,
+    // this page) vs 4 ("Order Hub"), and this page matches Dashboard's.
+    headerTitle: 'Centralizator Comenzi',
+    icon: Clock,
+    badgeKey: 'pendingOrders',
+  },
   { to: '/sent-orders', label: 'Comenzi Importate', icon: Inbox, badgeKey: 'importedOrders' },
   { to: '/reports', label: 'Rapoarte', icon: BarChart3 },
   { to: '/technical-logs', label: 'Jurnal Tehnic', icon: ScrollText },

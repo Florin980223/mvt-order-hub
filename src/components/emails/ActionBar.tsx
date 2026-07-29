@@ -24,9 +24,10 @@ interface ActionBarProps {
   emailStatus?: string
   latestExtractionJobStatus?: string | null
   correction?: OrderCorrection
-  // Dashboard hides this button — figura1-dashboard.png's action bar has
-  // only 4 buttons, and this one is already permanently disabled there
-  // anyway since latestExtractionJobStatus is never passed from that page.
+  // Dashboard and PendingOrdersPage both hide this button — figura1 and
+  // figura3's action bars have only 4 buttons each, and it's already
+  // permanently disabled on both anyway since latestExtractionJobStatus is
+  // never passed from either page.
   showRetryExtraction?: boolean
 }
 

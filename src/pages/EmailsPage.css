@@ -367,6 +367,18 @@
   color: var(--color-primary);
 }
 
+/* Sent-orders only (figura4-comenzi-importate.png) — no green/red variant
+   existed before this page's own mockup needed them. */
+.emails-status-badge--green {
+  background: color-mix(in srgb, var(--color-success) 15%, white);
+  color: var(--color-success);
+}
+
+.emails-status-badge--red {
+  background: color-mix(in srgb, var(--color-error) 15%, white);
+  color: var(--color-error);
+}
+
 /* File-type badge */
 
 .emails-file-badge {
@@ -599,8 +611,11 @@
 }
 
 .field-confidence-indicator--ok {
-  color: var(--color-success);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   margin-left: 4px;
+  color: var(--color-success);
 }
 
 .field-confidence-indicator--warning {
@@ -611,6 +626,14 @@
   color: var(--color-warning);
   font-size: 12px;
   font-weight: 500;
+}
+
+/* PendingOrdersPage's sectioned variant only (figura3-comenzi-asteptare.png,
+   showPercent prop) — reintroduces a per-field percentage, scoped to this
+   one variant; Dashboard/EmailsPage stay icon-only. */
+.field-confidence-indicator__percent {
+  font-size: 12px;
+  font-weight: 600;
 }
 
 .emails-detail__fields {

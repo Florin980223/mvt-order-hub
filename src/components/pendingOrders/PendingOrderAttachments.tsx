@@ -15,6 +15,11 @@ interface PendingOrderAttachmentsProps {
   // figura2-emailuri-noi.png. Off by default so Dashboard's cards (which
   // figura1 doesn't show this on) stay unchanged.
   showProcessedBadge?: boolean
+  // 'inline' only: figura4-comenzi-importate.png shows this card row
+  // inside its own info-card summary, with no repeated "Atașamente (N)"
+  // heading (the summary already has its own "Atașamente" label above the
+  // row). On by default so Dashboard/EmailsPage stay unchanged.
+  showHeading?: boolean
 }
 
 function FileTypeIcon({ mimeType, filename }: { mimeType: string; filename: string }) {
@@ -28,13 +33,16 @@ export function PendingOrderAttachments({
   attachments,
   variant = 'sidebar',
   showProcessedBadge = false,
+  showHeading = true,
 }: PendingOrderAttachmentsProps) {
   const openAttachment = useOpenAttachment()
 
   if (variant === 'inline') {
     return (
       <div className="pending-orders-attachments--inline">
-        <h4 className="pending-orders-attachments--inline__heading">Atașamente ({attachments.length})</h4>
+        {showHeading && (
+          <h4 className="pending-orders-attachments--inline__heading">Atașamente ({attachments.length})</h4>
+        )}
         {attachments.length > 0 && (
           <div className="pending-orders-attachments--inline__cards">
             {attachments.map((attachment) => (

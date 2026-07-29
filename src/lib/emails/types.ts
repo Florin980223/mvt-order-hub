@@ -13,6 +13,13 @@ export interface OrderFieldSourceRow {
   created_at: string
 }
 
+export interface OrderEventRow {
+  id: string
+  event_type: string
+  payload: unknown
+  created_at: string
+}
+
 export interface OrderRow {
   id: string
   client_order_number: string | null
@@ -34,7 +41,17 @@ export interface OrderRow {
   status: string
   is_priority: boolean
   external_reference_id: string | null
+  // Sent-orders (Phase 7e-1) only — null until an order is actually
+  // imported. updated_by is the profiles.id of whoever ran the import;
+  // resolving it to a display name is a separate query (useProfilesQuery),
+  // not an embedded join, since RLS only lets admins see other profiles
+  // (profiles_select_admin) — a non-admin operator legitimately can't
+  // resolve someone else's name, and this must degrade gracefully rather
+  // than assume the join always succeeds.
+  imported_at: string | null
+  updated_by: string | null
   order_field_sources: OrderFieldSourceRow[]
+  order_events: OrderEventRow[]
 }
 
 export interface EmailAttachmentRow {
@@ -51,6 +68,10 @@ export interface ExtractionJobRow {
   status: string
   error: string | null
   created_at: string
+  // Reports-only (Phase 7f-1 timing section) — both nullable, set once the
+  // job actually starts/finishes running; null while still queued.
+  started_at: string | null
+  finished_at: string | null
 }
 
 export interface EmailRow {
@@ -61,6 +82,10 @@ export interface EmailRow {
   body_html: string | null
   received_at: string
   status: string
+  // Reports-only (Phase 7f-1 timing section) — distinct from received_at
+  // (the Graph/mailbox timestamp): this is when our own ingest pipeline
+  // inserted the row, i.e. when "Preluare email" actually finished.
+  created_at: string
   email_attachments: EmailAttachmentRow[]
   orders: OrderRow[]
   extraction_jobs: ExtractionJobRow[]

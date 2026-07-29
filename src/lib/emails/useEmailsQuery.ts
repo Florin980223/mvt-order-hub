@@ -15,15 +15,17 @@ export function useEmailsQuery() {
         .from('emails')
         .select(
           `
-          id, graph_message_id, sender, subject, body_html, received_at, status,
+          id, graph_message_id, sender, subject, body_html, received_at, status, created_at,
           email_attachments (id, filename, mime_type, size, storage_path, created_at),
-          extraction_jobs (id, status, error, created_at),
+          extraction_jobs (id, status, error, created_at, started_at, finished_at),
           orders (
             id, client_order_number, client_name, pickup_address, pickup_at,
             delivery_address, delivery_at, cargo_type, quantity, quantity_unit,
             weight_kg, volume_m3, transport_amount, currency, carrier_proposed,
             notes, confidence_overall, status, is_priority, external_reference_id,
-            order_field_sources (field_name, source_type, source_ref, confidence, created_at)
+            imported_at, updated_by,
+            order_field_sources (field_name, source_type, source_ref, confidence, created_at),
+            order_events (id, event_type, payload, created_at)
           )
         `,
         )

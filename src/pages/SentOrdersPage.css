@@ -1,0 +1,105 @@
+/* SentOrdersPage — figura4-comenzi-importate.png. Reuses EmailsPage's
+   .emails-search/.emails-tabs/.emails-action-bar classes and
+   PendingOrdersPage's .pending-orders-* shell; this file only adds the
+   spacing/layout this page's own mockup needs on top of those. */
+
+/* Search row — figura4 shows the search icon trailing (inside the input,
+   right side) plus a separate Filtrează button, unlike EmailsPage's own
+   leading-icon-only search box. */
+.sent-orders-page__search-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.sent-orders-page__search {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Info-card row (figura4's own top section) — no equivalent variant of
+   PendingOrderTopBar fits here (that component is entirely extraction/
+   confidence-driven), hence the standalone .sent-order-summary classes. */
+.sent-order-summary {
+  display: flex;
+  align-items: stretch;
+  gap: 12px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+
+.sent-order-summary__banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--color-success) 12%, var(--color-surface));
+  color: var(--color-success);
+  font-weight: 600;
+}
+
+.sent-order-summary__card {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 16px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--color-surface);
+}
+
+.sent-order-summary__card-label {
+  font-size: 12px;
+  color: #6b6375;
+}
+
+.sent-order-summary__card-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.sent-order-summary__attachments {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sent-order-summary__attachments .pending-orders-attachments--inline__cards {
+  margin-top: 0;
+}
+
+/* Vezi istoric import — a plain expandable event log, not a modal (the
+   data is already embedded via order.order_events, no extra query). */
+.sent-order-action-bar__history {
+  flex-basis: 100%;
+  margin-top: 8px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--color-surface);
+}
+
+.sent-order-action-bar__history ul {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sent-order-action-bar__history li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 13px;
+  color: var(--color-text);
+}
+
+.sent-order-action-bar__history p {
+  margin: 0;
+  font-size: 13px;
+  color: #6b6375;
+}

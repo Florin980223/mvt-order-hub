@@ -133,6 +133,19 @@
   margin-top: 8px;
 }
 
+/* Scoped to Dashboard only, not the shared .emails-list-item__subject/
+   __time base rule (EmailsPage's own mockup wasn't re-checked this round
+   per the standing per-page-verification rule) — confirmed at native
+   resolution against figura1-dashboard.png that this text is a legible
+   medium gray, not washed out. --text resolves to that gray under light
+   OS preference, but this app's surfaces are pinned light regardless of
+   OS preference, so under dark OS preference --text itself flips to a
+   near-invisible pale gray against the still-light background. */
+.dashboard-split__list-scroll .emails-list-item__subject,
+.dashboard-split__list-scroll .emails-list-item__time {
+  color: #6b6375;
+}
+
 .dashboard-split__detail {
   flex: 1;
   min-width: 0;

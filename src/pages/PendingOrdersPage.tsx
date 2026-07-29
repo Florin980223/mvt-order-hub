@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Inbox, Loader2, RefreshCw, TriangleAlert } from 'lucide-react'
+import { ArrowRight, Inbox, Loader2, RefreshCw, TriangleAlert } from 'lucide-react'
 import { ActionBar } from '../components/emails/ActionBar'
 import { PendingOrderAttachments } from '../components/pendingOrders/PendingOrderAttachments'
 import { PendingOrderFields } from '../components/pendingOrders/PendingOrderFields'
@@ -22,6 +22,12 @@ interface PendingItem {
   email: EmailRow
   order: OrderRow
 }
+
+// figura3-comenzi-asteptare.png shows exactly 5 rows before the "Vezi toate
+// emailurile în așteptare" link — kept short enough to sit height-symmetric
+// with the Workflow AI card above it, rather than scrolling/growing with
+// however many orders actually need validation.
+const VISIBLE_TABLE_ROW_COUNT = 5
 
 export function PendingOrdersPage() {
   const { data, isLoading, isError, error, refetch } = useEmailsQuery()
@@ -75,16 +81,17 @@ export function PendingOrdersPage() {
       {!isLoading && !isError && pendingItems.length > 0 && (
         <div className="pending-orders-split">
           <div className="pending-orders-split__left">
-            <WorkflowProgressCard />
+            <WorkflowProgressCard order={selectedItem?.order ?? null} />
             <div className="pending-orders-card">
               <h2 className="pending-orders-card__title">Emailuri recente în așteptare</h2>
               <PendingOrdersTable
-                items={pendingItems}
+                items={pendingItems.slice(0, VISIBLE_TABLE_ROW_COUNT)}
                 selectedOrderId={selectedItem?.order.id ?? null}
                 onSelect={setSelectedOrderId}
               />
               <Link to="/emails" className="pending-orders-card__link">
                 Vezi toate emailurile în așteptare
+                <ArrowRight aria-hidden="true" size={14} />
               </Link>
             </div>
           </div>
@@ -93,7 +100,7 @@ export function PendingOrdersPage() {
             {selectedItem && (
               <div className="pending-orders-detail">
                 <div className="pending-orders-detail__scroll">
-                  <PendingOrderTopBar order={selectedItem.order} />
+                  <PendingOrderTopBar order={selectedItem.order} compactConfidence />
                   <h2 className="pending-orders-detail__heading">
                     Comandă #{selectedItem.order.client_order_number ?? selectedItem.order.id} — Status:{' '}
                     {formatOrderStatus(selectedItem.order.status)}
@@ -108,6 +115,7 @@ export function PendingOrdersPage() {
                   emailId={selectedItem.email.id}
                   emailStatus={selectedItem.email.status}
                   correction={correction}
+                  showRetryExtraction={false}
                 />
               </div>
             )}

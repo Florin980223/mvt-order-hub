@@ -1,0 +1,406 @@
+/* SettingsPage — figura6-setari.png (Phase 7g-1: top row only —
+   Conectări și Integrări / Setări Extracție AI / Setări Generale — plus
+   the header. Notificări/Import AscendTMS/Securitate/Backup are 7g-2.
+   The Utilizatori section is the pre-existing inline table, kept as-is
+   until it's extracted to its own page in 7g-2. */
+
+.settings-page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  height: 100%;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.settings-page__header h1 {
+  margin: 0;
+}
+
+.settings-page__subtitle {
+  margin: 4px 0 0;
+  color: var(--text);
+  font-size: 14px;
+}
+
+.settings-row {
+  display: grid;
+  grid-template-columns: 1.15fr 1fr 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+.settings-card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--color-surface);
+  min-width: 0;
+}
+
+.settings-card h2 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.settings-inline-state {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  font-size: 13px;
+  color: var(--text);
+}
+
+.settings-inline-state--error {
+  color: var(--color-error);
+}
+
+.settings-inline-state__spinner {
+  animation: settings-spin 1s linear infinite;
+}
+
+@keyframes settings-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Integration rows */
+
+.settings-integration-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.settings-card > .settings-integration-row:last-of-type {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.settings-integration-row__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border-radius: 8px;
+}
+
+.settings-integration-row__icon--blue {
+  background: color-mix(in srgb, var(--color-primary) 14%, transparent);
+  color: var(--color-primary);
+}
+
+.settings-integration-row__icon--teal {
+  background: color-mix(in srgb, #0d9488 14%, transparent);
+  color: #0d9488;
+}
+
+.settings-integration-row__icon--violet {
+  background: color-mix(in srgb, #7c3aed 14%, transparent);
+  color: #7c3aed;
+}
+
+.settings-integration-row__body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.settings-integration-row__name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.settings-integration-row__status {
+  margin: 0;
+  font-size: 12px;
+  color: var(--color-success);
+}
+
+.settings-integration-row__details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--text);
+}
+
+.settings-integration-row__details p {
+  margin: 0;
+}
+
+.settings-integration-row__trailing {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.settings-integration-row__active {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.settings-integration-row__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--border);
+}
+
+.settings-integration-row__dot--active {
+  background: var(--color-success);
+}
+
+.settings-btn {
+  padding: 7px 12px;
+  border: none;
+  border-radius: 6px;
+  background: var(--color-primary);
+  color: white;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.settings-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.settings-btn:not(:disabled):hover {
+  filter: brightness(0.92);
+}
+
+.settings-btn--outline {
+  background: var(--color-surface);
+  color: var(--color-text);
+  border: 1px solid var(--border);
+  text-decoration: none;
+  display: inline-block;
+}
+
+.settings-link-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  align-self: flex-start;
+  border: none;
+  background: transparent;
+  color: var(--color-primary);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 0;
+  cursor: pointer;
+}
+
+.settings-link-btn:disabled {
+  color: var(--text);
+  cursor: not-allowed;
+}
+
+.settings-endpoint-line {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.settings-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: var(--color-primary);
+  cursor: pointer;
+  padding: 2px;
+}
+
+.settings-endpoint-edit {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 2px 0;
+}
+
+.settings-endpoint-edit__input {
+  flex: 1;
+  min-width: 0;
+  padding: 5px 8px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: 12px;
+  color: var(--color-text);
+  background: var(--color-bg);
+}
+
+/* Field rows (dropdowns) */
+
+.settings-field-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.settings-field-row__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+  color: var(--color-text);
+}
+
+.settings-field-row__info {
+  color: var(--text);
+}
+
+.settings-select {
+  flex-shrink: 0;
+  max-width: 55%;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  font-size: 12px;
+}
+
+.settings-select:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* Toggle rows */
+
+.settings-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  cursor: default;
+}
+
+.settings-toggle-row__label {
+  font-size: 13px;
+  color: var(--color-text);
+}
+
+.settings-toggle {
+  position: relative;
+  flex-shrink: 0;
+  display: inline-flex;
+  width: 36px;
+  height: 20px;
+}
+
+.settings-toggle input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  margin: 0;
+  cursor: not-allowed;
+}
+
+.settings-toggle__track {
+  position: absolute;
+  inset: 0;
+  border-radius: 10px;
+  background: var(--border);
+  transition: background 0.15s;
+}
+
+.settings-toggle input:checked + .settings-toggle__track {
+  background: var(--color-success);
+}
+
+.settings-toggle__thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: white;
+  transition: left 0.15s;
+}
+
+.settings-toggle input:checked + .settings-toggle__track .settings-toggle__thumb {
+  left: 18px;
+}
+
+/* Theme toggle */
+
+.settings-theme-toggle {
+  display: flex;
+  gap: 8px;
+}
+
+.settings-theme-toggle__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  font-size: 12px;
+  cursor: not-allowed;
+}
+
+.settings-theme-toggle__btn--active {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  background: color-mix(in srgb, var(--color-primary) 8%, var(--color-surface));
+}
+
+/* Utilizatori (unchanged pre-existing table, minimal styling only) */
+
+.settings-card--users {
+  width: 100%;
+}
+
+.settings-users-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.settings-users-table th {
+  text-align: left;
+  padding: 8px 10px;
+  color: var(--text);
+  border-bottom: 1px solid var(--border);
+}
+
+.settings-users-table td {
+  padding: 8px 10px;
+  color: var(--color-text);
+  border-bottom: 1px solid var(--border);
+}

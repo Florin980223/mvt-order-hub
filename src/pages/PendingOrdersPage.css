@@ -3,6 +3,11 @@
   flex-direction: column;
   height: 100%;
   min-height: 0;
+  /* Single page-level scroll container (figura3-comenzi-asteptare.png shows
+     no inner scroll tracks) — was previously two separately-scrolling
+     panels (left column, right detail panel), each with their own visible
+     scrollbar. */
+  overflow-y: auto;
 }
 
 .pending-orders-page__header {
@@ -59,6 +64,12 @@
   gap: 16px;
 }
 
+/* Bounded + scrollable (scrollbar hidden, same treatment as
+   .pending-orders-detail__scroll) so this column's own overflow (long
+   wrapping addresses can still outgrow 5 rows) never forces
+   .pending-orders-page itself to scroll — that outer scroll was dragging
+   the right column's "sticky" ActionBar along with it, defeating the
+   point of pinning it. */
 .pending-orders-split__left {
   width: 420px;
   flex-shrink: 0;
@@ -66,54 +77,80 @@
   flex-direction: column;
   gap: 16px;
   overflow-y: auto;
+  scrollbar-width: none;
 }
 
+.pending-orders-split__left::-webkit-scrollbar {
+  display: none;
+}
+
+/* No border/box in figura3 — the detail panel sits directly on the page
+   background as plain stacked sections, not a bordered card like the left
+   column's Workflow/Emailuri cards. */
 .pending-orders-split__right {
   flex: 1;
   min-width: 0;
-  overflow: hidden;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--color-surface);
 }
 
 /* Workflow card */
 
+/* No border/box — confirmed at native resolution against
+   figura3-comenzi-asteptare.png (a scaled-down read of the mockup
+   previously misread compression artifacts as a border here). */
 .pending-orders-workflow {
   padding: 16px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--color-surface);
 }
 
 .pending-orders-workflow__title {
   margin: 0 0 12px;
+  /* Fixed brand-palette token + explicit 700: index.css's global h1/h2 rule
+     downgrades the browser's default h2 bold (700) to 500, which read as
+     not-bold against figura3. */
+  color: var(--color-text);
   font-size: 14px;
+  font-weight: 700;
 }
 
+/* Horizontal stepper (figura3-comenzi-asteptare.png): circles connected by
+   a line, label below each circle — not the vertical marker+label row this
+   used to be. */
 .pending-orders-workflow__steps {
   list-style: none;
   margin: 0;
   padding: 0;
   display: flex;
-  flex-direction: column;
-  gap: 10px;
 }
 
 .pending-orders-workflow__step {
+  position: relative;
+  flex: 1;
   display: flex;
+  flex-direction: column;
   align-items: center;
   gap: 8px;
-  font-size: 13px;
-  color: var(--text);
+  color: var(--color-text);
+  font-size: 12px;
+  font-weight: 700;
+  text-align: center;
 }
 
-.pending-orders-workflow__step--current {
-  color: var(--color-text);
-  font-weight: 600;
+/* Connecting line: drawn from this step's own center to the next step's
+   center (50% + 100% of an equal-width flex item lands exactly on the
+   following item's center). Behind the marker via z-index. */
+.pending-orders-workflow__step:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  width: 100%;
+  height: 2px;
+  background: var(--color-success);
+  z-index: 0;
 }
 
 .pending-orders-workflow__marker {
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -125,33 +162,68 @@
   font-weight: 600;
 }
 
+.pending-orders-workflow__label {
+  padding: 0 4px;
+}
+
 .pending-orders-workflow__step--done .pending-orders-workflow__marker {
-  background: color-mix(in srgb, var(--color-success) 18%, white);
-  color: var(--color-success);
+  background: var(--color-success);
+  color: white;
 }
 
 .pending-orders-workflow__step--current .pending-orders-workflow__marker {
-  background: color-mix(in srgb, var(--color-primary) 18%, white);
-  color: var(--color-primary);
+  background: var(--color-surface);
+  border: 2px solid var(--border);
+}
+
+/* Green summary box (figura3-comenzi-asteptare.png) — was missing entirely
+   from the first pass of this component, not just under-styled. */
+.pending-orders-workflow__summary {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 16px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--color-success) 12%, white);
+  color: var(--color-success);
+}
+
+.pending-orders-workflow__summary svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.pending-orders-workflow__summary p {
+  margin: 0;
+  color: var(--color-text);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.5;
 }
 
 /* Pending emails card + table */
 
+/* No border/box — same confirmed-at-native-resolution correction as
+   .pending-orders-workflow above. */
 .pending-orders-card {
   display: flex;
   flex-direction: column;
   padding: 16px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--color-surface);
 }
 
 .pending-orders-card__title {
   margin: 0 0 12px;
+  /* Same h2-downgrade fix as .pending-orders-workflow__title. */
+  color: var(--color-text);
   font-size: 14px;
+  font-weight: 700;
 }
 
 .pending-orders-card__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   margin-top: 12px;
   font-size: 13px;
   color: var(--color-primary);
@@ -169,47 +241,156 @@
   font-size: 12px;
 }
 
+/* Re-zoomed figura3 at native resolution to check this directly (not
+   assumed from an earlier "make it all bold" pass): the header row is
+   visibly lighter/thinner than the body rows below it, not bold — same
+   muted-label treatment as .pending-orders-fields__label (fixed color,
+   not --text, so it doesn't wash out further in dark mode; no
+   font-weight override, so it stays at the regular body weight). */
 .pending-orders-table th {
   padding: 6px 4px;
   border-bottom: 1px solid var(--border);
-  color: var(--text);
+  color: #6b6375;
   font-size: 11px;
   font-weight: 500;
   text-align: left;
 }
 
+/* Body rows are visibly darker/slightly heavier than the header but not
+   as bold as titles/section headers — matches
+   .pending-orders-fields__value's weight (500), not the 600 used here
+   before. */
 .pending-orders-table td {
   padding: 6px 4px;
   border-bottom: 1px solid var(--border);
   color: var(--color-text);
+  font-weight: 500;
+  vertical-align: top;
   overflow: hidden;
+}
+
+/* Subiect wraps onto multiple lines in figura3 (natural word-wrap at
+   spaces — its own examples are multi-word). Expeditor (sender email) has
+   no natural wrap point at all, and figura3's own example addresses are
+   all short enough to fit on one line uncut — there's no mockup evidence
+   it ever wraps. Real sender addresses in this app's data are often
+   longer, so without truncation they broke mid-word/mid-domain
+   ("transport@trans" / "cereale-" / "moldova.ro"), which figura3 never
+   shows. Truncate instead, same single-line treatment as Tip fișier. */
+.pending-orders-table td:nth-child(2),
+.pending-orders-table td:nth-child(4) {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
+.pending-orders-table__datetime {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* figura3 rows end with a small chevron affordance after the status pill —
+   kept inside the Status cell rather than as its own column, since a 420px
+   sidebar has no spare width for a 6th column. */
+.pending-orders-table__status-cell {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+/* Sent-orders variant only (figura4-comenzi-importate.png) — sortable
+   Data header. */
+.pending-orders-table__sort-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: none;
+  background: transparent;
+  padding: 0;
+  color: inherit;
+  font: inherit;
+  font-weight: inherit;
+  cursor: pointer;
+}
+
+/* Sent-orders variant only — leading row dot + date, side by side (the
+   date's own flex-column layout would otherwise force the dot onto its
+   own line, since a block-level flex child can't sit inline next to a
+   preceding sibling without a shared row wrapper). */
+.pending-orders-table__date-cell {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+/* Best-effort read of figura4 (not fully certain, see Phase 7e-1 plan's
+   open questions): green for a normal/confirmed row, red for
+   import_failed, and the selected row shows blue regardless of its own
+   status. */
+.pending-orders-table__dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  flex-shrink: 0;
+  margin-top: 5px;
+  border-radius: 50%;
+}
+
+.pending-orders-table__dot--ok {
+  background: var(--color-success);
+}
+
+.pending-orders-table__dot--error {
+  background: var(--color-error);
+}
+
+.pending-orders-table__dot--selected {
+  background: var(--color-primary);
+}
+
+.pending-orders-table__row-chevron {
+  flex-shrink: 0;
+  color: var(--text);
+}
+
+/* Wide enough to fit "30.07.2026" on one line uncut — it has no space to
+   wrap at, so a too-narrow column here clips it silently (no ellipsis)
+   rather than wrapping cleanly. */
 .pending-orders-table th:nth-child(1),
 .pending-orders-table td:nth-child(1) {
-  width: 15%;
+  width: 18%;
 }
 
+/* Narrower than before now that this column truncates instead of
+   wrapping — it no longer needs room to accommodate a full long address
+   across multiple lines. */
 .pending-orders-table th:nth-child(2),
 .pending-orders-table td:nth-child(2) {
-  width: 28%;
+  width: 20%;
 }
 
+/* Wider than before — the extra room (reclaimed from Expeditor above)
+   keeps Subiect's natural word-wrap to ~2 lines instead of every word
+   landing on its own line. */
 .pending-orders-table th:nth-child(3),
 .pending-orders-table td:nth-child(3) {
-  width: 27%;
+  width: 26%;
 }
 
+/* Wide enough that the "Tip fișier" header text stays on one line,
+   matching figura3 — it was wrapping to "Tip"/"fișier" on two lines at
+   the old 12%. The body cells (short "PDF"/"XLSX" badges) don't need
+   this much room themselves, but table-layout: fixed shares one width
+   between header and body in the same column. */
 .pending-orders-table th:nth-child(4),
 .pending-orders-table td:nth-child(4) {
-  width: 12%;
+  width: 17%;
 }
 
 .pending-orders-table th:nth-child(5),
 .pending-orders-table td:nth-child(5) {
-  width: 18%;
+  width: 19%;
 }
 
 .pending-orders-table__row {
@@ -228,22 +409,43 @@
 
 /* Detail panel */
 
+/* Bounded to the split row's height so its own scroll region + sticky
+   ActionBar work — the ActionBar is a plain flex sibling after the flex:1
+   scroll region below, which is enough to pin it at the bottom without
+   position:sticky, same as before Part A's page-level-scroll change. */
 .pending-orders-detail {
   display: flex;
   flex-direction: column;
   height: 100%;
 }
 
+/* overflow-y stays functional (fields still scroll under the pinned
+   ActionBar) but the scrollbar itself is hidden — figura3 shows no inner
+   scroll track, and the only way to keep both "sticky footer" and "no
+   visible track" is to scroll here while hiding the browser's own
+   scrollbar chrome, not to remove overflow entirely (that was Part A's
+   approach, but it also lost the sticky ActionBar as a side effect). */
 .pending-orders-detail__scroll {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
   padding: 20px;
+  scrollbar-width: none;
 }
 
+.pending-orders-detail__scroll::-webkit-scrollbar {
+  display: none;
+}
+
+/* Same h2-downgrade fix as .pending-orders-workflow__title/.pending-orders-card__title
+   — this one was missed in that earlier pass. Confirmed bold at native
+   resolution against figura3 ("Comandă #AUTO-... – Status:" renders
+   clearly heavier than field text). */
 .pending-orders-detail__heading {
   margin: 16px 0 0;
+  color: var(--color-text);
   font-size: 16px;
+  font-weight: 700;
 }
 
 .pending-orders-detail__heading-row {
@@ -309,6 +511,15 @@
   flex-wrap: wrap;
 }
 
+.pending-orders-topbar__trailing {
+  margin-left: auto;
+}
+
+/* Border kept intentionally — confirmed at native resolution against
+   figura3-comenzi-asteptare.png that "Istoric AI" has the same thin
+   rounded-rectangle outline as "Trimite confirmare client" in the action
+   bar below, i.e. it's this app's established outline-button style, not
+   an artifact to remove. Only the text weight changes here. */
 .pending-orders-topbar__btn {
   display: inline-flex;
   align-items: center;
@@ -319,7 +530,7 @@
   background: var(--color-surface);
   color: var(--color-text);
   font: inherit;
-  font-weight: 500;
+  font-weight: 700;
   cursor: not-allowed;
   opacity: 0.6;
 }
@@ -345,6 +556,27 @@
   font-weight: 500;
 }
 
+/* figura3-comenzi-asteptare.png (PendingOrdersPage only, compactConfidence):
+   simple checkmark+percentage pill, reusing .pending-orders-topbar__readiness's
+   visual recipe instead of the ring gauge. */
+.pending-orders-topbar__confidence-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--color-success) 15%, white);
+  color: var(--color-success);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.pending-orders-topbar__warning--compact {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .pending-orders-topbar__readiness {
   display: inline-flex;
   align-items: center;
@@ -368,16 +600,29 @@
 }
 
 .pending-orders-fields__section h3 {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   margin: 0 0 8px;
-  color: var(--text);
-  font-size: 12px;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
+  /* Fixed brand-palette token, not --text: same dark-mode wash-out reasoning
+     as elsewhere in this file — the muted --text token was reading as
+     lighter/less bold than the mockup even though font-weight was already
+     700 (h3's browser default). figura3 also isn't uppercase — plain title
+     case ("Date comandă", not "DATE COMANDĂ"). */
+  color: var(--color-text);
+  font-size: 15px;
+  font-weight: 700;
 }
 
+/* auto-fit rather than a hardcoded 2 columns: figura3 shows Date comandă/
+   Rute/Programare as 2 columns, but Marfă as 4 (Tip marfă/Cantitate/
+   Greutate/Volum all on one row) and Transport as 3. A fixed column count
+   can't do both — auto-fit sizes each section's own row(s) by however many
+   fields it has and the width actually available, so 2-field sections
+   still render as 2 even columns while Marfă naturally spreads to 4. */
 .pending-orders-fields__grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 10px 20px;
 }
 
@@ -399,6 +644,22 @@
   font-size: 14px;
   font-weight: 500;
   color: var(--color-text);
+}
+
+/* Sectioned variant only (figura3-comenzi-asteptare.png) — date fields get
+   an inline calendar button next to the value/percent, on the same line. */
+.pending-orders-fields__value--inline-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* The sectioned variant's own Hartă link/calendar-btn call site (see
+   renderField's withExtras) stacks the map link below the value instead of
+   beside it, unlike flat/preview's flat-cell row placement. */
+.pending-orders-fields__section .pending-orders-fields__map-btn {
+  margin-top: 4px;
+  align-self: flex-start;
 }
 
 /* Dark + bold labels for flat/preview only — figura1/figura2 want labels
@@ -448,10 +709,12 @@
   gap: 4px;
   flex-shrink: 0;
   padding: 6px 10px;
-  border: 1px solid var(--border);
+  /* figura3-comenzi-asteptare.png: blue border+text+icon, not the neutral
+     --border/--color-text combo used for the calendar button next to it. */
+  border: 1px solid var(--color-primary);
   border-radius: 6px;
   background: var(--color-surface);
-  color: var(--color-text);
+  color: var(--color-primary);
   font-size: 12px;
   text-decoration: none;
 }
@@ -478,6 +741,52 @@
   background: color-mix(in srgb, var(--color-primary) 6%, var(--color-surface));
 }
 
+/* Sent variant only (figura4-comenzi-importate.png) — every field value
+   sits in its own bordered box (confirmed at native resolution: this
+   applies uniformly, icon or no icon, unlike other variants' plain-text
+   values), with the checkmark outside the box, not inline with the value. */
+.pending-orders-fields__sent-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pending-orders-fields__sent-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--color-surface);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+.pending-orders-fields__sent-box-value {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pending-orders-fields__sent-box .pending-orders-fields__map-btn {
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.pending-orders-fields__value-icon {
+  flex-shrink: 0;
+  color: #6b6375;
+}
+
+.pending-orders-fields__check--ok {
+  flex-shrink: 0;
+  color: var(--color-success);
+}
+
 
 /* Attachments side list */
 
@@ -488,12 +797,19 @@
   border-left: 1px solid var(--border);
 }
 
+/* Title case in figura3-comenzi-asteptare.png ("Atașamente detectate"),
+   not uppercase — found during the full re-comparison pass. Also not
+   bold (h3's browser-default 700 was never overridden here) and using
+   the fixed muted-label color (not --text, which washes out further
+   under dark OS preference) rather than dark navy — confirmed at native
+   resolution this text is genuinely light/muted, not a rendering
+   artifact. */
 .pending-orders-attachments h3 {
   margin: 0 0 12px;
-  color: var(--text);
+  color: #6b6375;
+  font-weight: 400;
   font-size: 12px;
   letter-spacing: 0.02em;
-  text-transform: uppercase;
 }
 
 .pending-orders-attachments ul {
@@ -513,9 +829,13 @@
   color: var(--color-text);
 }
 
+/* Confirmed bold at native resolution against figura3's attachment
+   cards (the "Comanda_Europlast_723.pdf" filename), unlike the plain
+   weight this had before. */
 .pending-orders-attachments__name {
   flex: 1;
   overflow: hidden;
+  font-weight: 600;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -537,9 +857,13 @@
   min-width: 0;
 }
 
+/* Fixed brand-palette token, not --text: confirmed at native resolution
+   this text is genuinely dark/bold in figura1, and --text washes out to
+   near-invisible under dark OS preference (same pattern fixed elsewhere
+   in this file already). Weight (600) was already correct. */
 .pending-orders-attachments--inline__heading {
   margin: 0 0 6px;
-  color: var(--text);
+  color: var(--color-text);
   font-size: 12px;
   font-weight: 600;
 }

@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
-import { Bell, CheckCircle2, ChevronDown, Headset } from 'lucide-react'
+import { Bell, CheckCircle2, ChevronDown, Headset, HelpCircle } from 'lucide-react'
 import { supabase } from '../../lib/supabaseClient'
 import { useAuth } from '../../lib/auth/useAuth'
 import { useEmailsQuery } from '../../lib/emails/useEmailsQuery'
@@ -52,7 +52,10 @@ export function AppLayout() {
     return {
       needsValidationEmails: emails.filter((email) => email.status === 'needs_validation').length,
       pendingOrders: orders.filter((order) => order.status === 'needs_validation').length,
-      importedOrders: orders.filter((order) => order.status === 'imported').length,
+      // Matches SentOrdersPage's own SENT_STATUSES filter (imported +
+      // import_failed) — previously imported-only, which silently
+      // diverged from what that page actually shows.
+      importedOrders: orders.filter((order) => order.status === 'imported' || order.status === 'import_failed').length,
     }
   }, [emailsData])
 
@@ -165,6 +168,17 @@ export function AppLayout() {
                 </div>
               )}
             </div>
+
+            {/* Only figura3-comenzi-asteptare.png actually shows this icon —
+                the other 5 mockups don't. Added app-wide anyway (not gated
+                to PendingOrdersPage) since AppLayout's header is the same
+                shared chrome on every page and a generic help icon is
+                harmless regardless of page. No help destination exists yet
+                in the MVP scope, so disabled+tooltip like the other
+                not-yet-implemented header/topbar buttons. */}
+            <button type="button" className="app-header-help" disabled title="Ajutor indisponibil încă" aria-label="Ajutor">
+              <HelpCircle aria-hidden="true" size={20} />
+            </button>
 
             {user && (
               <div className="app-user-menu">
