@@ -191,7 +191,18 @@ export function PendingOrderFields({ order, correction, variant = 'sectioned', o
     return (
       <div className="pending-orders-fields__item" key={field.fieldName}>
         <span className="pending-orders-fields__label">{label}</span>
-        <span className={isDate ? 'pending-orders-fields__value pending-orders-fields__value--inline-action' : 'pending-orders-fields__value'}>
+        <span
+          className={[
+            'pending-orders-fields__value',
+            isDate && 'pending-orders-fields__value--inline-action',
+            // Confirmed at native resolution against figura3-comenzi-asteptare.png
+            // — every value here sits in a bordered box (value + percent +
+            // checkmark together), unlike flat/preview's plain-text values.
+            variant === 'sectioned' && 'pending-orders-fields__value--boxed',
+          ]
+            .filter(Boolean)
+            .join(' ')}
+        >
           {LeadingIcon && <LeadingIcon aria-hidden="true" size={13} className="pending-orders-fields__value-icon" />}
           {value}
           <FieldConfidenceIndicator

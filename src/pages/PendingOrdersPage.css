@@ -646,6 +646,21 @@
   color: var(--color-text);
 }
 
+/* Sectioned variant only (figura3-comenzi-asteptare.png) — confirmed at
+   native resolution that every field value (plus its percent/checkmark)
+   sits in a bordered box here, unlike flat/preview's plain text. */
+.pending-orders-fields__value--boxed {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--color-surface);
+  box-sizing: border-box;
+}
+
 /* Sectioned variant only (figura3-comenzi-asteptare.png) — date fields get
    an inline calendar button next to the value/percent, on the same line. */
 .pending-orders-fields__value--inline-action {
