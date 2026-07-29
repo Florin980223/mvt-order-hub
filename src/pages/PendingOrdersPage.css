@@ -780,6 +780,11 @@
 .pending-orders-fields__value-icon {
   flex-shrink: 0;
   color: #6b6375;
+  /* Only takes effect for 'preview' (figura2), whose .pending-orders-fields__value
+     isn't a flex container like 'sent's box — vertical-align/margin are
+     no-ops inside the 'sent' flex row, harmless there. */
+  margin-right: 4px;
+  vertical-align: -2px;
 }
 
 .pending-orders-fields__check--ok {

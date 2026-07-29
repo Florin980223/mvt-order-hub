@@ -120,6 +120,21 @@ const SENT_FIELD_ICONS: Record<string, LucideIcon> = {
   __operator_import: User,
 }
 
+// figura2-emailuri-noi.png only — a leading icon before the value text
+// (confirmed at native resolution: no border box around the value here,
+// unlike figura4's 'sent' variant — just the icon + trailing confidence
+// check/warning, same as this variant already had). client_name has no
+// icon, matching the mockup.
+const PREVIEW_FIELD_ICONS: Record<string, LucideIcon> = {
+  pickup_address: MapPin,
+  delivery_address: MapPin,
+  pickup_at: Calendar,
+  cargo_type: Package,
+  quantity: Layers,
+  weight_kg: Scale,
+  volume_m3: Box,
+}
+
 // Sectioned variant only (figura3-comenzi-asteptare.png). FileText/MapPin/
 // Calendar reuse the same icon identity this file already uses elsewhere
 // for these concepts (Hartă link, date-edit button); Package/Truck are
@@ -150,11 +165,12 @@ export function PendingOrderFields({ order, correction, variant = 'sectioned', o
   // preview variants get their Hartă link / calendar button from
   // renderFieldExtras below instead, rendered beside the field in their own
   // flat-cell row rather than inside the item itself.
-  function renderField(field: OrderFieldDef, label: string, withExtras = false) {
+  function renderField(field: OrderFieldDef, label: string, withExtras = false, leadingIcon?: LucideIcon) {
     const source = latestSourceFor(order.order_field_sources, field.fieldName)
     const value = field.value(order)
     const isAddress = withExtras && (field.fieldName === 'pickup_address' || field.fieldName === 'delivery_address')
     const isDate = withExtras && (field.fieldName === 'pickup_at' || field.fieldName === 'delivery_at')
+    const LeadingIcon = leadingIcon
 
     if (isEditing && field.inputType && correction) {
       return (
@@ -176,6 +192,7 @@ export function PendingOrderFields({ order, correction, variant = 'sectioned', o
       <div className="pending-orders-fields__item" key={field.fieldName}>
         <span className="pending-orders-fields__label">{label}</span>
         <span className={isDate ? 'pending-orders-fields__value pending-orders-fields__value--inline-action' : 'pending-orders-fields__value'}>
+          {LeadingIcon && <LeadingIcon aria-hidden="true" size={13} className="pending-orders-fields__value-icon" />}
           {value}
           <FieldConfidenceIndicator
             confidence={source?.confidence ?? null}
@@ -330,7 +347,7 @@ export function PendingOrderFields({ order, correction, variant = 'sectioned', o
 
               return (
                 <div className="pending-orders-fields__flat-cell" key={fieldName}>
-                  {renderField(field, label)}
+                  {renderField(field, label, false, variant === 'preview' ? PREVIEW_FIELD_ICONS[fieldName] : undefined)}
                   {renderFieldExtras(fieldName, value)}
                 </div>
               )

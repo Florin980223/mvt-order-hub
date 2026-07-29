@@ -162,6 +162,14 @@
   white-space: nowrap;
 }
 
+/* Scoped to EmailsPage only, not the shared .emails-tabs__tab base rule
+   (other pages using .emails-tabs weren't re-checked this round per the
+   standing per-page-verification rule) — confirmed at native resolution
+   against figura2-emailuri-noi.png that only the active tab is bold. */
+.emails-split__list .emails-tabs__tab:not(.emails-tabs__tab--active) {
+  font-weight: 400;
+}
+
 .emails-split__list .emails-search {
   flex: 1;
   min-width: 0;
