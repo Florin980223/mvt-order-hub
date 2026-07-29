@@ -1,8 +1,7 @@
-/* SettingsPage — figura6-setari.png (Phase 7g-1: top row only —
-   Conectări și Integrări / Setări Extracție AI / Setări Generale — plus
-   the header. Notificări/Import AscendTMS/Securitate/Backup are 7g-2.
-   The Utilizatori section is the pre-existing inline table, kept as-is
-   until it's extracted to its own page in 7g-2. */
+/* SettingsPage — figura6-setari.png, matched in full (Phases 7g-1 + 7g-2).
+   Utilizatori was extracted to its own /users route (UsersPage.tsx),
+   which reuses .settings-card/.settings-users-table/.settings-inline-state
+   from this file rather than duplicating them. */
 
 .settings-page {
   display: flex;
@@ -403,4 +402,105 @@
   padding: 8px 10px;
   color: var(--color-text);
   border-bottom: 1px solid var(--border);
+}
+
+/* Channel selector (Notificări card) */
+
+.settings-channel-select {
+  display: flex;
+  gap: 6px;
+}
+
+.settings-channel-select__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  font-size: 12px;
+  cursor: not-allowed;
+}
+
+.settings-channel-select__btn--active {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  background: color-mix(in srgb, var(--color-primary) 8%, var(--color-surface));
+}
+
+/* Plain text input (IP allowlist, retention days) */
+
+.settings-text-input {
+  flex-shrink: 0;
+  max-width: 55%;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  font-size: 12px;
+}
+
+.settings-text-input:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* Link-buttons used inline within a field row (Mapare câmpuri, Gestionează
+   utilizatori, Deschide jurnale) — confirmed at native resolution these
+   are bordered boxes matching the adjacent dropdowns' visual weight, not
+   bare text links like "Vezi toate integrările" at a card's end. */
+.settings-link-btn--field {
+  align-self: auto;
+  gap: 6px;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.settings-link-btn--field:not(:disabled):hover {
+  background: color-mix(in srgb, var(--color-primary) 6%, var(--color-surface));
+}
+
+.settings-link-btn--field svg:last-child {
+  margin-left: auto;
+  color: var(--text);
+}
+
+.settings-link-btn--nav {
+  text-decoration: none;
+  align-self: flex-start;
+  width: 100%;
+}
+
+/* Backup și Jurnale — full-width row, 3 columns */
+
+.settings-card--backup {
+  width: 100%;
+}
+
+.settings-backup-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.settings-backup-col {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.settings-backup-col__note {
+  margin: 0;
+  font-size: 12px;
+  color: var(--text);
 }

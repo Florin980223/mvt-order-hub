@@ -1,0 +1,33 @@
+.users-page {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  height: 100%;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.users-page__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  align-self: flex-start;
+  color: var(--color-primary);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.users-page__back:hover {
+  text-decoration: underline;
+}
+
+.users-page__header h1 {
+  margin: 0;
+}
+
+.users-page__subtitle {
+  margin: 4px 0 0;
+  color: var(--text);
+  font-size: 14px;
+}

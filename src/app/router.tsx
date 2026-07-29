@@ -12,6 +12,7 @@ import { PendingOrdersPage } from '../pages/PendingOrdersPage'
 import { SentOrdersPage } from '../pages/SentOrdersPage'
 import { ReportsPage } from '../pages/ReportsPage'
 import { SettingsPage } from '../pages/SettingsPage'
+import { UsersPage } from '../pages/UsersPage'
 import { TechnicalLogsPage } from '../pages/TechnicalLogsPage'
 import { NotFoundPage } from '../pages/NotFoundPage'
 
@@ -35,6 +36,10 @@ export function AppRouter() {
           <Route path="/technical-logs" element={<TechnicalLogsPage />} />
           <Route element={<RequireAdmin />}>
             <Route path="/settings" element={<SettingsPage />} />
+            {/* Not in navItems.ts / sidebar — reachable only via Settings'
+                "Gestionează utilizatori" link, same as figura6-setari.png's
+                own button/chevron affordance. */}
+            <Route path="/users" element={<UsersPage />} />
           </Route>
         </Route>
       </Route>

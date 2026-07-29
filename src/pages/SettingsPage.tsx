@@ -1,12 +1,24 @@
 import { useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { ChevronRight, Loader2, Mail, Pencil, Sparkles, Truck, TriangleAlert } from 'lucide-react'
+import {
+  Bell,
+  ChevronRight,
+  Info,
+  Loader2,
+  Mail,
+  Pencil,
+  ScrollText,
+  Shield,
+  Smartphone,
+  Sparkles,
+  Truck,
+  TriangleAlert,
+} from 'lucide-react'
 import { supabase } from '../lib/supabaseClient'
-import { useAuth } from '../lib/auth/useAuth'
 import { useMailConnectionQuery } from '../lib/settings/useMailConnectionQuery'
 import { useOutboundApiQuery } from '../lib/settings/useOutboundApiQuery'
 import { useConfidenceThresholdQuery } from '../lib/settings/useConfidenceThresholdQuery'
-import { useProfilesQuery, type ProfileRow } from '../lib/settings/useProfilesQuery'
 import { useSubmissionJobsQuery } from '../lib/reports/useSubmissionJobsQuery'
 import { formatDateTime } from '../lib/emails/format'
 import { IntegrationRow } from '../components/settings/IntegrationRow'
@@ -18,6 +30,7 @@ import './SettingsPage.css'
 const CONNECTABLE_STATUSES = ['disconnected', 'error']
 const CONFIDENCE_THRESHOLD_OPTIONS = [70, 75, 80, 85, 90, 95, 99]
 const NOT_CONFIGURABLE_TITLE = 'Această setare nu este încă configurabilă'
+const ALWAYS_ON_LOG_TITLE = 'Jurnalizarea activității este întotdeauna activă și nu poate fi dezactivată'
 
 interface OutlookOauthStartResult {
   authorize_url: string
@@ -29,13 +42,6 @@ interface UpdateOutboundApiResult {
 
 interface UpdateConfidenceThresholdResult {
   threshold: number
-}
-
-interface UpdateProfileResult {
-  id: string
-  full_name: string | null
-  role: string
-  active: boolean
 }
 
 function isValidHttpUrl(value: string): boolean {
@@ -129,31 +135,6 @@ export function SettingsPage() {
   })
 
   const currentThresholdPercent = Math.round((confidenceThresholdSetting?.value_json.threshold ?? 0.85) * 100)
-
-  const { user } = useAuth()
-  const {
-    data: profiles,
-    isLoading: isProfilesLoading,
-    isError: isProfilesError,
-    error: profilesError,
-  } = useProfilesQuery()
-
-  const updateProfileMutation = useMutation({
-    mutationFn: async (update: { profile_id: string; active?: boolean; role?: string }) => {
-      const { data, error } = await supabase.functions.invoke<UpdateProfileResult>('update-profile', {
-        body: update,
-      })
-      if (error) throw error
-      return data
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['settings', 'profiles'] })
-    },
-  })
-
-  function isSelf(profile: ProfileRow): boolean {
-    return profile.id === user?.id
-  }
 
   return (
     <div className="settings-page">
@@ -330,68 +311,112 @@ export function SettingsPage() {
         </section>
       </div>
 
-      <section className="settings-card settings-card--users">
-        <h2>Utilizatori</h2>
+      <div className="settings-row">
+        {/* Notificări */}
+        <section className="settings-card">
+          <h2>Notificări</h2>
+          <DisabledToggle label="Emailuri noi" checked title={NOT_CONFIGURABLE_TITLE} />
+          <DisabledToggle label="Comenzi cu încredere scăzută" checked title={NOT_CONFIGURABLE_TITLE} />
+          <DisabledToggle label="Erori la import în AscendTMS" checked title={NOT_CONFIGURABLE_TITLE} />
+          <DisabledToggle label="Import reușit" checked title={NOT_CONFIGURABLE_TITLE} />
+          <DisabledToggle label="Confirmări trimise clienților" checked={false} title={NOT_CONFIGURABLE_TITLE} />
 
-        {isProfilesLoading && (
-          <p className="settings-inline-state">
-            <Loader2 aria-hidden="true" size={14} className="settings-inline-state__spinner" /> Se încarcă utilizatorii...
-          </p>
-        )}
+          <div className="settings-field-row">
+            <span className="settings-field-row__label">Canal notificări</span>
+            <div className="settings-channel-select" title={NOT_CONFIGURABLE_TITLE}>
+              <button type="button" className="settings-channel-select__btn settings-channel-select__btn--active" disabled>
+                <Bell aria-hidden="true" size={13} />
+                Toate
+              </button>
+              <button type="button" className="settings-channel-select__btn" disabled>
+                <Mail aria-hidden="true" size={13} />
+                Email
+              </button>
+              <button type="button" className="settings-channel-select__btn" disabled>
+                <Smartphone aria-hidden="true" size={13} />
+                Aplicație
+              </button>
+            </div>
+          </div>
+        </section>
 
-        {isProfilesError && (
-          <p className="settings-inline-state settings-inline-state--error">
-            <TriangleAlert aria-hidden="true" size={14} />
-            Utilizatorii nu au putut fi încărcați{profilesError instanceof Error ? `: ${profilesError.message}` : '.'}
-          </p>
-        )}
+        {/* Setări Import în AscendTMS */}
+        <section className="settings-card">
+          <h2>Setări Import în AscendTMS</h2>
+          <DisabledToggle label="Import automat dacă încredere ≥ prag" checked title={NOT_CONFIGURABLE_TITLE} />
+          <DisabledToggle label="Verifică duplicat înainte de import" checked title={NOT_CONFIGURABLE_TITLE} />
+          <DisabledToggle label="Actualizează status comandă după import" checked title={NOT_CONFIGURABLE_TITLE} />
 
-        {!isProfilesLoading && !isProfilesError && (
-          <table className="settings-users-table">
-            <thead>
-              <tr>
-                <th>Nume</th>
-                <th>Rol</th>
-                <th>Activ</th>
-                <th />
-              </tr>
-            </thead>
-            <tbody>
-              {(profiles ?? []).map((profile) => (
-                <tr key={profile.id}>
-                  <td>{profile.full_name ?? '—'}</td>
-                  <td>
-                    <select
-                      value={profile.role}
-                      disabled={isSelf(profile) || updateProfileMutation.isPending}
-                      onChange={(e) => updateProfileMutation.mutate({ profile_id: profile.id, role: e.target.value })}
-                    >
-                      <option value="operator">Operator</option>
-                      <option value="admin">Administrator</option>
-                    </select>
-                  </td>
-                  <td>{profile.active ? 'Da' : 'Nu'}</td>
-                  <td>
-                    <button
-                      type="button"
-                      disabled={isSelf(profile) || updateProfileMutation.isPending}
-                      title={isSelf(profile) ? 'Nu vă puteți dezactiva propriul cont' : undefined}
-                      onClick={() => updateProfileMutation.mutate({ profile_id: profile.id, active: !profile.active })}
-                    >
-                      {profile.active ? 'Dezactivează' : 'Activează'}
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
+          <div className="settings-field-row">
+            <span className="settings-field-row__label">Mapare câmpuri</span>
+            <button
+              type="button"
+              className="settings-link-btn settings-link-btn--field"
+              disabled
+              title="Configurarea mapării de câmpuri nu este încă disponibilă"
+            >
+              Configurează maparea
+              <ChevronRight aria-hidden="true" size={14} />
+            </button>
+          </div>
+          <DisabledSelect label="Proformă înainte de import" value="Opțională" title={NOT_CONFIGURABLE_TITLE} />
+          <DisabledSelect label="Utilizator AscendTMS" value="MVT_ORDER_HUB" title={NOT_CONFIGURABLE_TITLE} />
+        </section>
 
-        {updateProfileMutation.isError && (
-          <p className="settings-inline-state settings-inline-state--error">
-            {updateProfileMutation.error instanceof Error ? updateProfileMutation.error.message : 'Actualizarea utilizatorului a eșuat.'}
-          </p>
-        )}
+        {/* Securitate și Acces */}
+        <section className="settings-card">
+          <h2>Securitate și Acces</h2>
+          <DisabledToggle label="Autentificare în doi pași (2FA)" checked title={NOT_CONFIGURABLE_TITLE} />
+          <DisabledSelect label="Sesiune automată (timeout)" value="30 minute" title={NOT_CONFIGURABLE_TITLE} />
+          <DisabledSelect label="Rol implicit utilizatori noi" value="Operator" title={NOT_CONFIGURABLE_TITLE} />
+          <label className="settings-field-row" title={NOT_CONFIGURABLE_TITLE}>
+            <span className="settings-field-row__label">
+              IP-uri permise (opțional)
+              <Info aria-hidden="true" size={13} className="settings-field-row__info" />
+            </span>
+            <input type="text" className="settings-text-input" disabled placeholder="ex: 192.168.1.1, 10.0.0.0/24" />
+          </label>
+          {/* Real data (audit_logs) exists and is actively populated by 10
+              edge functions, but logging is unconditional in code — there is
+              no flag to actually gate, so this renders permanently on rather
+              than as a fake toggle. */}
+          <DisabledToggle label="Log activități" checked title={ALWAYS_ON_LOG_TITLE} />
+          <Link to="/users" className="settings-link-btn settings-link-btn--field settings-link-btn--nav">
+            <Shield aria-hidden="true" size={14} />
+            Gestionează utilizatori
+            <ChevronRight aria-hidden="true" size={14} />
+          </Link>
+        </section>
+      </div>
+
+      {/* Backup și Jurnale — full width */}
+      <section className="settings-card settings-card--backup">
+        <h2>Backup și Jurnale</h2>
+        <div className="settings-backup-row">
+          <div className="settings-backup-col">
+            <span className="settings-field-row__label">Backup baze de date</span>
+            <button type="button" className="settings-btn settings-btn--outline" disabled title={NOT_CONFIGURABLE_TITLE}>
+              Backup manual
+            </button>
+            <p className="settings-backup-col__note">Ultimul backup: —</p>
+          </div>
+          <div className="settings-backup-col">
+            <span className="settings-field-row__label">
+              Păstrare date (zile)
+              <Info aria-hidden="true" size={13} className="settings-field-row__info" />
+            </span>
+            <input type="text" className="settings-text-input" disabled value="365" readOnly title={NOT_CONFIGURABLE_TITLE} />
+          </div>
+          <div className="settings-backup-col">
+            <span className="settings-field-row__label">Jurnale sistem</span>
+            <DisabledSelect label="Nivel logare" value="Informațional" title={NOT_CONFIGURABLE_TITLE} />
+            <Link to="/technical-logs" className="settings-link-btn settings-link-btn--field settings-link-btn--nav">
+              <ScrollText aria-hidden="true" size={14} />
+              Deschide jurnale
+              <ChevronRight aria-hidden="true" size={14} />
+            </Link>
+          </div>
+        </div>
       </section>
     </div>
   )
