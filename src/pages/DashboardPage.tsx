@@ -105,13 +105,13 @@ export function DashboardPage() {
             </div>
             <div className="emails-page__header-controls">
               <div className="emails-search">
-                <Search aria-hidden="true" size={16} />
                 <input
                   type="text"
                   placeholder="Caută după expeditor sau subiect..."
                   value={searchText}
                   onChange={(event) => setSearchText(event.target.value)}
                 />
+                <Search aria-hidden="true" size={16} />
               </div>
               <button type="button" className="emails-filter-button">
                 <SlidersHorizontal aria-hidden="true" size={16} />
@@ -150,6 +150,7 @@ export function DashboardPage() {
                 onSelect={setSelectedEmailId}
                 favoriteIds={favoriteEmailIds}
                 onToggleFavorite={toggleFavorite}
+                showDate
               />
             </div>
 

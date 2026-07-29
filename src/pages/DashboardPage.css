@@ -126,6 +126,15 @@
   white-space: nowrap;
 }
 
+/* Scoped to Dashboard only, not the shared .emails-tabs__tab base rule
+   (EmailsPage's own mockup wasn't re-checked this round per the standing
+   per-page-verification rule) — confirmed at native resolution against
+   figura1-dashboard.png that only the active tab is bold, the other two
+   are a lighter weight. */
+.dashboard-split__list .emails-tabs__tab:not(.emails-tabs__tab--active) {
+  font-weight: 400;
+}
+
 .dashboard-split__list-scroll {
   flex: 1;
   min-height: 0;

@@ -1,5 +1,5 @@
 import { Mail, Star } from 'lucide-react'
-import { formatTime } from '../../lib/emails/format'
+import { formatDate, formatTime } from '../../lib/emails/format'
 import type { EmailRow } from '../../lib/emails/types'
 import { AttachmentBadge } from './AttachmentBadge'
 import { StatusBadge } from './StatusBadge'
@@ -17,6 +17,10 @@ interface EmailListProps {
   // (Dashboard). 'selected' shows it only on the currently-selected row,
   // matching figura2-emailuri-noi.png (EmailsPage).
   starVisibility?: 'all' | 'selected'
+  // Dashboard only (figura1-dashboard.png shows both date and time on each
+  // row) — off by default so EmailsPage/PendingOrdersPage stay unchanged
+  // until their own mockups are re-checked in this same audit pass.
+  showDate?: boolean
 }
 
 export function EmailList({
@@ -26,6 +30,7 @@ export function EmailList({
   favoriteIds,
   onToggleFavorite,
   starVisibility = 'all',
+  showDate = false,
 }: EmailListProps) {
   if (emails.length === 0) {
     return <div className="emails-list-empty">Niciun email găsit.</div>
@@ -52,7 +57,10 @@ export function EmailList({
               <div className="emails-list-item__content">
                 <div className="emails-list-item__row">
                   <span className="emails-list-item__sender">{email.sender}</span>
-                  <span className="emails-list-item__time">{formatTime(email.received_at)}</span>
+                  <span className="emails-list-item__time">
+                    {showDate && `${formatDate(email.received_at)} `}
+                    {formatTime(email.received_at)}
+                  </span>
                 </div>
                 <div className="emails-list-item__subject">{email.subject ?? '(fără subiect)'}</div>
                 <div className="emails-list-item__meta">
