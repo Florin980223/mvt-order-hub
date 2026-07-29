@@ -153,10 +153,15 @@
 .app-connection-pill {
   display: inline-flex;
   align-items: center;
+  gap: 6px;
   padding: 4px 12px;
   border-radius: 999px;
   font-size: 13px;
   font-weight: 500;
+}
+
+.app-connection-pill__icon {
+  flex-shrink: 0;
 }
 
 .app-connection-pill--success {

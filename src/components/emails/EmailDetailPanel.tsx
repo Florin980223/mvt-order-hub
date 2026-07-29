@@ -69,16 +69,16 @@ export function EmailDetailPanel({ email, isFavorite, onToggleFavorite }: EmailD
         </div>
 
         <dl className="emails-detail__addresses">
-          <div>
-            <dt>De la</dt>
+          <div className="emails-detail__addresses-col">
+            <dt>De la:</dt>
             <dd>{email.sender}</dd>
           </div>
-          <div>
-            <dt>Către</dt>
+          <div className="emails-detail__addresses-col">
+            <dt>Către:</dt>
             <dd>{mailboxAddress ?? '—'}</dd>
           </div>
-          <div>
-            <dt>Cc</dt>
+          <div className="emails-detail__addresses-col">
+            <dt>Cc:</dt>
             <dd>—</dd>
           </div>
         </dl>

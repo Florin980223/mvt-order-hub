@@ -727,7 +727,8 @@ height="3.815777559055118in"}
 
   **Cerință**          **Implementare minimă**
   -------------------- -----------------------------------------------------------------------------------------
-  Autentificare        Supabase Auth; parole gestionate de platformă; resetare securizată.
+  Autentificare        Supabase Auth; parole gestionate de platformă; resetar
+  e securizată.
   Autorizare           RLS pe tabele operaționale; rol verificat și server-side pentru acțiuni administrative.
   Tokenuri Microsoft   Criptate/secret store; niciodată returnate frontendului.
   Fișiere              Bucket privat, signed URLs, validare MIME/size și denumiri randomizate.

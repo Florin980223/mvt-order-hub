@@ -467,8 +467,12 @@
   align-items: center;
   gap: 6px;
   margin-top: 4px;
-  color: var(--text);
+  /* Fixed brand-palette token, not --text: same dark-mode wash-out reasoning
+     as the other bolded elements this phase (h1/h2, addresses dt/dd, body) —
+     --text washes out to light gray in dark mode and reads as not-bold. */
+  color: var(--color-text);
   font-size: 13px;
+  font-weight: 500;
 }
 
 .emails-detail__received svg {
@@ -478,21 +482,21 @@
 }
 
 .emails-detail__addresses {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
   margin: 16px 0 0;
 }
 
-.emails-detail__addresses > div {
+.emails-detail__addresses-col {
   display: flex;
-  gap: 8px;
+  flex-direction: column;
+  gap: 4px;
   font-size: 13px;
+  min-width: 0;
 }
 
 .emails-detail__addresses dt {
-  width: 56px;
-  flex-shrink: 0;
   /* Same treatment as the field labels earlier this phase: fixed dark
      token + matching weight, not the muted --text token. */
   color: var(--color-text);
@@ -503,6 +507,7 @@
   margin: 0;
   color: var(--color-text);
   font-weight: 500;
+  overflow-wrap: break-word;
 }
 
 .emails-detail__body {

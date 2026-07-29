@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
-import { Bell, ChevronDown, Headset } from 'lucide-react'
+import { Bell, CheckCircle2, ChevronDown, Headset } from 'lucide-react'
 import { supabase } from '../../lib/supabaseClient'
 import { useAuth } from '../../lib/auth/useAuth'
 import { useEmailsQuery } from '../../lib/emails/useEmailsQuery'
@@ -129,6 +129,9 @@ export function AppLayout() {
           <div className="app-header-actions">
             {connection && connectionVariant && (
               <span className={`app-connection-pill app-connection-pill--${connectionVariant}`}>
+                {connection.status === 'connected' && (
+                  <CheckCircle2 aria-hidden="true" size={14} className="app-connection-pill__icon" />
+                )}
                 {formatConnectionStatus(connection.status)}
                 {connection.status === 'connected' ? ' la Outlook' : ''}
               </span>
