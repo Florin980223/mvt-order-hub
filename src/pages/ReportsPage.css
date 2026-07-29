@@ -55,6 +55,25 @@
   font: inherit;
 }
 
+/* Native date inputs always render their own calendar-picker icon (and
+   follow OS locale for digit order) — this can't be overridden across
+   browsers without replacing them with a custom popup control, which is
+   new functionality beyond this pass's scope, not a styling gap. Hiding
+   the duplicate native icon and adding our own leading Calendar +
+   trailing chevron gets the closer to figura5's single-pill look without
+   fabricating a fake calendar dropdown. */
+.reports-date-range input::-webkit-calendar-picker-indicator {
+  /* Chrome opens the picker on a click anywhere in the field, so hiding
+     this doesn't remove functionality — it removes the 2 duplicate
+     native calendar icons competing with our own leading Calendar icon. */
+  display: none;
+}
+
+.reports-date-range__chevron {
+  color: var(--text);
+  flex-shrink: 0;
+}
+
 /* Disabled per plan — no route/lane column exists anywhere in the schema, only free-text pickup/delivery addresses. */
 .reports-route-filter {
   padding: 8px 14px;

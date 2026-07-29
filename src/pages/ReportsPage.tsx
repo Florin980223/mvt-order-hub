@@ -4,6 +4,7 @@ import {
   Box,
   Calendar,
   CheckCircle2,
+  ChevronDown,
   ClipboardList,
   Clock,
   Download,
@@ -247,6 +248,7 @@ export function ReportsPage() {
             <input type="date" value={fromDate} max={toDate} onChange={(event) => setFromDate(event.target.value)} />
             <span>–</span>
             <input type="date" value={toDate} min={fromDate} onChange={(event) => setToDate(event.target.value)} />
+            <ChevronDown aria-hidden="true" size={14} className="reports-date-range__chevron" />
           </div>
           <button
             type="button"
