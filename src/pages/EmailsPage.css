@@ -471,13 +471,6 @@
   background: color-mix(in srgb, var(--color-primary) 8%, transparent);
 }
 
-.emails-detail__icon-btn--priority {
-  /* Same token as PendingOrdersPage.css's priority-flag fix — distinct from
-     --active's primary blue, so favorite and priority never look like the
-     same toggle. */
-  color: var(--color-warning);
-}
-
 .emails-detail__icon-btn--active {
   color: var(--color-primary);
 }

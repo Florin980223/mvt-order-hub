@@ -1,10 +1,9 @@
 import DOMPurify from 'dompurify'
-import { Calendar, Flag, MoreVertical, Reply, Star } from 'lucide-react'
+import { Calendar, MoreVertical, Reply, Star } from 'lucide-react'
 import { formatDateTime } from '../../lib/emails/format'
 import type { EmailRow } from '../../lib/emails/types'
 import { usePrimaryMailboxAddress } from '../../lib/emails/useEmailsQuery'
 import { useOrderCorrection } from '../../lib/orders/useOrderCorrection'
-import { useTogglePriorityMutation } from '../../lib/orders/useTogglePriorityMutation'
 import { PendingOrderAttachments } from '../pendingOrders/PendingOrderAttachments'
 import { PendingOrderFields } from '../pendingOrders/PendingOrderFields'
 import { PendingOrderTopBar } from '../pendingOrders/PendingOrderTopBar'
@@ -21,7 +20,6 @@ export function EmailDetailPanel({ email, isFavorite, onToggleFavorite }: EmailD
   const { data: mailboxAddress } = usePrimaryMailboxAddress()
   const order = email.orders[0] ?? null
   const correction = useOrderCorrection(order)
-  const togglePriority = useTogglePriorityMutation(order)
 
   const sanitizedBody = email.body_html
     ? DOMPurify.sanitize(email.body_html, { FORBID_TAGS: ['style', 'script'] })
@@ -34,17 +32,12 @@ export function EmailDetailPanel({ email, isFavorite, onToggleFavorite }: EmailD
           <h2 className="emails-detail__subject">{email.subject ?? '(fără subiect)'}</h2>
           <div className="emails-detail__header-actions">
             <StatusBadge status={email.status} />
-            {order && (
-              <button
-                type="button"
-                className={`emails-detail__icon-btn${order.is_priority ? ' emails-detail__icon-btn--priority' : ''}`}
-                onClick={() => togglePriority.mutate()}
-                disabled={togglePriority.isPending}
-                aria-label={order.is_priority ? 'Elimină prioritatea' : 'Marchează ca prioritară'}
-              >
-                <Flag aria-hidden="true" size={16} fill={order.is_priority ? 'currentColor' : 'none'} />
-              </button>
-            )}
+            {/* No flag/priority icon here — confirmed at native resolution
+                against figura2-emailuri-noi.png that this row is the status
+                pill + Star + Reply + "..." only. The is_priority feature
+                itself (data, mutation, this page's own Prioritare tab) stays
+                intact; this was just its only UI toggle, which never
+                matched either brief mockup's icon row. */}
             {onToggleFavorite && (
               <button
                 type="button"
