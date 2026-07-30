@@ -1,0 +1,10 @@
+{
+  "graphMessageId": "mock-022-componente-auto-craiova-lyon",
+  "sender": "logistica@autoparts-oltenia.ro",
+  "subject": "Comandă transport internațional - atașat fișier",
+  "receivedAt": "2026-07-30T11:05:00Z",
+  "bodyHtml": "<div><p>Bună ziua,</p><p>Detaliile comenzii sunt în fișierul atașat.</p><p>Vă mulțumim,<br>AutoParts Oltenia SRL</p></div>",
+  "attachments": [
+    { "filename": "comanda-componente-auto.csv", "mimeType": "text/csv", "generatorRef": "componente-auto-csv" }
+  ]
+}

@@ -13,7 +13,7 @@ export function DisabledSelect({ label, value, title, showInfoIcon }: DisabledSe
     <label className="settings-field-row" title={title}>
       <span className="settings-field-row__label">
         {label}
-        {showInfoIcon && <Info aria-hidden="true" size={13} className="settings-field-row__info" />}
+        {showInfoIcon && <Info aria-hidden="true" size={11} className="settings-field-row__info" />}
       </span>
       <select className="settings-select" disabled value={value} onChange={() => {}}>
         <option value={value}>{value}</option>

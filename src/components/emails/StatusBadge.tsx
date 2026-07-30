@@ -2,7 +2,7 @@ interface StatusBadgeProps {
   status: string
 }
 
-const STATUS_LABELS: Record<string, string> = {
+export const STATUS_LABELS: Record<string, string> = {
   new: 'Nou',
   queued: 'În coadă',
   processing: 'În procesare',

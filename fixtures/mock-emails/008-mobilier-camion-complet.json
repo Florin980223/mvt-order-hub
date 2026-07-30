@@ -1,0 +1,8 @@
+{
+  "graphMessageId": "mock-008-mobilier",
+  "sender": "logistica@mobexpert-depozit.ro",
+  "subject": "Transport mobilier - depozit către showroom",
+  "receivedAt": "2026-07-30T14:45:00Z",
+  "bodyHtml": "<div><p>Bună ziua,</p><p>Nr. comandă: MBX-0912</p><p>Client: MobExpert Distribuție SRL</p><p>Adresă ridicare: Depozit central, Șos. de Centură nr. 21, Chiajna, Ilfov</p><p>Adresă livrare: Showroom Militari, Bd. Iuliu Maniu nr. 480, București</p><p>Marfă: Mobilier living și dormitor, ambalat</p><p>Cantitate: camion complet, nu s-a stabilit greutatea exactă</p><p>Transportatorul va fi confirmat telefonic.</p><p>O zi bună,<br>MobExpert Distribuție SRL</p></div>",
+  "attachments": []
+}

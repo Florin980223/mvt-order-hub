@@ -1,0 +1,10 @@
+{
+  "graphMessageId": "mock-024-utilaje-industriale-ploiesti-viena",
+  "sender": "comenzi@indusmach-prahova.ro",
+  "subject": "Transport internațional utilaje industriale - comandă",
+  "receivedAt": "2026-07-30T11:55:00Z",
+  "bodyHtml": "<div><p>Bună ziua,</p><p>Comanda de transport pentru utilajele industriale este atașată.</p><p>Cu stimă,<br>IndusMach Prahova SRL</p></div>",
+  "attachments": [
+    { "filename": "comanda-utilaje.xlsx", "mimeType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "generatorRef": "utilaje-industriale-xlsx" }
+  ]
+}

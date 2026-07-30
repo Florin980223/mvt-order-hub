@@ -1,0 +1,8 @@
+{
+  "graphMessageId": "mock-015-utilaj-industrial",
+  "sender": "proiecte@indumasini-ploiesti.ro",
+  "subject": "Comandă transport utilaj industrial agabaritic",
+  "receivedAt": "2026-07-30T18:50:00Z",
+  "bodyHtml": "<div><p>Bună ziua,</p><p>Nr. comandă: IMP-2026-055</p><p>Client: IndUmasini Ploiești SRL</p><p>Adresă ridicare: Hala de producție, Str. Uzinelor nr. 2, Ploiești</p><p>Data ridicare: 12.08.2026, ora 08:00</p><p>Adresă livrare: Zona industrială Ploiești Vest, se comunică punctul exact la sosire</p><p>Marfă: Utilaj industrial agabaritic, presă hidraulică</p><p>Greutate: 12000 kg</p><p>Volum: 45 m3</p><p>Necesită escortă auto și autorizație transport agabaritic — se convine valoarea după stabilirea traseului.</p><p>IndUmasini Ploiești SRL</p></div>",
+  "attachments": []
+}

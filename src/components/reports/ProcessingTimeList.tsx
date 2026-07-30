@@ -28,7 +28,7 @@ export function ProcessingTimeList({ rows }: ProcessingTimeListProps) {
         return (
           <li key={row.label} className="reports-processing-time__row">
             <span className="reports-processing-time__icon">
-              <Icon aria-hidden="true" size={16} />
+              <Icon aria-hidden="true" size={13} />
             </span>
             <span className="reports-processing-time__label">{row.label}</span>
             <span className="reports-processing-time__value">

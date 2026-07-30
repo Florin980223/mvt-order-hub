@@ -70,8 +70,14 @@
    .pending-orders-page itself to scroll — that outer scroll was dragging
    the right column's "sticky" ActionBar along with it, defeating the
    point of pinning it. */
+/* Wider than Dashboard's 420px list column — figura3's own left column has
+   a 5-column table to fit (Data/Expeditor/Subiect/Tip fișier/Status), which
+   needs more horizontal room than Dashboard's simple email list. Widened
+   again from 470px specifically to fit Expeditor's real (untruncated)
+   sender addresses — see .pending-orders-table td:nth-child(2)/th above
+   for the measurements behind this width. */
 .pending-orders-split__left {
-  width: 420px;
+  width: 590px;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
@@ -241,46 +247,48 @@
   font-size: 12px;
 }
 
-/* Re-zoomed figura3 at native resolution to check this directly (not
-   assumed from an earlier "make it all bold" pass): the header row is
-   visibly lighter/thinner than the body rows below it, not bold — same
-   muted-label treatment as .pending-orders-fields__label (fixed color,
-   not --text, so it doesn't wash out further in dark mode; no
-   font-weight override, so it stays at the regular body weight). */
+/* Bold per explicit request (deliberate deviation from the earlier
+   confirmed-lighter reading of figura3's header row) — no more row
+   separator either (also explicit request), so border-bottom is gone. */
 .pending-orders-table th {
   padding: 6px 4px;
-  border-bottom: 1px solid var(--border);
   color: #6b6375;
   font-size: 11px;
-  font-weight: 500;
+  font-weight: 700;
   text-align: left;
 }
 
-/* Body rows are visibly darker/slightly heavier than the header but not
-   as bold as titles/section headers — matches
-   .pending-orders-fields__value's weight (500), not the 600 used here
-   before. */
+/* Bold per explicit request. No row separator (also explicit request) —
+   border-bottom removed. */
 .pending-orders-table td {
   padding: 6px 4px;
-  border-bottom: 1px solid var(--border);
   color: var(--color-text);
-  font-weight: 500;
+  font-weight: 700;
   vertical-align: top;
   overflow: hidden;
 }
 
-/* Subiect wraps onto multiple lines in figura3 (natural word-wrap at
-   spaces — its own examples are multi-word). Expeditor (sender email) has
-   no natural wrap point at all, and figura3's own example addresses are
-   all short enough to fit on one line uncut — there's no mockup evidence
-   it ever wraps. Real sender addresses in this app's data are often
-   longer, so without truncation they broke mid-word/mid-domain
-   ("transport@trans" / "cereale-" / "moldova.ro"), which figura3 never
-   shows. Truncate instead, same single-line treatment as Tip fișier. */
-.pending-orders-table td:nth-child(2),
+/* Tip fișier: no natural wrap point, single-line ellipsis as before.
+   Expeditor (sender email) used to truncate the same way, but real
+   sender addresses in this app's data run up to ~37 chars — even at a
+   generously widened column, bold 12px couldn't fit the longest ones
+   without truncating (measured up to 218px needed). Dropped to 10px
+   (see .pending-orders-table td:nth-child(2) below) instead of
+   truncating, per explicit request that nothing in this column cut off. */
 .pending-orders-table td:nth-child(4) {
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/* Smaller than the table's base 12px specifically so the longest real
+   sender address (measured: up to 218px at 12px bold) fits without
+   truncating inside a column width that still leaves reasonable room for
+   Subiect/Data/Tip fișier/Status — at 10px bold the longest measured
+   sender needs ~183px, comfortably under this column's ~34% share. */
+.pending-orders-table td:nth-child(2) {
+  font-size: 10px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .pending-orders-table__datetime {
@@ -359,20 +367,22 @@
    rather than wrapping cleanly. */
 .pending-orders-table th:nth-child(1),
 .pending-orders-table td:nth-child(1) {
-  width: 18%;
+  width: 13%;
 }
 
-/* Narrower than before now that this column truncates instead of
-   wrapping — it no longer needs room to accommodate a full long address
-   across multiple lines. */
+/* Widened substantially and paired with the reduced font-size above —
+   measured the longest real sender address at 218px (12px bold) / 183px
+   (10px bold) across this table's actual displayed rows, so this column
+   is sized to fit that untruncated rather than ellipsizing. */
 .pending-orders-table th:nth-child(2),
 .pending-orders-table td:nth-child(2) {
-  width: 20%;
+  width: 34%;
 }
 
-/* Wider than before — the extra room (reclaimed from Expeditor above)
-   keeps Subiect's natural word-wrap to ~2 lines instead of every word
-   landing on its own line. */
+/* Reclaimed room from Expeditor's old share now that Expeditor needs much
+   more space to stay untruncated — Subiect's own line-clamp (below) means
+   it degrades gracefully at a narrower width, unlike Expeditor which had
+   no such fallback. */
 .pending-orders-table th:nth-child(3),
 .pending-orders-table td:nth-child(3) {
   width: 26%;
@@ -385,12 +395,74 @@
    between header and body in the same column. */
 .pending-orders-table th:nth-child(4),
 .pending-orders-table td:nth-child(4) {
-  width: 17%;
+  width: 13%;
 }
 
 .pending-orders-table th:nth-child(5),
 .pending-orders-table td:nth-child(5) {
-  width: 19%;
+  width: 14%;
+}
+
+/* Hard cap at figura3's own 2-line rhythm (confirmed at native resolution:
+   e.g. "Comandă transport / Europlast – iulie" wraps at 2 full lines,
+   never 3) — the column-width bump above handles typical subjects, but
+   real data can still run longer than figura3's short curated examples, so
+   this clamps and ellipsizes rather than letting a 3rd+ line reappear.
+   Targets its own inner span rather than the <td> directly — a `<td>`
+   needs to stay `display: table-cell` for table-layout: fixed to honor
+   its nth-child width; switching it to `display: -webkit-box` here made
+   the browser size the cell by content instead, silently breaking that
+   column's width. */
+.pending-orders-table__subject {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Sent variant's Rută column (figura4-comenzi-importate.png) — same
+   line-clamp technique as .pending-orders-table__subject above, on its
+   own inner span for the same table-layout: fixed reason. figura4's own
+   route examples are just city names ("Cluj-Napoca → Hamburg"), but this
+   app's actual pickup_address/delivery_address are full street addresses
+   concatenated together, which ran to 4 wrapped lines before this —
+   there's no separate "city" field to extract a shorter version from, so
+   this clamps the full text at a clean 2 lines instead. */
+.pending-orders-table__route {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Sent variant's own column proportions — Client (company names, e.g.
+   "ConstructMat Prod SRL") needs nowhere near the Expeditor column's 34%
+   (tuned for long sender emails), so that space is reclaimed for Rută,
+   which needs much more than the pending variant's Subiect share given
+   the full-address concatenation above. */
+.pending-orders-table--sent th:nth-child(1),
+.pending-orders-table--sent td:nth-child(1) {
+  width: 13%;
+}
+
+.pending-orders-table--sent th:nth-child(2),
+.pending-orders-table--sent td:nth-child(2) {
+  width: 20%;
+}
+
+.pending-orders-table--sent th:nth-child(3),
+.pending-orders-table--sent td:nth-child(3) {
+  width: 40%;
+}
+
+.pending-orders-table--sent th:nth-child(4),
+.pending-orders-table--sent td:nth-child(4) {
+  width: 13%;
+}
+
+.pending-orders-table--sent th:nth-child(5),
+.pending-orders-table--sent td:nth-child(5) {
+  width: 14%;
 }
 
 .pending-orders-table__row {
@@ -489,9 +561,67 @@
   color: var(--color-primary);
 }
 
+/* "Mai multe opțiuni" kebab — order-history dropdown (Dashboard only).
+   Same open/close + absolute-panel-anchored-to-its-trigger pattern as
+   .app-notifications/.app-notifications-panel and .app-help/.app-help-panel
+   in AppLayout.css, reused here since this icon button sits in a plain
+   heading row rather than a wrapping action-bar row like
+   .sent-order-action-bar__history (which expands inline via flex-basis:
+   100% instead). */
+.pending-orders-detail__more {
+  position: relative;
+}
+
+.pending-orders-detail__more-panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 260px;
+  max-height: 280px;
+  overflow-y: auto;
+  background: var(--color-surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  z-index: 10;
+  padding: 12px;
+}
+
+.pending-orders-detail__more-panel-title {
+  margin: 0 0 8px;
+  color: var(--color-text);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.pending-orders-detail__more-panel-empty {
+  margin: 0;
+  color: var(--text);
+  font-size: 13px;
+}
+
+.pending-orders-detail__more-panel-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pending-orders-detail__more-panel-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 12px;
+  color: var(--color-text);
+}
+
+/* Gap trimmed from 24px to reclaim a little more room for the field grid
+   (see .pending-orders-attachments above for the fuller width story). */
 .pending-orders-detail__body {
   display: flex;
-  gap: 24px;
+  gap: 16px;
   margin-top: 16px;
 }
 
@@ -508,22 +638,26 @@
   margin-left: auto;
 }
 
-/* Border kept intentionally — confirmed at native resolution against
-   figura3-comenzi-asteptare.png that "Istoric AI" has the same thin
-   rounded-rectangle outline as "Trimite confirmare client" in the action
-   bar below, i.e. it's this app's established outline-button style, not
-   an artifact to remove. Only the text weight changes here. */
+/* Border kept for spacing (matches "Trimite confirmare client" in the
+   action bar's box model) but made transparent per explicit request —
+   pragmatic resolution of a color disagreement that didn't need settling:
+   no visible line on "Istoric AI" regardless of whether it should be
+   --border or something else. */
 .pending-orders-topbar__btn {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   padding: 8px 14px;
-  border: 1px solid var(--border);
+  border: 1px solid transparent;
   border-radius: 6px;
   background: var(--color-surface);
   color: var(--color-text);
   font: inherit;
   font-weight: 700;
+  cursor: pointer;
+}
+
+.pending-orders-topbar__btn:disabled {
   cursor: not-allowed;
   opacity: 0.6;
 }
@@ -532,6 +666,17 @@
   border: none;
   background: var(--color-primary);
   color: white;
+}
+
+.pending-orders-topbar__btn--primary:not(:disabled):hover {
+  filter: brightness(0.92);
+}
+
+.pending-orders-topbar__error {
+  flex-basis: 100%;
+  margin: 0;
+  color: var(--color-error);
+  font-size: 0.875rem;
 }
 
 .pending-orders-topbar__confidence {
@@ -582,6 +727,61 @@
   font-weight: 500;
 }
 
+/* "Istoric AI" — order-history dropdown, anchored to its own trigger
+   button. Same open/close + absolute-panel-anchored-to-its-trigger pattern
+   as .pending-orders-detail__more/__more-panel (Dashboard's kebab) and
+   .app-notifications/.app-notifications-panel in AppLayout.css, reused
+   here under this file's own pending-orders-topbar__* prefix since the
+   trigger sits in this row rather than the detail heading row. */
+.pending-orders-topbar__history {
+  position: relative;
+}
+
+.pending-orders-topbar__history-panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 260px;
+  max-height: 280px;
+  overflow-y: auto;
+  background: var(--color-surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  z-index: 10;
+  padding: 12px;
+}
+
+.pending-orders-topbar__history-panel-title {
+  margin: 0 0 8px;
+  color: var(--color-text);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.pending-orders-topbar__history-panel-empty {
+  margin: 0;
+  color: var(--text);
+  font-size: 13px;
+}
+
+.pending-orders-topbar__history-panel-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pending-orders-topbar__history-panel-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 12px;
+  color: var(--color-text);
+}
+
 /* Grouped fields */
 
 .pending-orders-fields {
@@ -616,7 +816,7 @@
 .pending-orders-fields__grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 10px 20px;
+  gap: 10px 16px;
 }
 
 .pending-orders-fields__item {
@@ -625,12 +825,18 @@
   gap: 2px;
 }
 
+/* Bold per explicit request. Safe to set on this shared base rule (not
+   scoped) because .pending-orders-fields--flat/--preview both already
+   carry their own higher-specificity override pinning this back to 500
+   for Dashboard/EmailsPage (see further down) — only the sectioned variant
+   (this page, no modifier class) picks up the new 700 here. */
 .pending-orders-fields__label {
   font-size: 12px;
   /* Fixed brand-palette token, not --text: same reasoning as the h1/h2 fix
      in index.css — surfaces here are pinned light regardless of OS
      preference, so --text's dark-mode override (#9ca3af) washes these out. */
   color: #6b6375;
+  font-weight: 700;
 }
 
 .pending-orders-fields__value {
@@ -639,16 +845,31 @@
   color: var(--color-text);
 }
 
+/* Bold per explicit request, scoped to the sectioned variant only (this
+   page) — .pending-orders-fields__value is the same class flat/preview
+   use via the shared renderField(), so this can't go on the base rule
+   above without also bolding Dashboard/EmailsPage's field values. Both
+   modifier classes excluded so only the plain, unmodified
+   .pending-orders-fields wrapper (sectioned's own, no --flat/--preview
+   suffix) matches. */
+.pending-orders-fields:not(.pending-orders-fields--flat):not(.pending-orders-fields--preview) .pending-orders-fields__value {
+  font-weight: 700;
+}
+
 /* Sectioned variant only (figura3-comenzi-asteptare.png) — confirmed at
    native resolution that every field value (plus its percent/checkmark)
-   sits in a bordered box here, unlike flat/preview's plain text. */
+   sits in a bordered box here, unlike flat/preview's plain text. Border
+   kept for spacing but made transparent per explicit request — pragmatic
+   resolution of a color disagreement that didn't need settling: no
+   visible line in the Date comandă/Rute/Programare/Marfă/Transport field
+   boxes regardless of whether it should be --border or something else. */
 .pending-orders-fields__value--boxed {
   display: inline-flex;
   align-items: center;
   gap: 8px;
   width: 100%;
   padding: 8px 12px;
-  border: 1px solid var(--border);
+  border: 1px solid transparent;
   border-radius: 6px;
   background: var(--color-surface);
   box-sizing: border-box;
@@ -664,10 +885,35 @@
 
 /* The sectioned variant's own Hartă link/calendar-btn call site (see
    renderField's withExtras) stacks the map link below the value instead of
-   beside it, unlike flat/preview's flat-cell row placement. */
+   beside it, unlike flat/preview's flat-cell row placement. margin-top:
+   auto (rather than a fixed value) pins it to the bottom of its
+   .pending-orders-fields__item flex column — items in the same grid row
+   are already equal-height (grid's default stretch), but when one side's
+   address value wraps more lines than the other, a fixed margin-top left
+   the two side-by-side "Vezi pe hartă" buttons (and the visual gap before
+   the next section) at different heights. auto absorbs the leftover space
+   above the button instead of below it, so both buttons land on the same
+   line regardless of how each side's value wrapped. Border made
+   transparent (scoped to this sectioned-variant selector only, not the
+   shared base .pending-orders-fields__map-btn rule used by Dashboard/
+   EmailsPage/SentOrdersPage) per explicit request — same treatment as the
+   field-value boxes and Istoric AI. */
 .pending-orders-fields__section .pending-orders-fields__map-btn {
-  margin-top: 4px;
+  margin-top: auto;
   align-self: flex-start;
+  border-color: transparent;
+}
+
+/* Same treatment as the map-btn rule right above — the sectioned variant's
+   calendar icon button (next to Dată & Ora Pickup/Delivery) was still
+   showing its shared-base-rule border (--border) here, since the map-btn
+   fix above never got a calendar-btn counterpart. Scoped to this
+   sectioned-variant selector only, not the shared base
+   .pending-orders-fields__calendar-btn rule used by Dashboard/EmailsPage/
+   SentOrdersPage, per the same explicit request as the field-value boxes
+   and Istoric AI. */
+.pending-orders-fields__section .pending-orders-fields__calendar-btn {
+  border-color: transparent;
 }
 
 /* Dark + bold labels for flat/preview only — figura1/figura2 want labels
@@ -749,6 +995,19 @@
   background: color-mix(in srgb, var(--color-primary) 6%, var(--color-surface));
 }
 
+/* Dashboard-only (flat variant — 'flat' is Dashboard's own ungrouped
+   layout, see the variant prop's doc comment in PendingOrderFields.tsx).
+   Border kept for spacing but made transparent per explicit request, same
+   pragmatic treatment as the sectioned variant's map-btn/field boxes and
+   Istoric AI. Scoped to --flat (not the shared base rules above) so
+   EmailsPage's 'preview' variant, which reuses the same
+   .pending-orders-fields__map-btn/__calendar-btn classes, keeps its own
+   visible border untouched — only Dashboard asked for this. */
+.pending-orders-fields--flat .pending-orders-fields__map-btn,
+.pending-orders-fields--flat .pending-orders-fields__calendar-btn {
+  border-color: transparent;
+}
+
 /* Sent variant only (figura4-comenzi-importate.png) — every field value
    sits in its own bordered box (confirmed at native resolution: this
    applies uniformly, icon or no icon, unlike other variants' plain-text
@@ -759,6 +1018,9 @@
   gap: 8px;
 }
 
+/* Border kept for spacing but made transparent per explicit request — same
+   pragmatic treatment as the sectioned variant's field boxes and Istoric
+   AI on PendingOrdersPage. */
 .pending-orders-fields__sent-box {
   display: flex;
   align-items: center;
@@ -766,7 +1028,7 @@
   flex: 1;
   min-width: 0;
   padding: 8px 12px;
-  border: 1px solid var(--border);
+  border: 1px solid transparent;
   border-radius: 6px;
   background: var(--color-surface);
   font-size: 14px;
@@ -780,9 +1042,14 @@
   white-space: nowrap;
 }
 
+/* Border made transparent per explicit request, same treatment as the
+   map-btn border elsewhere — scoped to this sent-box selector only, not
+   the shared base .pending-orders-fields__map-btn rule used by
+   Dashboard/EmailsPage. */
 .pending-orders-fields__sent-box .pending-orders-fields__map-btn {
   margin-left: auto;
   flex-shrink: 0;
+  border-color: transparent;
 }
 
 .pending-orders-fields__value-icon {
@@ -803,11 +1070,19 @@
 
 /* Attachments side list */
 
+/* Narrower than before (was 220px) and no divider line — both per explicit
+   request, moving this panel's share of .pending-orders-detail__body
+   toward figura3's own smaller proportion, and giving the field-grid the
+   reclaimed room. Note: within this row-based card layout (icon+name+
+   size+badge+download all inline), the filename now truncates more
+   aggressively than before — a deeper restructure (stacking name below
+   icon) would preserve more of it, but that overlaps the
+   document-preview-thumbnail redesign already deferred for a later pass,
+   so left alone here. */
 .pending-orders-attachments {
-  width: 220px;
+  width: 160px;
   flex-shrink: 0;
-  padding-left: 20px;
-  border-left: 1px solid var(--border);
+  padding-left: 16px;
 }
 
 /* Title case in figura3-comenzi-asteptare.png ("Atașamente detectate"),
@@ -887,13 +1162,16 @@
   gap: 8px;
 }
 
+/* Border kept for spacing but made transparent per explicit request — same
+   pragmatic treatment as the sectioned variant's field boxes and Istoric
+   AI elsewhere in this file. */
 .pending-orders-attachments--inline__card {
   position: relative;
   display: flex;
   align-items: center;
   gap: 8px;
   padding: 8px 10px;
-  border: 1px solid var(--border);
+  border: 1px solid transparent;
   border-radius: 8px;
   background: var(--color-surface);
 }
@@ -962,4 +1240,25 @@
 
 .pending-orders-attachments--inline__download:hover {
   background: color-mix(in srgb, var(--color-primary) 8%, transparent);
+}
+
+/* Action bar — scoped fix, not a shared-rule change */
+
+/* The 4 action buttons (.emails-action-bar/.emails-action-bar__btn,
+   styled in EmailsPage.css) were wrapping to 2 rows here even though they
+   fit fine on EmailsPage itself — this page's left column is 590px
+   (widened in an earlier pass to fit Expeditor's untruncated sender
+   addresses) vs EmailsPage's 525px, leaving this page's own action bar
+   ~90px less width to work with out of the same total viewport. Fixed via
+   this page's own scoped override (container padding/gap, not the
+   buttons' text or font-size) rather than touching the shared base rules
+   in EmailsPage.css, which would also resize Dashboard/EmailsPage/
+   SentOrdersPage's own action bars without checking their mockups. */
+.pending-orders-detail .emails-action-bar {
+  padding: 8px;
+  gap: 3px;
+}
+
+.pending-orders-detail .emails-action-bar__btn {
+  padding: 8px;
 }

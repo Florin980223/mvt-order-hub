@@ -10,16 +10,55 @@ interface ListFooterProps {
   totalPages: number
   onPrevPage: () => void
   onNextPage: () => void
+  // When provided, "Actualizat..." renders as a real refresh button instead
+  // of static text. Optional (falls back to the old plain <span>) for
+  // back-compat, though all 3 current call sites (Dashboard/Emails/SentOrders
+  // Page) now pass it, so that fallback path is effectively unused today.
+  onRefresh?: () => void
+  // Spins the RefreshCw icon while a refetch triggered by onRefresh is in
+  // flight — pass the owning query hook's own isFetching/isRefetching.
+  isRefreshing?: boolean
 }
 
-/** Shared by Dashboard's and EmailsPage's list columns (figura1/figura2's identical footer row). */
-export function ListFooter({ dataUpdatedAt, rangeStart, rangeEnd, total, currentPage, totalPages, onPrevPage, onNextPage }: ListFooterProps) {
+/** Shared by Dashboard's, EmailsPage's and SentOrdersPage's list columns (figura1/figura2/figura4's identical footer row). */
+export function ListFooter({
+  dataUpdatedAt,
+  rangeStart,
+  rangeEnd,
+  total,
+  currentPage,
+  totalPages,
+  onPrevPage,
+  onNextPage,
+  onRefresh,
+  isRefreshing,
+}: ListFooterProps) {
+  const updatedContent = (
+    <>
+      <RefreshCw
+        aria-hidden="true"
+        size={13}
+        className={isRefreshing ? 'emails-list-footer__updated-icon--spinning' : undefined}
+      />
+      {formatUpdatedRelative(dataUpdatedAt)}
+    </>
+  )
+
   return (
     <div className="emails-list-footer">
-      <span className="emails-list-footer__updated">
-        <RefreshCw aria-hidden="true" size={13} />
-        {formatUpdatedRelative(dataUpdatedAt)}
-      </span>
+      {onRefresh ? (
+        <button
+          type="button"
+          className="emails-list-footer__updated emails-list-footer__updated--button"
+          onClick={onRefresh}
+          disabled={isRefreshing}
+          aria-label="Reîmprospătează lista"
+        >
+          {updatedContent}
+        </button>
+      ) : (
+        <span className="emails-list-footer__updated">{updatedContent}</span>
+      )}
       <div className="emails-list-footer__pagination">
         <span>
           {total === 0 ? 0 : rangeStart}-{rangeEnd} din {total}

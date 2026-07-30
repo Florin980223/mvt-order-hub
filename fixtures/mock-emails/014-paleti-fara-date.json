@@ -1,0 +1,8 @@
+{
+  "graphMessageId": "mock-014-paleti",
+  "sender": "office@repallet-oradea.ro",
+  "subject": "Transport paleți retur",
+  "receivedAt": "2026-07-30T18:15:00Z",
+  "bodyHtml": "<div><p>Bună ziua,</p><p>Client: RePallet Logistics SRL</p><p>Adresă ridicare: Punct de colectare, Str. Ogorului nr. 6, Oradea</p><p>Adresă livrare: Depozit central, Str. Uzinei nr. 14, Debrecen (via Borș)</p><p>Marfă: Paleți EUR, retur gol</p><p>Cantitate: 240 bucăți</p><p>Datele exacte de ridicare și livrare urmează să fie confirmate telefonic în cursul săptămânii.</p><p>RePallet Logistics SRL</p></div>",
+  "attachments": []
+}

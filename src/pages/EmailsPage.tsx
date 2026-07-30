@@ -5,21 +5,64 @@ import { EmailList } from '../components/emails/EmailList'
 import { ListFooter } from '../components/emails/ListFooter'
 import { useEmailsQuery } from '../lib/emails/useEmailsQuery'
 import { matchesSearch } from '../lib/emails/search'
+import type { EmailRow } from '../lib/emails/types'
 import './EmailsPage.css'
 
 const PAGE_SIZE = 6
 
 type TabKey = 'all' | 'needs_validation' | 'with_attachments' | 'priority'
 
+type ConfidenceFilter = 'all' | '0.8' | '0.5'
+
+// Average of the email's orders' confidence_overall — null when the email
+// has no orders (or none with a score) yet, so it always fails a minimum-
+// confidence filter rather than being treated as 0%. Mirrors DashboardPage's
+// own emailConfidence (not exported from there, so duplicated locally here
+// rather than reaching into a Dashboard-owned module).
+function emailConfidence(email: EmailRow): number | null {
+  const values = email.orders.map((order) => order.confidence_overall).filter((value): value is number => value !== null)
+  if (values.length === 0) return null
+  return values.reduce((sum, value) => sum + value, 0) / values.length
+}
+
 export function EmailsPage() {
-  const { data, dataUpdatedAt, isLoading, isError, error, refetch } = useEmailsQuery()
+  const { data, dataUpdatedAt, isLoading, isError, error, refetch, isFetching } = useEmailsQuery()
   const [activeTab, setActiveTab] = useState<TabKey>('all')
   const [searchText, setSearchText] = useState('')
   const [selectedEmailId, setSelectedEmailId] = useState<string | null>(null)
   const [favoriteEmailIds, setFavoriteEmailIds] = useState<Set<string>>(new Set())
   const [page, setPage] = useState(0)
 
+  // Same interaction pattern as DashboardPage's filter panel (state, panel
+  // toggle, active-state styling, "Resetează filtrele") — fields here are
+  // confidence/carrier since attachments/priority are already tab-covered
+  // on this page (Dashboard has no such tabs, hence its extra checkboxes).
+  const [filterOpen, setFilterOpen] = useState(false)
+  const [filterMinConfidence, setFilterMinConfidence] = useState<ConfidenceFilter>('all')
+  const [filterCarrier, setFilterCarrier] = useState('all')
+
   const emails = useMemo(() => data ?? [], [data])
+
+  const carrierOptions = useMemo(() => {
+    const carriers = new Set<string>()
+    emails.forEach((email) => {
+      email.orders.forEach((order) => {
+        if (order.carrier_proposed) carriers.add(order.carrier_proposed)
+      })
+    })
+    return Array.from(carriers).sort((a, b) => a.localeCompare(b))
+  }, [emails])
+
+  const hasActiveFilters = filterMinConfidence !== 'all' || filterCarrier !== 'all'
+
+  function resetFilters() {
+    setFilterMinConfidence('all')
+    setFilterCarrier('all')
+  }
+
+  function toggleFilterOpen() {
+    setFilterOpen((open) => !open)
+  }
 
   const counts = useMemo(
     () => ({
@@ -38,8 +81,17 @@ export function EmailsPage() {
       if (activeTab === 'priority') return email.orders.some((order) => order.is_priority)
       return true
     })
-    return byTab.filter((email) => matchesSearch(email, searchText))
-  }, [emails, activeTab, searchText])
+    return byTab.filter((email) => {
+      if (!matchesSearch(email, searchText)) return false
+      if (filterMinConfidence !== 'all') {
+        const threshold = filterMinConfidence === '0.8' ? 0.8 : 0.5
+        const confidence = emailConfidence(email)
+        if (confidence === null || confidence < threshold) return false
+      }
+      if (filterCarrier !== 'all' && !email.orders.some((order) => order.carrier_proposed === filterCarrier)) return false
+      return true
+    })
+  }, [emails, activeTab, searchText, filterMinConfidence, filterCarrier])
 
   // Clamped rather than reset via effect, same pattern as DashboardPage.
   const totalPages = Math.max(1, Math.ceil(visibleEmails.length / PAGE_SIZE))
@@ -103,10 +155,48 @@ export function EmailsPage() {
                 />
                 <Search aria-hidden="true" size={16} />
               </div>
-              <button type="button" className="emails-filter-button">
-                <SlidersHorizontal aria-hidden="true" size={16} />
-                Filtrează
-              </button>
+              <div className="emails-filter">
+                <button
+                  type="button"
+                  className={`emails-filter-button${hasActiveFilters ? ' emails-filter-button--active' : ''}`}
+                  onClick={toggleFilterOpen}
+                  aria-expanded={filterOpen}
+                >
+                  <SlidersHorizontal aria-hidden="true" size={16} />
+                  Filtrează
+                </button>
+                {filterOpen && (
+                  <div className="emails-filter-panel">
+                    <label className="emails-filter-panel__field">
+                      Încredere extragere minimă
+                      <select
+                        value={filterMinConfidence}
+                        onChange={(event) => setFilterMinConfidence(event.target.value as ConfidenceFilter)}
+                      >
+                        <option value="all">Toate</option>
+                        <option value="0.8">≥ 80%</option>
+                        <option value="0.5">≥ 50%</option>
+                      </select>
+                    </label>
+                    <label className="emails-filter-panel__field">
+                      Carrier propus
+                      <select value={filterCarrier} onChange={(event) => setFilterCarrier(event.target.value)}>
+                        <option value="all">Toți</option>
+                        {carrierOptions.map((carrier) => (
+                          <option key={carrier} value={carrier}>
+                            {carrier}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    {hasActiveFilters && (
+                      <button type="button" className="emails-filter-panel__reset" onClick={resetFilters}>
+                        Resetează filtrele
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
 
             <nav className="emails-tabs">
@@ -160,6 +250,8 @@ export function EmailsPage() {
               totalPages={totalPages}
               onPrevPage={() => setPage(currentPage - 1)}
               onNextPage={() => setPage(currentPage + 1)}
+              onRefresh={() => refetch()}
+              isRefreshing={isFetching}
             />
           </div>
           <div className="emails-split__detail">

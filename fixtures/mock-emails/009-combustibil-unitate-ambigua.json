@@ -1,0 +1,8 @@
+{
+  "graphMessageId": "mock-009-combustibil",
+  "sender": "comenzi@petrostock-distributie.ro",
+  "subject": "Comandă transport motorină - cisternă",
+  "receivedAt": "2026-07-30T15:20:00Z",
+  "bodyHtml": "<div><p>Bună ziua,</p><p>Nr. comandă: PST-4471</p><p>Client: PetroStock Distribuție SRL</p><p>Adresă ridicare: Depozit carburanți, Str. Rafinăriei nr. 3, Ploiești</p><p>Data ridicare: 05.08.2026, ora 06:00</p><p>Adresă livrare: Stație PECO Buzău Nord, DN2 km 104, Buzău</p><p>Marfă: Motorină</p><p>Cantitate: 20000 litri</p><p>Transport cu cisternă ADR, șofer atestat obligatoriu.</p><p>PetroStock Distribuție SRL</p></div>",
+  "attachments": []
+}

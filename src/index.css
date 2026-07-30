@@ -33,6 +33,18 @@
   }
 }
 
+/* Settings page's "Temă interfață" → Întunecată (general_preferences.theme,
+   see src/lib/settings/useThemePreferenceEffect.ts). Deliberately reuses
+   the exact same limited rules as prefers-color-scheme above rather than a
+   separate, fuller palette — there is no complete dark design for this app
+   yet (--color-* brand tokens above stay pinned light either way). This
+   only makes a manual selection do what the OS preference already did. */
+[data-theme='dark'] {
+  --text: #9ca3af;
+  --bg: #16171d;
+  --border: #2e303a;
+}
+
 body {
   margin: 0;
 }

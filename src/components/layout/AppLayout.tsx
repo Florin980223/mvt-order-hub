@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
-import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
-import { Bell, CheckCircle2, ChevronDown, Headset, HelpCircle } from 'lucide-react'
+import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
+import { Bell, CheckCircle2, ChevronDown, Headset, HelpCircle, Mail, Phone } from 'lucide-react'
 import { supabase } from '../../lib/supabaseClient'
 import { useAuth } from '../../lib/auth/useAuth'
 import { useEmailsQuery } from '../../lib/emails/useEmailsQuery'
@@ -8,6 +8,7 @@ import { useMailConnectionQuery } from '../../lib/settings/useMailConnectionQuer
 import { formatConnectionStatus } from '../../lib/settings/format'
 import { useNotificationsQuery } from '../../lib/notifications/useNotificationsQuery'
 import { useMarkNotificationReadMutation } from '../../lib/notifications/useMarkNotificationReadMutation'
+import { useThemePreferenceEffect } from '../../lib/settings/useThemePreferenceEffect'
 import { navItems, type BadgeKey } from './navItems'
 import './AppLayout.css'
 
@@ -18,6 +19,34 @@ const CONNECTION_PILL_VARIANT: Record<string, 'success' | 'warning' | 'error'> =
   disconnected: 'error',
   error: 'error',
 }
+
+// Static FAQ content for the header help panel — plain-text answers, no
+// backend/CMS. Kept short on purpose (Task: "genuinely useful but simple").
+const HELP_FAQ: { question: string; answer: string }[] = [
+  {
+    question: 'Cum trimit o comandă în AscendTMS?',
+    answer:
+      'Deschide comanda din "Comenzi în Așteptare", verifică datele extrase și apasă butonul de import către AscendTMS din bara de acțiuni a comenzii.',
+  },
+  {
+    question: 'Cum corectez datele extrase de AI?',
+    answer:
+      'În panoul de detalii al comenzii, editează direct câmpurile completate automat; corecțiile se salvează înainte de trimiterea comenzii spre import.',
+  },
+  {
+    question: 'Ce înseamnă scorul de încredere AI?',
+    answer:
+      'Arată cât de sigur este AI-ul de datele extrase dintr-un email. Scorurile mici semnalează câmpuri care merită verificate manual înainte de import.',
+  },
+  {
+    question: 'Cum conectez mailbox-ul Outlook al companiei?',
+    answer: 'Din "Setări" → secțiunea de conexiune email, autorizează contul Outlook; starea conexiunii apare apoi în antet.',
+  },
+  {
+    question: 'Cum exportez un raport?',
+    answer: 'Din pagina "Rapoarte", alege intervalul de date dorit și apasă "Exportă raport" pentru a descărca un fișier CSV.',
+  },
+]
 
 function initialsOf(fullName: string | null, email: string | null): string {
   if (fullName) {
@@ -36,6 +65,7 @@ export function AppLayout() {
   const { user, role, fullName } = useAuth()
   const [notificationsOpen, setNotificationsOpen] = useState(false)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
+  const [helpOpen, setHelpOpen] = useState(false)
 
   const visibleNavItems = navItems.filter((item) => !item.adminOnly || role === 'admin')
   const currentNavItem = navItems.find((item) => item.to === location.pathname)
@@ -45,6 +75,11 @@ export function AppLayout() {
   const { data: connection } = useMailConnectionQuery()
   const { data: notificationsData } = useNotificationsQuery()
   const markReadMutation = useMarkNotificationReadMutation()
+
+  // Admin-only in effect (app_settings RLS), but applied here rather than
+  // only on SettingsPage so the preference actually persists across
+  // navigation instead of resetting the moment you leave Settings.
+  useThemePreferenceEffect()
 
   const badgeCounts = useMemo<Record<BadgeKey, number>>(() => {
     const emails = emailsData ?? []
@@ -173,12 +208,59 @@ export function AppLayout() {
                 the other 5 mockups don't. Added app-wide anyway (not gated
                 to PendingOrdersPage) since AppLayout's header is the same
                 shared chrome on every page and a generic help icon is
-                harmless regardless of page. No help destination exists yet
-                in the MVP scope, so disabled+tooltip like the other
-                not-yet-implemented header/topbar buttons. */}
-            <button type="button" className="app-header-help" disabled title="Ajutor indisponibil încă" aria-label="Ajutor">
-              <HelpCircle aria-hidden="true" size={20} />
-            </button>
+                harmless regardless of page. Now wired to a static help
+                panel (contact info reused from the sidebar's own "Suport"
+                block + a short FAQ) — same open/close pattern as the
+                notification bell above. */}
+            <div className="app-help">
+              <button
+                type="button"
+                className="app-header-help"
+                onClick={() => setHelpOpen((open) => !open)}
+                aria-label="Ajutor"
+              >
+                <HelpCircle aria-hidden="true" size={20} />
+              </button>
+
+              {helpOpen && (
+                <div className="app-help-panel">
+                  <div className="app-help-panel__section">
+                    <span className="app-help-panel__heading">Suport</span>
+                    <a href="mailto:help@mvtlogistics.ro" className="app-help-panel__contact">
+                      <Mail aria-hidden="true" size={14} />
+                      help@mvtlogistics.ro
+                    </a>
+                    <a href="tel:+40336100200" className="app-help-panel__contact">
+                      <Phone aria-hidden="true" size={14} />
+                      +40 336 100 200
+                    </a>
+                  </div>
+
+                  <div className="app-help-panel__section">
+                    <span className="app-help-panel__heading">Linkuri utile</span>
+                    <Link to="/pending-orders" className="app-help-panel__link" onClick={() => setHelpOpen(false)}>
+                      Comenzi în așteptare
+                    </Link>
+                    <Link to="/settings" className="app-help-panel__link" onClick={() => setHelpOpen(false)}>
+                      Conectare mailbox (Setări)
+                    </Link>
+                    <Link to="/reports" className="app-help-panel__link" onClick={() => setHelpOpen(false)}>
+                      Rapoarte și export
+                    </Link>
+                  </div>
+
+                  <div className="app-help-panel__section">
+                    <span className="app-help-panel__heading">Întrebări frecvente</span>
+                    {HELP_FAQ.map((item) => (
+                      <details key={item.question} className="app-help-panel__faq">
+                        <summary>{item.question}</summary>
+                        <p>{item.answer}</p>
+                      </details>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
 
             {user && (
               <div className="app-user-menu">

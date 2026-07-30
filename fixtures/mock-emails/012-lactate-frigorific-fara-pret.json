@@ -1,0 +1,8 @@
+{
+  "graphMessageId": "mock-012-lactate",
+  "sender": "logistica@lactodava-targoviste.ro",
+  "subject": "Comandă transport produse lactate - frigorific",
+  "receivedAt": "2026-07-30T17:05:00Z",
+  "bodyHtml": "<div><p>Bună ziua,</p><p>Nr. comandă: LDV-0783</p><p>Client: LactoDava SRL</p><p>Adresă ridicare: Fabrica de lactate, Str. Câmpiei nr. 4, Târgoviște</p><p>Data ridicare: 04.08.2026, ora 05:30</p><p>Adresă livrare: Centru de distribuție, Str. Gării nr. 11, Ploiești</p><p>Data livrare: 04.08.2026, ora 09:00</p><p>Marfă: Produse lactate refrigerate</p><p>Cantitate: 6 tone</p><p>Transportator propus: FrigoLog Transport SRL</p><p>Valoare transport: se stabilește ulterior cu transportatorul</p><p>Observații: Obligatoriu transport frigorific, temperatură maximă 4°C.</p><p>LactoDava SRL</p></div>",
+  "attachments": []
+}

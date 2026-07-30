@@ -1,0 +1,8 @@
+{
+  "graphMessageId": "mock-013-electrocasnice",
+  "sender": "comenzi@electrostar-depozit.ro",
+  "subject": "Comandă transport electrocasnice",
+  "receivedAt": "2026-07-30T17:40:00Z",
+  "bodyHtml": "<div><p>Bună ziua,</p><p>Nr. comandă: EST-3390</p><p>Beneficiar: ElectroStar Retail SRL</p><p>Adresă ridicare: Depozit central, Str. Aviatorilor nr. 33, Timișoara</p><p>Data ridicare: 08.08.2026, ora 10:00</p><p>Adresă livrare: Magazin ElectroStar, Bd. Take Ionescu nr. 60, Arad</p><p>Marfă: Electrocasnice mari, paletizate și film întins</p><p>Cantitate: 12 paleți</p><p>Observații: Fragil, necesită hayon la descărcare.</p><p>ElectroStar Retail SRL</p></div>",
+  "attachments": []
+}

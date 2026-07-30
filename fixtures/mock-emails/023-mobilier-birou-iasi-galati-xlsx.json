@@ -1,0 +1,10 @@
+{
+  "graphMessageId": "mock-023-mobilier-birou-iasi-galati",
+  "sender": "comenzi@officedesign-iasi.ro",
+  "subject": "Transport mobilier de birou - comandă",
+  "receivedAt": "2026-07-30T11:30:00Z",
+  "bodyHtml": "<div><p>Bună ziua,</p><p>Comanda de transport pentru mobilierul de birou este atașată.</p><p>Cu stimă,<br>OfficeDesign Iași SRL</p></div>",
+  "attachments": [
+    { "filename": "comanda-mobilier.xlsx", "mimeType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "generatorRef": "mobilier-birou-xlsx" }
+  ]
+}

@@ -1,6 +1,6 @@
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { CORS_HEADERS, handleCorsPreflight } from '../_shared/cors.ts'
-import { getValidAccessToken, graphFetch } from '../_shared/graphClient.ts'
+import { graphFetch, resolveSendingConnection } from '../_shared/graphClient.ts'
 import { buildConfirmationEmail } from '../_shared/confirmationEmailTemplate.ts'
 
 interface SendClientConfirmationPayload {
@@ -81,29 +81,13 @@ Deno.serve(async (req) => {
       throw new Error('email row not found for order')
     }
 
-    // Older/seeded emails may not have connection_id set — falls back to
-    // the single connected mailbox, same assumption brief 14.1 makes
-    // ("inbox dedicat comenzilor").
-    let connectionId = email.connection_id as string | null
-    if (!connectionId) {
-      const { data: connections, error: connectionsError } = await supabase
-        .from('mail_connections')
-        .select('id')
-        .eq('status', 'connected')
-      if (connectionsError) throw new Error(connectionsError.message)
-      if (!connections || connections.length !== 1) {
-        throw new Error(
-          `cannot determine which mailbox to send from (email has no connection_id and ${
-            connections?.length ?? 0
-          } mailboxes are connected)`,
-        )
-      }
-      connectionId = connections[0].id
-    }
+    // Older/seeded emails may not have connection_id set — resolveSendingConnection
+    // falls back to whichever connected mailbox actually has a usable token
+    // (see _shared/graphClient.ts for the full rationale; this logic used
+    // to live inline here and is now shared with send-email-reply).
+    const { accessToken } = await resolveSendingConnection(supabase, email.connection_id as string | null)
 
     const { subject, body } = buildConfirmationEmail(order)
-
-    const accessToken = await getValidAccessToken(connectionId)
     await graphFetch(accessToken, '/me/sendMail', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

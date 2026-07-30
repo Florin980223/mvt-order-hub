@@ -21,15 +21,15 @@ export function ExportReportsCard({ onExportCsv, isExportingCsv, csvError }: Exp
       <p className="reports-export__subtitle">Generează și descarcă rapoarte personalizate.</p>
       <div className="reports-export__grid">
         <button type="button" className="reports-export__btn" disabled title={UNAVAILABLE_TITLE}>
-          <FileText aria-hidden="true" size={16} />
+          <FileText aria-hidden="true" size={14} />
           Raport general (PDF)
         </button>
         <button type="button" className="reports-export__btn" disabled title={UNAVAILABLE_TITLE}>
-          <FileSpreadsheet aria-hidden="true" size={16} className="reports-export__icon--excel" />
+          <FileSpreadsheet aria-hidden="true" size={14} className="reports-export__icon--excel" />
           Raport performanță (Excel)
         </button>
         <button type="button" className="reports-export__btn" disabled title={UNAVAILABLE_TITLE}>
-          <FileSpreadsheet aria-hidden="true" size={16} className="reports-export__icon--excel" />
+          <FileSpreadsheet aria-hidden="true" size={14} className="reports-export__icon--excel" />
           Raport clienți (Excel)
         </button>
         <button
@@ -39,7 +39,7 @@ export function ExportReportsCard({ onExportCsv, isExportingCsv, csvError }: Exp
           onClick={onExportCsv}
           title="Exportă comenzile din perioada selectată ca CSV"
         >
-          <FileSpreadsheet aria-hidden="true" size={16} className="reports-export__icon--excel" />
+          <FileSpreadsheet aria-hidden="true" size={14} className="reports-export__icon--excel" />
           {isExportingCsv ? 'Se exportă...' : 'Raport detaliat comenzi (CSV)'}
         </button>
       </div>

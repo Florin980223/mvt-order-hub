@@ -3,38 +3,52 @@
    which reuses .settings-card/.settings-users-table/.settings-inline-state
    from this file rather than duplicating them. */
 
+/* Density pass (same treatment as ReportsPage.css in this session): page
+   padding/gaps, card padding, fonts and row spacing all trimmed further so
+   the header + both card rows + the Backup și Jurnale row fit a
+   ~900-1000px viewport with no scrolling. Scrollbar hidden (overflow-y
+   kept functional) as a fallback for taller content, and every
+   `border: 1px solid var(--border)` swapped for `transparent` — border
+   kept for spacing/box-model only, visually hidden (matches white
+   background), same technique used on ReportsPage/PendingOrdersPage. */
 .settings-page {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 8px;
   height: 100%;
-  padding: 20px;
+  padding: 12px;
   overflow-y: auto;
+  scrollbar-width: none;
+}
+
+.settings-page::-webkit-scrollbar {
+  display: none;
 }
 
 .settings-page__header h1 {
   margin: 0;
+  font-size: 20px;
 }
 
 .settings-page__subtitle {
-  margin: 4px 0 0;
+  margin: 2px 0 0;
   color: var(--text);
-  font-size: 14px;
+  font-size: 12px;
 }
 
 .settings-row {
   display: grid;
   grid-template-columns: 1.15fr 1fr 1fr;
-  gap: 16px;
+  gap: 8px;
   align-items: start;
 }
 
 .settings-card {
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  padding: 16px;
-  border: 1px solid var(--border);
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid transparent;
   border-radius: 8px;
   background: var(--color-surface);
   min-width: 0;
@@ -42,7 +56,7 @@
 
 .settings-card h2 {
   margin: 0;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 700;
   color: var(--color-primary);
 }
@@ -52,7 +66,7 @@
   align-items: center;
   gap: 6px;
   margin: 0;
-  font-size: 13px;
+  font-size: 12px;
   color: var(--text);
 }
 
@@ -75,9 +89,9 @@
 .settings-integration-row {
   display: flex;
   align-items: flex-start;
-  gap: 12px;
-  padding-bottom: 14px;
-  border-bottom: 1px solid var(--border);
+  gap: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid transparent;
 }
 
 .settings-card > .settings-integration-row:last-of-type {
@@ -89,10 +103,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  width: 28px;
+  height: 28px;
   flex-shrink: 0;
-  border-radius: 8px;
+  border-radius: 7px;
 }
 
 .settings-integration-row__icon--blue {
@@ -115,27 +129,27 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 1px;
 }
 
 .settings-integration-row__name {
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 600;
   color: var(--color-text);
 }
 
 .settings-integration-row__status {
   margin: 0;
-  font-size: 12px;
+  font-size: 11px;
   color: var(--color-success);
 }
 
 .settings-integration-row__details {
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  margin-top: 4px;
-  font-size: 12px;
+  gap: 1px;
+  margin-top: 2px;
+  font-size: 11px;
   color: var(--text);
 }
 
@@ -148,14 +162,14 @@
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 8px;
+  gap: 5px;
 }
 
 .settings-integration-row__active {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  font-size: 12px;
+  font-size: 11px;
   color: var(--text);
   white-space: nowrap;
 }
@@ -172,13 +186,13 @@
 }
 
 .settings-btn {
-  padding: 7px 12px;
+  padding: 5px 10px;
   border: none;
   border-radius: 6px;
   background: var(--color-primary);
   color: white;
   font: inherit;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
   white-space: nowrap;
   cursor: pointer;
@@ -196,7 +210,7 @@
 .settings-btn--outline {
   background: var(--color-surface);
   color: var(--color-text);
-  border: 1px solid var(--border);
+  border: 1px solid transparent;
   text-decoration: none;
   display: inline-block;
 }
@@ -210,7 +224,7 @@
   background: transparent;
   color: var(--color-primary);
   font: inherit;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
   padding: 0;
   cursor: pointer;
@@ -248,10 +262,10 @@
 .settings-endpoint-edit__input {
   flex: 1;
   min-width: 0;
-  padding: 5px 8px;
-  border: 1px solid var(--border);
+  padding: 4px 7px;
+  border: 1px solid transparent;
   border-radius: 4px;
-  font-size: 12px;
+  font-size: 11px;
   color: var(--color-text);
   background: var(--color-bg);
 }
@@ -262,14 +276,14 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: 10px;
 }
 
 .settings-field-row__label {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  font-size: 13px;
+  font-size: 12px;
   color: var(--color-text);
 }
 
@@ -280,13 +294,13 @@
 .settings-select {
   flex-shrink: 0;
   max-width: 55%;
-  padding: 6px 10px;
-  border: 1px solid var(--border);
+  padding: 4px 8px;
+  border: 1px solid transparent;
   border-radius: 6px;
   background: var(--color-surface);
   color: var(--color-text);
   font: inherit;
-  font-size: 12px;
+  font-size: 11px;
 }
 
 .settings-select:disabled {
@@ -300,12 +314,12 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: 10px;
   cursor: default;
 }
 
 .settings-toggle-row__label {
-  font-size: 13px;
+  font-size: 12px;
   color: var(--color-text);
 }
 
@@ -313,8 +327,8 @@
   position: relative;
   flex-shrink: 0;
   display: inline-flex;
-  width: 36px;
-  height: 20px;
+  width: 34px;
+  height: 18px;
 }
 
 .settings-toggle input {
@@ -323,6 +337,10 @@
   opacity: 0;
   margin: 0;
   cursor: not-allowed;
+}
+
+.settings-toggle input:not(:disabled) {
+  cursor: pointer;
 }
 
 .settings-toggle__track {
@@ -341,8 +359,8 @@
   position: absolute;
   top: 2px;
   left: 2px;
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
   background: white;
   transition: left 0.15s;
@@ -356,20 +374,20 @@
 
 .settings-theme-toggle {
   display: flex;
-  gap: 8px;
+  gap: 6px;
 }
 
 .settings-theme-toggle__btn {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  border: 1px solid var(--border);
+  gap: 5px;
+  padding: 5px 10px;
+  border: 1px solid transparent;
   border-radius: 6px;
   background: var(--color-surface);
   color: var(--color-text);
   font: inherit;
-  font-size: 12px;
+  font-size: 11px;
   cursor: not-allowed;
 }
 
@@ -377,6 +395,10 @@
   border-color: var(--color-primary);
   color: var(--color-primary);
   background: color-mix(in srgb, var(--color-primary) 8%, var(--color-surface));
+}
+
+.settings-theme-toggle__btn:not(:disabled) {
+  cursor: pointer;
 }
 
 /* Utilizatori (unchanged pre-existing table, minimal styling only) */
@@ -388,40 +410,40 @@
 .settings-users-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 13px;
+  font-size: 12px;
 }
 
 .settings-users-table th {
   text-align: left;
-  padding: 8px 10px;
+  padding: 6px 8px;
   color: var(--text);
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid transparent;
 }
 
 .settings-users-table td {
-  padding: 8px 10px;
+  padding: 6px 8px;
   color: var(--color-text);
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid transparent;
 }
 
 /* Channel selector (Notificări card) */
 
 .settings-channel-select {
   display: flex;
-  gap: 6px;
+  gap: 5px;
 }
 
 .settings-channel-select__btn {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: 6px 10px;
-  border: 1px solid var(--border);
+  gap: 4px;
+  padding: 5px 9px;
+  border: 1px solid transparent;
   border-radius: 6px;
   background: var(--color-surface);
   color: var(--color-text);
   font: inherit;
-  font-size: 12px;
+  font-size: 11px;
   cursor: not-allowed;
 }
 
@@ -431,18 +453,69 @@
   background: color-mix(in srgb, var(--color-primary) 8%, var(--color-surface));
 }
 
+.settings-channel-select__btn:not(:disabled) {
+  cursor: pointer;
+}
+
+/* Field mapping panel ("Mapare câmpuri" → Configurează maparea) */
+
+.settings-field-mapping {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--color-bg);
+}
+
+.settings-field-mapping__hint {
+  margin: 0;
+  font-size: 11px;
+  color: var(--text);
+}
+
+.settings-field-mapping__list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.settings-field-mapping__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.settings-field-mapping__label {
+  font-size: 12px;
+  color: var(--color-text);
+}
+
+.settings-field-mapping__row .settings-text-input {
+  max-width: 60%;
+}
+
+.settings-field-mapping__actions {
+  display: flex;
+  gap: 6px;
+}
+
 /* Plain text input (IP allowlist, retention days) */
 
 .settings-text-input {
   flex-shrink: 0;
   max-width: 55%;
-  padding: 6px 10px;
-  border: 1px solid var(--border);
+  padding: 4px 8px;
+  border: 1px solid transparent;
   border-radius: 6px;
   background: var(--color-surface);
   color: var(--color-text);
   font: inherit;
-  font-size: 12px;
+  font-size: 11px;
 }
 
 .settings-text-input:disabled {
@@ -457,12 +530,12 @@
 .settings-link-btn--field {
   align-self: auto;
   gap: 6px;
-  padding: 6px 10px;
-  border: 1px solid var(--border);
+  padding: 5px 9px;
+  border: 1px solid transparent;
   border-radius: 6px;
   background: var(--color-surface);
   color: var(--color-text);
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 500;
 }
 
@@ -490,17 +563,17 @@
 .settings-backup-row {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 24px;
+  gap: 16px;
 }
 
 .settings-backup-col {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .settings-backup-col__note {
   margin: 0;
-  font-size: 12px;
+  font-size: 11px;
   color: var(--text);
 }

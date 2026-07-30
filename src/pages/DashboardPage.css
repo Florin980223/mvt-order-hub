@@ -58,8 +58,6 @@
   flex-direction: column;
   min-height: 0;
   padding: 16px 0 0;
-  border: 1px solid var(--border);
-  border-radius: 8px;
   background: var(--color-surface);
 }
 
@@ -104,6 +102,123 @@
   background: color-mix(in srgb, var(--color-primary) 8%, transparent);
 }
 
+/* Same active-state convention as .pending-orders-detail__icon-btn--active
+   (fixed color, not a background swap) — shown when the control's value
+   differs from its default. */
+.dashboard-list-heading__icon-btn--active {
+  color: var(--color-primary);
+}
+
+.dashboard-sort {
+  position: relative;
+}
+
+.dashboard-sort-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 220px;
+  background: var(--color-surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  z-index: 10;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.dashboard-sort-menu__item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 8px 10px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--color-text);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.dashboard-sort-menu__item:hover {
+  background: color-mix(in srgb, var(--color-primary) 8%, transparent);
+}
+
+.dashboard-sort-menu__item--active {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.dashboard-filter {
+  position: relative;
+}
+
+.emails-filter-button--active {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.dashboard-filter-panel {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  width: 240px;
+  background: var(--color-surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  z-index: 10;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.dashboard-filter-panel__checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+.dashboard-filter-panel__field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+  color: var(--color-text);
+}
+
+.dashboard-filter-panel__field select {
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+}
+
+.dashboard-filter-panel__reset {
+  align-self: flex-start;
+  padding: 6px 10px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--color-error);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.dashboard-filter-panel__reset:hover {
+  background: color-mix(in srgb, var(--color-error) 8%, transparent);
+}
+
 .dashboard-split__list .emails-page__header-controls,
 .dashboard-split__list .emails-tabs {
   padding: 0 16px;
@@ -115,6 +230,10 @@
 }
 
 .dashboard-split__list .emails-filter-button {
+  flex-shrink: 0;
+}
+
+.dashboard-split__list .dashboard-filter {
   flex-shrink: 0;
 }
 
@@ -140,6 +259,13 @@
   min-height: 0;
   overflow-y: auto;
   margin-top: 8px;
+  /* figura1-dashboard.png: no visible scroll track for this column, same
+     hide-but-keep-functional technique as .pending-orders-detail__scroll. */
+  scrollbar-width: none;
+}
+
+.dashboard-split__list-scroll::-webkit-scrollbar {
+  display: none;
 }
 
 /* Scoped to Dashboard only, not the shared .emails-list-item__subject/
@@ -159,7 +285,5 @@
   flex: 1;
   min-width: 0;
   overflow: hidden;
-  border: 1px solid var(--border);
-  border-radius: 8px;
   background: var(--color-surface);
 }

@@ -18,19 +18,21 @@ interface KpiTileProps {
 export function KpiTile({ icon: Icon, iconVariant, label, value, trend }: KpiTileProps) {
   return (
     <div className="reports-kpi-tile">
-      <span className={`reports-kpi-tile__icon reports-kpi-tile__icon--${iconVariant}`}>
-        <Icon aria-hidden="true" size={20} />
-      </span>
-      <span className="reports-kpi-tile__label">{label}</span>
+      <div className="reports-kpi-tile__top">
+        <span className={`reports-kpi-tile__icon reports-kpi-tile__icon--${iconVariant}`}>
+          <Icon aria-hidden="true" size={15} />
+        </span>
+        <span className="reports-kpi-tile__label">{label}</span>
+      </div>
       <span className="reports-kpi-tile__value">{value}</span>
       {trend && (
         <span
           className={`reports-kpi-tile__trend reports-kpi-tile__trend--${trend.direction === 'down' ? 'down' : 'up'}`}
         >
           {trend.direction === 'down' ? (
-            <ArrowDown aria-hidden="true" size={12} />
+            <ArrowDown aria-hidden="true" size={10} />
           ) : (
-            <ArrowUp aria-hidden="true" size={12} />
+            <ArrowUp aria-hidden="true" size={10} />
           )}
           {trend.percent.toFixed(1).replace(/\.0$/, '')}% față de perioada anterioară
         </span>

@@ -9,7 +9,8 @@
     "lint": "eslint .",
     "typecheck": "tsc -b",
     "preview": "vite preview",
-    "seed:mock-emails": "tsx scripts/seed-mock-emails.ts"
+    "seed:mock-emails": "tsx scripts/seed-mock-emails.ts",
+    "seed:test-sent-orders": "tsx scripts/seed-test-sent-orders.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.4.0",

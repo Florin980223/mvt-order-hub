@@ -51,7 +51,7 @@ export function PendingOrdersTable({
 
   if (variant === 'sent') {
     return (
-      <table className="pending-orders-table">
+      <table className="pending-orders-table pending-orders-table--sent">
         <thead>
           <tr>
             <th>
@@ -103,9 +103,11 @@ export function PendingOrdersTable({
                 </td>
                 <td>{order.client_name ?? '—'}</td>
                 <td>
-                  {order.pickup_address ?? '—'}
-                  {' → '}
-                  {order.delivery_address ?? '—'}
+                  <span className="pending-orders-table__route">
+                    {order.pickup_address ?? '—'}
+                    {' → '}
+                    {order.delivery_address ?? '—'}
+                  </span>
                 </td>
                 <td>{order.cargo_type ?? '—'}</td>
                 <td>
@@ -154,7 +156,9 @@ export function PendingOrdersTable({
               </span>
             </td>
             <td>{email.sender}</td>
-            <td>{email.subject ?? '(fără subiect)'}</td>
+            <td>
+              <span className="pending-orders-table__subject">{email.subject ?? '(fără subiect)'}</span>
+            </td>
             <td>
               {email.email_attachments.length > 0
                 ? email.email_attachments.map((attachment) => (

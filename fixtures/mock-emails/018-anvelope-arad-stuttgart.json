@@ -1,0 +1,8 @@
+{
+  "graphMessageId": "mock-018-anvelope-arad-stuttgart",
+  "sender": "logistica@tiremax-export.ro",
+  "subject": "Comandă transport internațional anvelope - Arad - Stuttgart",
+  "receivedAt": "2026-07-30T09:05:00Z",
+  "bodyHtml": "<div><p>Bună ziua,</p><p>Vă transmitem o comandă de transport cu următoarele detalii:</p><p>Nr. comandă: ARD-2026-0559</p><p>Client: SC TireMax Export SRL</p><p>Adresă ridicare: Depozit TireMax, Calea Aradului nr. 210, Arad</p><p>Data ridicare: 07.08.2026, ora 06:00</p><p>Adresă livrare: Reifen Zentrum GmbH, Industriestraße 14, Stuttgart, Germania</p><p>Data livrare: 09.08.2026, ora 12:00</p><p>Marfă: Anvelope auto, paletizate</p><p>Cantitate: 33 paleți</p><p>Greutate: 8200 kg</p><p>Volum: 45 m3</p><p>Valoare transport: 2100 EUR</p><p>Transportator propus: SC EuroLine Cargo SRL</p><p>Observații: Vamă UE, documente CMR necesare.</p><p>Cu stimă,<br>SC TireMax Export SRL</p></div>",
+  "attachments": []
+}

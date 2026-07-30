@@ -1,0 +1,10 @@
+{
+  "graphMessageId": "mock-020-chimice-deva-praga",
+  "sender": "aprovizionare@chemprod-hunedoara.ro",
+  "subject": "Comandă transport internațional produse chimice - Deva - Praga",
+  "receivedAt": "2026-07-30T10:15:00Z",
+  "bodyHtml": "<div><p>Bună ziua,</p><p>Vă rugăm procesați comanda atașată (PDF).</p><p>ChemProd Hunedoara SRL</p></div>",
+  "attachments": [
+    { "filename": "comanda-chimice.pdf", "mimeType": "application/pdf", "generatorRef": "produse-chimice-deva-pdf" }
+  ]
+}

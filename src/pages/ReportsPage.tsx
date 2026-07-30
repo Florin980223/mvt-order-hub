@@ -378,7 +378,7 @@ export function ReportsPage() {
               <div className="reports-volume-cards">
                 <div className="reports-volume-card">
                   <span className="reports-volume-card__icon reports-volume-card__icon--blue">
-                    <Package aria-hidden="true" size={18} />
+                    <Package aria-hidden="true" size={14} />
                   </span>
                   <span className="reports-volume-card__label">Greutate totală</span>
                   <span className="reports-volume-card__value">{formatNumber(totalWeight)} kg</span>
@@ -393,7 +393,7 @@ export function ReportsPage() {
                 </div>
                 <div className="reports-volume-card">
                   <span className="reports-volume-card__icon reports-volume-card__icon--purple">
-                    <Box aria-hidden="true" size={18} />
+                    <Box aria-hidden="true" size={14} />
                   </span>
                   <span className="reports-volume-card__label">Volum total</span>
                   <span className="reports-volume-card__value">{formatNumber(totalVolume)} m³</span>
@@ -408,7 +408,7 @@ export function ReportsPage() {
                 </div>
                 <div className="reports-volume-card">
                   <span className="reports-volume-card__icon reports-volume-card__icon--green">
-                    <Euro aria-hidden="true" size={18} />
+                    <Euro aria-hidden="true" size={14} />
                   </span>
                   <span className="reports-volume-card__label">Valoare transport</span>
                   <span className="reports-volume-card__value">{formatCurrency(totalValue)}</span>

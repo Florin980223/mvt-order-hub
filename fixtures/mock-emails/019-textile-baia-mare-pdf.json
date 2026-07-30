@@ -1,0 +1,10 @@
+{
+  "graphMessageId": "mock-019-textile-baia-mare",
+  "sender": "aprovizionare@textilnord-maramures.ro",
+  "subject": "Comandă transport materiale textile - Baia Mare - Satu Mare",
+  "receivedAt": "2026-07-30T09:50:00Z",
+  "bodyHtml": "<div><p>Bună ziua,</p><p>Vă rugăm procesați comanda atașată (PDF).</p><p>TextilNord Maramureș SRL</p></div>",
+  "attachments": [
+    { "filename": "comanda-textile.pdf", "mimeType": "application/pdf", "generatorRef": "textile-baia-mare-pdf" }
+  ]
+}

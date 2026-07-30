@@ -17,7 +17,7 @@ export function IntegrationRow({ icon: Icon, iconVariant, name, statusText, acti
   return (
     <div className="settings-integration-row">
       <span className={`settings-integration-row__icon settings-integration-row__icon--${iconVariant}`}>
-        <Icon aria-hidden="true" size={20} />
+        <Icon aria-hidden="true" size={16} />
       </span>
       <div className="settings-integration-row__body">
         <span className="settings-integration-row__name">{name}</span>

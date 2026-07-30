@@ -1,0 +1,8 @@
+{
+  "graphMessageId": "mock-016-porumb-umed",
+  "sender": "achizitii@agrosilo-calarasi.ro",
+  "subject": "Comandă transport porumb umed - recoltă nouă",
+  "receivedAt": "2026-07-30T19:25:00Z",
+  "bodyHtml": "<div><p>Bună ziua,</p><p>Client: AgroSilo Călărași SRL</p><p>Adresă ridicare: Câmp recoltare, com. Frumușani, jud. Călărași</p><p>Data ridicare: 09.08.2026</p><p>Adresă livrare: Uscător de cereale, Str. Silozului nr. 1, Călărași</p><p>Marfă: Porumb boabe umed, vrac, direct de la combină</p><p>Cantitate: aprox 20-22 tone, cântărire finală la siloz</p><p>AgroSilo Călărași SRL</p></div>",
+  "attachments": []
+}

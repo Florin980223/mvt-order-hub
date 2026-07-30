@@ -201,6 +201,10 @@
   background: color-mix(in srgb, var(--color-primary) 8%, transparent);
 }
 
+.app-help {
+  position: relative;
+}
+
 .app-header-help {
   display: flex;
   align-items: center;
@@ -212,8 +216,93 @@
   border-radius: 999px;
   background: transparent;
   color: var(--color-text);
-  cursor: not-allowed;
-  opacity: 0.6;
+  cursor: pointer;
+}
+
+.app-header-help:hover {
+  background: color-mix(in srgb, var(--color-primary) 8%, transparent);
+}
+
+.app-help-panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 300px;
+  max-height: 420px;
+  overflow-y: auto;
+  background: var(--color-surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  z-index: 10;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.app-help-panel__section {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.app-help-panel__heading {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  color: var(--text);
+  margin-bottom: 2px;
+}
+
+.app-help-panel__contact {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 4px;
+  border-radius: 6px;
+  color: var(--color-text);
+  font-size: 13px;
+  text-decoration: none;
+}
+
+.app-help-panel__contact:hover {
+  background: color-mix(in srgb, var(--color-primary) 8%, transparent);
+}
+
+.app-help-panel__link {
+  padding: 6px 4px;
+  border-radius: 6px;
+  color: var(--color-primary);
+  font-size: 13px;
+  text-decoration: none;
+}
+
+.app-help-panel__link:hover {
+  background: color-mix(in srgb, var(--color-primary) 8%, transparent);
+}
+
+.app-help-panel__faq {
+  padding: 6px 4px;
+  border-radius: 6px;
+  font-size: 13px;
+  color: var(--color-text);
+}
+
+.app-help-panel__faq summary {
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.app-help-panel__faq summary:hover {
+  color: var(--color-primary);
+}
+
+.app-help-panel__faq p {
+  margin: 6px 0 0;
+  color: var(--text);
+  line-height: 1.4;
 }
 
 .app-notifications-badge {

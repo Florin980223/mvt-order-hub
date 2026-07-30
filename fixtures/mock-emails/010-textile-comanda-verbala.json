@@ -1,0 +1,8 @@
+{
+  "graphMessageId": "mock-010-textile",
+  "sender": "vanzari@textilprod-cluj.ro",
+  "subject": "Re: Transport marfă textilă - urgent",
+  "receivedAt": "2026-07-30T15:55:00Z",
+  "bodyHtml": "<div><p>Bună ziua,</p><p>Client: TextilProd Cluj SRL</p><p>Adresă ridicare: Hala de producție, Str. Fabricii nr. 17, Cluj-Napoca</p><p>Data ridicare: 07.08.2026, ora 09:00</p><p>Adresă livrare: Depozit regional, Str. Depozitelor nr. 2, Oradea</p><p>Marfă: Confecții textile, cutii paletizate</p><p>Cantitate: 8 paleți</p><p>Observații: Comandă confirmată telefonic, fără număr de comandă alocat încă în sistemul nostru.</p><p>Cu stimă,<br>TextilProd Cluj SRL</p></div>",
+  "attachments": []
+}

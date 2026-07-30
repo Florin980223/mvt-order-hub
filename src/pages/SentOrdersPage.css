@@ -17,6 +17,29 @@
   min-width: 0;
 }
 
+/* Divider lines made transparent per explicit request, same pragmatic
+   treatment as the other borders removed on this page — border-top
+   value inherited from the shared --border token, which resolves to a
+   visibly dark color under dark OS preference (see the field-box border
+   fix earlier), not the subtle light-gray line it looks like normally.
+   Scoped to this page only:
+   - .emails-list-footer is shared with Dashboard/EmailsPage's own
+     ListFooter, but only SentOrdersPage wraps it in .pending-orders-card
+     (Dashboard/EmailsPage use their own .dashboard-split__list/
+     .emails-split__list wrappers instead), so this selector can't match
+     their footers.
+   - .sent-order-action-bar is this page's own added class on the
+     .emails-action-bar wrapper (see SentOrderActionBar.tsx), so this
+     doesn't touch Dashboard/EmailsPage/PendingOrdersPage's action bars,
+     which all use the shared class without it. */
+.pending-orders-card .emails-list-footer {
+  border-top-color: transparent;
+}
+
+.sent-order-action-bar {
+  border-top-color: transparent;
+}
+
 /* Info-card row (figura4's own top section) — no equivalent variant of
    PendingOrderTopBar fits here (that component is entirely extraction/
    confidence-driven), hence the standalone .sent-order-summary classes. */
@@ -39,12 +62,18 @@
   font-weight: 600;
 }
 
+/* Border kept for spacing but made transparent per explicit request, same
+   pragmatic treatment as elsewhere on this page. Note: --border resolves
+   to a noticeably dark value (#2e303a) under dark OS preference — unlike
+   --color-surface/--color-bg, it was never pinned light — so this was a
+   visibly dark 1px line here, not the subtle light-gray line seen in most
+   testing. */
 .sent-order-summary__card {
   display: flex;
   flex-direction: column;
   gap: 2px;
   padding: 10px 16px;
-  border: 1px solid var(--border);
+  border: 1px solid transparent;
   border-radius: 6px;
   background: var(--color-surface);
 }
@@ -102,4 +131,133 @@
   margin: 0;
   font-size: 13px;
   color: #6b6375;
+}
+
+/* Blue outline per explicit request, matching figura4-comenzi-importate.png
+   exactly (blue border+text+icon on "Vezi istoric import"/"Exportă PDF").
+   Scoped to .sent-order-action-bar rather than the shared base
+   .emails-action-bar__btn--outline rule, which "Trimite confirmare
+   client" on Dashboard/EmailsPage/PendingOrdersPage also uses — changing
+   the base rule would turn all of those blue too. */
+.sent-order-action-bar .emails-action-bar__btn--outline {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+/* Tabs — smaller and bold per explicit request, matching figura4's
+   compact tab style. Scoped to this page's own nav (added
+   sent-orders-page__tabs alongside the shared emails-tabs class) rather
+   than the shared base .emails-tabs__tab rule, which Dashboard/EmailsPage/
+   PendingOrdersPage all also use at their own (larger) size. */
+.sent-orders-page__tabs.emails-tabs .emails-tabs__tab {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-text);
+  padding: 8px 2px;
+  margin-right: 12px;
+  /* Room for the count badge (below) to sit beside the label rather than
+     wrapping/crowding it. white-space: nowrap keeps "Importate azi" etc.
+     on one line instead of wrapping to two. */
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.sent-orders-page__tabs.emails-tabs .emails-tabs__tab:last-child {
+  margin-right: 0;
+}
+
+.sent-orders-page__tabs.emails-tabs {
+  flex-wrap: nowrap;
+  /* Sized down enough (font/padding/badge above) that all 4 tabs fit on
+     one line without needing to scroll — overflow stays as a safety net
+     for very narrow viewports, with the scrollbar hidden the same way
+     it's hidden site-wide (ReportsPage.css/PendingOrdersPage.css) rather
+     than shown as a visible gray bar. */
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.sent-orders-page__tabs.emails-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+/* The base rule above sets color on every tab (needed so inactive tabs
+   read as dark/bold, not the muted --text token) at higher specificity
+   than the shared .emails-tabs__tab--active rule in EmailsPage.css — this
+   restores the active tab's blue color on top of it. */
+.sent-orders-page__tabs.emails-tabs .emails-tabs__tab--active {
+  color: var(--color-primary);
+}
+
+/* Tab count badges (figura4-comenzi-importate.png) — each tab's count is a
+   colored pill, not plain trailing text. Same visual recipe as
+   StatusBadge/.emails-status-badge (border-radius: 999px pill,
+   color-mix(15%, white) background + solid text, ~12px/700 weight),
+   scoped to this page's own tabs since no other page's tabs use pill
+   counts yet. */
+.sent-orders-page__tab-count {
+  display: inline-block;
+  padding: 1px 7px;
+  border-radius: 999px;
+  font-size: 10.5px;
+  font-weight: 700;
+}
+
+/* Toate + Cu confirmare trimisă — both render as the same light blue pill
+   in the mockup (sampled bg ~#E0E8F8, text ~#1E4FC0), which is almost
+   exactly color-mix(--color-primary 15%, white)/--color-primary, so this
+   reuses the app's blue token rather than a hardcoded hex. */
+.sent-orders-page__tab-count--blue {
+  background: color-mix(in srgb, var(--color-primary) 15%, white);
+  color: var(--color-primary);
+}
+
+/* Importate azi — sampled mockup bg (~#E0F0E4) matches
+   color-mix(--color-success 15%, white) almost exactly. */
+.sent-orders-page__tab-count--green {
+  background: color-mix(in srgb, var(--color-success) 15%, white);
+  color: var(--color-success);
+}
+
+/* Necesită follow-up — sampled at native resolution: bg ~#F8E8D8, text
+   ~#C2410C/#EA580C (true orange, red-leaning). This does NOT match
+   --color-warning (#f59e0b, a yellow-leaning amber) — mixed 15% with white
+   that token produces a visibly more yellow pill than the mockup's. No
+   existing theme token covers this hue, so per the mockup-matching
+   fallback this is hardcoded to the sampled pixel color instead of an
+   invented value. */
+.sent-orders-page__tab-count--orange {
+  background: #fce6db;
+  color: #c2410c;
+}
+
+/* Filter panel checkbox — same shape as DashboardPage's own
+   .dashboard-filter-panel__checkbox, duplicated locally under the
+   emails- prefix since this page imports EmailsPage.css (which has no
+   checkbox variant of its own) rather than DashboardPage.css. */
+.emails-filter-panel__checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+/* Detail heading status word (figura4 shows this colored, e.g. green
+   "Importată") — reuses the same color tokens as the table's Status pills
+   (StatusBadge's --green/--blue/--red) but as plain text, not a pill,
+   since the heading isn't a badge. */
+.sent-orders-detail__status--imported {
+  color: var(--color-success);
+}
+
+.sent-orders-detail__status--confirmation_sent {
+  color: var(--color-primary);
+}
+
+.sent-orders-detail__status--import_failed {
+  color: var(--color-error);
 }

@@ -99,6 +99,20 @@ async function parseAttachment(def: AttachmentDef, bytes: Buffer): Promise<Parse
 }
 
 async function processFixture(fixture: MockEmailFixture): Promise<SeedSummaryRow> {
+  // created_at is left to the emails table's own `default now()` in every
+  // other insert in this codebase, but that's wrong here specifically:
+  // fixture.receivedAt is a fixed date baked into the JSON fixture (an
+  // authored "scenario" timestamp), while `now()` is the real wall-clock
+  // moment this script happens to run — two unrelated clocks. Reports.tsx's
+  // "Preluare email" KPI is (created_at - received_at), so whenever this
+  // script is (re)run on a day that doesn't line up with the fixture's
+  // baked-in receivedAt, that diff balloons to hours/days and renders as
+  // nonsense like "6643 min 11 sec". Setting created_at explicitly to a
+  // small, realistic offset after receivedAt keeps that KPI meaningful
+  // regardless of when the seed actually runs.
+  const ingestLagMs = 90_000
+  const createdAt = new Date(new Date(fixture.receivedAt).getTime() + ingestLagMs).toISOString()
+
   const { data: emailRow, error: emailError } = await supabaseAdmin
     .from('emails')
     .insert({
@@ -108,6 +122,7 @@ async function processFixture(fixture: MockEmailFixture): Promise<SeedSummaryRow
       body_html: fixture.bodyHtml,
       body_text: sanitizeEmailBodyToText(fixture.bodyHtml),
       received_at: fixture.receivedAt,
+      created_at: createdAt,
       status: 'new',
     })
     .select('id')

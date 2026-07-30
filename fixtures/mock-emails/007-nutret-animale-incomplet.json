@@ -1,0 +1,8 @@
+{
+  "graphMessageId": "mock-007-nutret-animale",
+  "sender": "aprovizionare@zootehnica-vrancea.ro",
+  "subject": "Comandă transport nutreț concentrat",
+  "receivedAt": "2026-07-30T14:10:00Z",
+  "bodyHtml": "<div><p>Bună ziua,</p><p>Comandă de la: Ferma Zootehnica Vrancea SRL</p><p>Adresă ridicare: Fabrica de nutrețuri, Str. Morii nr. 5, Focșani</p><p>Data ridicare: 06.08.2026, ora 07:30</p><p>Adresă livrare: Ferma zootehnică, com. Vidra, jud. Vrancea</p><p>Marfă: Nutreț concentrat pentru bovine, saci</p><p>Cantitate: 15 tone</p><p>Vă rugăm confirmați cât mai repede, avem nevoie urgentă.</p><p>Mulțumim,<br>Zootehnica Vrancea SRL</p></div>",
+  "attachments": []
+}

@@ -1,4 +1,4 @@
-import { createClient } from 'npm:@supabase/supabase-js@2'
+import { createClient, type SupabaseClient } from 'npm:@supabase/supabase-js@2'
 
 const GRAPH_BASE_URL = 'https://graph.microsoft.com/v1.0'
 const TOKEN_REFRESH_MARGIN_MS = 5 * 60 * 1000
@@ -51,6 +51,71 @@ export async function getValidAccessToken(connectionId: string): Promise<string>
   })
 
   return refreshed.access_token
+}
+
+export interface ResolvedSendingConnection {
+  connectionId: string
+  accessToken: string
+}
+
+/**
+ * Picks a connected mailbox with a usable Graph access token, for
+ * server-side sends (client confirmations, replies, ...).
+ *
+ * If `explicitConnectionId` is set (e.g. the email row already has
+ * connection_id), that connection is used as-is — a failure there is
+ * surfaced directly, not silently masked by falling back. Only when there's
+ * no explicit connection does this fall back through every `connected`
+ * mail_connections row, newest-first, returning the first one that yields a
+ * valid token.
+ *
+ * Older/seeded emails may not have connection_id set, and even when one is
+ * set its refresh token can be dead (e.g. revoked, or the mailbox was
+ * reconnected under a new connection). Brief 14.1's "inbox dedicat
+ * comenzilor" assumes a single mailbox in steady state, but multiple can
+ * legitimately end up connected (e.g. during setup/testing), so instead of
+ * trusting a single deterministic pick (like get_primary_mailbox_address()'s
+ * "oldest wins", fine for a read-only display but not for an action that
+ * needs a live token), this tries the most-recently-connected mailboxes
+ * first and falls through past any that fail to refresh.
+ */
+export async function resolveSendingConnection(
+  supabase: SupabaseClient,
+  explicitConnectionId: string | null,
+): Promise<ResolvedSendingConnection> {
+  // Matches the original send-client-confirmation behavior exactly: an
+  // explicit connection_id is trusted as-is (no fallback if its token fails
+  // to refresh — that's a real error worth surfacing, not silently masked).
+  // The newest-first fallback only kicks in when there's no explicit id.
+  if (explicitConnectionId) {
+    const accessToken = await getValidAccessToken(explicitConnectionId)
+    return { connectionId: explicitConnectionId, accessToken }
+  }
+
+  const { data: connections, error: connectionsError } = await supabase
+    .from('mail_connections')
+    .select('id')
+    .eq('status', 'connected')
+    .order('created_at', { ascending: false })
+  if (connectionsError) throw new Error(connectionsError.message)
+  if (!connections || connections.length === 0) {
+    throw new Error('cannot determine which mailbox to send from (no connected mailbox available)')
+  }
+
+  let lastError: Error | null = null
+  for (const candidate of connections) {
+    try {
+      const accessToken = await getValidAccessToken(candidate.id)
+      return { connectionId: candidate.id, accessToken }
+    } catch (err) {
+      lastError = err instanceof Error ? err : new Error(String(err))
+      console.error('resolveSendingConnection: connection', candidate.id, 'failed:', lastError.message)
+    }
+  }
+
+  throw new Error(
+    `no connected mailbox has a usable token (tried ${connections.length}; last error: ${lastError?.message ?? 'unknown'})`,
+  )
 }
 
 async function refreshTokens(refreshToken: string): Promise<StoredTokens> {

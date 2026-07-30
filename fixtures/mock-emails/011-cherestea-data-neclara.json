@@ -1,0 +1,8 @@
+{
+  "graphMessageId": "mock-011-cherestea",
+  "sender": "aprovizionare@silvatrans-suceava.ro",
+  "subject": "Comandă transport cherestea",
+  "receivedAt": "2026-07-30T16:30:00Z",
+  "bodyHtml": "<div><p>Bună ziua,</p><p>Nr. comandă: SVT-2026-118</p><p>Client: SilvaTrans Suceava SRL</p><p>Adresă ridicare: Depozit Suceava</p><p>Adresă livrare: Fabrica de mobilă, Str. Industriei nr. 9, Vaslui</p><p>Data livrare: prima săptămână din august, se stabilește exact ulterior</p><p>Marfă: Cherestea rășinoase, fasonată</p><p>Cantitate: 30 metri cubi</p><p>SilvaTrans Suceava SRL</p></div>",
+  "attachments": []
+}

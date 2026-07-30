@@ -69,6 +69,20 @@ per-request nonce. This **must** be replaced with a real per-request nonce,
 generated and verified server-side, before Phase 4b ships a public "Connect
 Outlook" button.
 
+## AI re-extraction ("Extrage Automat cu AI")
+
+The `extract-order-ai` Edge Function calls OpenAI (`gpt-4o-mini`) to fill an
+order's still-missing/low-confidence fields on demand. It needs an
+`OPENAI_API_KEY` Edge Function secret — set once from Dashboard → Edge
+Functions → Secrets, or:
+
+```bash
+supabase secrets set OPENAI_API_KEY=<your key>
+```
+
+Without it, the button returns a clear "not configured" error instead of
+silently pretending to extract anything.
+
 ## Documentation
 
 See [`CLAUDE.md`](./CLAUDE.md) for project conventions, and the [`docs/`](./docs) folder for architecture, decisions, and roadmap.
