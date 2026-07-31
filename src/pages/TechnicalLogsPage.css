@@ -1,0 +1,23 @@
+/* Jurnal tehnic (/technical-logs) — not part of the brief's 6-page mockup
+   spec, so there's no figura to match; this only gives the page the same
+   card/table/badge visual language as the rest of the app instead of the
+   raw unstyled <table>s it had before. Layout/table/loading-state classes
+   are reused from UsersPage.css/SettingsPage.css (.users-page,
+   .settings-card, .settings-users-table, .settings-inline-state) since
+   this page is structurally the same shape (back link + header + card(s)
+   with a data table) — this file only adds what's specific to having 3
+   stacked cards instead of 1. */
+
+.technical-logs__card + .technical-logs__card {
+  margin-top: 0;
+}
+
+.technical-logs__card h2 {
+  margin-bottom: 8px;
+}
+
+.technical-logs__empty {
+  margin: 0;
+  color: var(--text);
+  font-size: 12px;
+}

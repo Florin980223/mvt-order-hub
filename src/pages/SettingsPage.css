@@ -7,10 +7,16 @@
    padding/gaps, card padding, fonts and row spacing all trimmed further so
    the header + both card rows + the Backup și Jurnale row fit a
    ~900-1000px viewport with no scrolling. Scrollbar hidden (overflow-y
-   kept functional) as a fallback for taller content, and every
-   `border: 1px solid var(--border)` swapped for `transparent` — border
-   kept for spacing/box-model only, visually hidden (matches white
-   background), same technique used on ReportsPage/PendingOrdersPage. */
+   kept functional) as a fallback for taller content. The outer
+   `.settings-card` border was swapped to `transparent` (kept for
+   spacing/box-model only) since the card's white background already
+   differs from the page's `--color-bg`, so no line is needed — same
+   technique used on ReportsPage/PendingOrdersPage. That reasoning does
+   NOT hold for controls *inside* a card (buttons/selects/inputs/segmented
+   toggles), whose background is the same white as their parent card —
+   those keep a real `var(--border)` border, restored in a later pass
+   after a native-resolution recheck against figura6-setari.png found
+   every one of them rendering as an invisible, borderless box. */
 .settings-page {
   display: flex;
   flex-direction: column;
@@ -91,7 +97,11 @@
   align-items: flex-start;
   gap: 8px;
   padding-bottom: 8px;
-  border-bottom: 1px solid transparent;
+  /* Visible divider, unlike the card's own outer border — confirmed at
+     native resolution figura6-setari.png shows a faint line between
+     Outlook/AscendTMS/AI Engine rows, even though the outer card border
+     stays transparent (page bg vs. card bg already differ there). */
+  border-bottom: 1px solid var(--border);
 }
 
 .settings-card > .settings-integration-row:last-of-type {
@@ -210,7 +220,12 @@
 .settings-btn--outline {
   background: var(--color-surface);
   color: var(--color-text);
-  border: 1px solid transparent;
+  /* Unlike the card's own border (transparent — page bg vs. card bg
+     already differ), this button's background is the exact same white as
+     its parent card, so it needs a real, visible border to read as a
+     button at all — confirmed against figura6-setari.png at native
+     resolution (Reconectează/Testează conexiune/Configurează). */
+  border: 1px solid var(--border);
   text-decoration: none;
   display: inline-block;
 }
@@ -263,7 +278,7 @@
   flex: 1;
   min-width: 0;
   padding: 4px 7px;
-  border: 1px solid transparent;
+  border: 1px solid var(--border);
   border-radius: 4px;
   font-size: 11px;
   color: var(--color-text);
@@ -295,7 +310,10 @@
   flex-shrink: 0;
   max-width: 55%;
   padding: 4px 8px;
-  border: 1px solid transparent;
+  /* Same reasoning as .settings-btn--outline — same background as the
+     card it sits in, needs a real border to be visible (confirmed
+     against figura6's "Fus orar"/"Format dată"/etc. dropdowns). */
+  border: 1px solid var(--border);
   border-radius: 6px;
   background: var(--color-surface);
   color: var(--color-text);
@@ -382,7 +400,9 @@
   align-items: center;
   gap: 5px;
   padding: 5px 10px;
-  border: 1px solid transparent;
+  /* Inactive segment also has a visible gray border in figura6, not just
+     the active (blue-bordered) one — confirmed at native resolution. */
+  border: 1px solid var(--border);
   border-radius: 6px;
   background: var(--color-surface);
   color: var(--color-text);
@@ -438,7 +458,9 @@
   align-items: center;
   gap: 4px;
   padding: 5px 9px;
-  border: 1px solid transparent;
+  /* Same as .settings-theme-toggle__btn — inactive segments ("Email",
+     "Aplicație") are visibly gray-bordered in figura6, not borderless. */
+  border: 1px solid var(--border);
   border-radius: 6px;
   background: var(--color-surface);
   color: var(--color-text);
@@ -510,7 +532,9 @@
   flex-shrink: 0;
   max-width: 55%;
   padding: 4px 8px;
-  border: 1px solid transparent;
+  /* Visible border, confirmed against figura6's "IP-uri permise" input —
+     same reasoning as .settings-select/.settings-btn--outline. */
+  border: 1px solid var(--border);
   border-radius: 6px;
   background: var(--color-surface);
   color: var(--color-text);
@@ -526,12 +550,15 @@
 /* Link-buttons used inline within a field row (Mapare câmpuri, Gestionează
    utilizatori, Deschide jurnale) — confirmed at native resolution these
    are bordered boxes matching the adjacent dropdowns' visual weight, not
-   bare text links like "Vezi toate integrările" at a card's end. */
+   bare text links like "Vezi toate integrările" at a card's end. Border
+   was previously left transparent by the density pass (a regression —
+   the box read as a plain unbordered row, contradicting this very
+   comment); restored to a real border below. */
 .settings-link-btn--field {
   align-self: auto;
   gap: 6px;
   padding: 5px 9px;
-  border: 1px solid transparent;
+  border: 1px solid var(--border);
   border-radius: 6px;
   background: var(--color-surface);
   color: var(--color-text);
@@ -546,6 +573,15 @@
 .settings-link-btn--field svg:last-child {
   margin-left: auto;
   color: var(--text);
+}
+
+/* The leading icon (e.g. Gestionează utilizatori's user icon) is blue in
+   figura6, distinct from the row's dark-navy text and the trailing
+   chevron's gray — only applies when there are two icons (leading +
+   trailing chevron); a lone chevron (e.g. "Configurează maparea") stays
+   gray via the :last-child rule above. */
+.settings-link-btn--field svg:first-child:not(:last-child) {
+  color: var(--color-primary);
 }
 
 .settings-link-btn--nav {

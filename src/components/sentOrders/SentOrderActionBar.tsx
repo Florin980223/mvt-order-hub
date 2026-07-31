@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, type RefObject } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { ExternalLink, FileDown, History, Send } from 'lucide-react'
 import { supabase } from '../../lib/supabaseClient'
@@ -14,6 +14,14 @@ interface SentOrderActionBarProps {
   // opening its own independent copy.
   showHistory: boolean
   onToggleHistory: () => void
+  // Outside-click-to-close for showHistory is owned by SentOrdersPage (the
+  // trigger for that same panel also lives there, in the detail header's
+  // kebab — see SentOrdersPage.tsx's historyTriggerRef/historyPanelRef).
+  // Attached to this component's own root below, which already wraps both
+  // "Vezi istoric import" (an equivalent trigger for the same panel) and
+  // the history panel itself, so a mousedown on either is treated as
+  // "inside" from the page's perspective too.
+  historyPanelRef?: RefObject<HTMLDivElement | null>
 }
 
 interface SendClientConfirmationResult {
@@ -119,7 +127,7 @@ function buildOrderExportHtml(order: OrderRow): string {
  * component, not a variant. Reuses .emails-action-bar/__btn's existing
  * CSS (green/outline/amber/outline already covers this exact pattern).
  */
-export function SentOrderActionBar({ order, showHistory, onToggleHistory }: SentOrderActionBarProps) {
+export function SentOrderActionBar({ order, showHistory, onToggleHistory, historyPanelRef }: SentOrderActionBarProps) {
   const queryClient = useQueryClient()
   const [exportError, setExportError] = useState<string | null>(null)
 
@@ -173,7 +181,7 @@ export function SentOrderActionBar({ order, showHistory, onToggleHistory }: Sent
   }
 
   return (
-    <div className="emails-action-bar sent-order-action-bar">
+    <div className="emails-action-bar sent-order-action-bar" ref={historyPanelRef}>
       <button
         type="button"
         className="emails-action-bar__btn emails-action-bar__btn--primary"

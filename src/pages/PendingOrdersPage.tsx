@@ -107,7 +107,7 @@ export function PendingOrdersPage() {
                   </h2>
                   <div className="pending-orders-detail__body">
                     <PendingOrderFields order={selectedItem.order} correction={correction} />
-                    <PendingOrderAttachments attachments={selectedItem.email.email_attachments} />
+                    <PendingOrderAttachments attachments={selectedItem.email.email_attachments} order={selectedItem.order} />
                   </div>
                 </div>
                 <ActionBar

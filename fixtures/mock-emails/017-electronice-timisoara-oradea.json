@@ -2,7 +2,7 @@
   "graphMessageId": "mock-017-electronice-timisoara-oradea",
   "sender": "comenzi@electrotim-distributie.ro",
   "subject": "Comandă transport piese electronice - Timișoara - Oradea",
-  "receivedAt": "2026-07-30T08:30:00Z",
+  "receivedAt": "2026-07-31T07:00:00Z",
   "bodyHtml": "<div><p>Bună ziua,</p><p>Vă transmitem o comandă de transport cu următoarele detalii:</p><p>Nr. comandă: TIM-2026-0231</p><p>Client: SC ElectroTim Distribuție SRL</p><p>Adresă ridicare: Depozit ElectroTim, Str. Aradului nr. 45, Timișoara</p><p>Data ridicare: 05.08.2026, ora 07:30</p><p>Adresă livrare: Hub Logistic Oradea, Str. Ogorului nr. 8, Oradea</p><p>Data livrare: 05.08.2026, ora 15:00</p><p>Marfă: Piese electronice, ambalate în cutii</p><p>Cantitate: 12 paleți</p><p>Greutate: 3400 kg</p><p>Volum: 18 m3</p><p>Valoare transport: 1450 RON</p><p>Transportator propus: SC NordVest Trans SRL</p><p>Observații: Descărcare cu rampă, acces TIR.</p><p>Cu stimă,<br>SC ElectroTim Distribuție SRL</p></div>",
   "attachments": []
 }

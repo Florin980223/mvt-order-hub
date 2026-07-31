@@ -364,6 +364,36 @@ async function generateProduseChimiceDevaPdf(): Promise<Buffer> {
   return Buffer.from(await doc.save())
 }
 
+async function generateSiderurgieGalatiBudapestaPdf(): Promise<Buffer> {
+  const doc = await PDFDocument.create()
+  const page = doc.addPage([595, 842])
+  const font = await doc.embedFont(StandardFonts.Helvetica)
+
+  const lines = [
+    'Nr. comanda: GLT-2026-0364',
+    'Client: SC MetalGalati Siderurgie SRL',
+    'Adresa ridicare: Depozit MetalGalati, Str. Otelarilor nr. 15, Galati',
+    'Data ridicare: 15.08.2026, ora 06:00',
+    'Adresa livrare: Centru Logistic Budapesta Est, Kerepesi ut 92, Budapesta, Ungaria',
+    'Data livrare: 16.08.2026, ora 14:00',
+    'Marfa: Produse siderurgice, table laminate',
+    'Cantitate: 22 tone',
+    'Greutate: 22000 kg',
+    'Volum: 35 m3',
+    'Valoare transport: 3800 EUR',
+    'Transportator propus: SC SteelCargo Trans SRL',
+    'Observatii: Incarcare cu macara, marfa ambalata in pachete metalice.',
+  ]
+
+  let y = 780
+  for (const line of lines) {
+    page.drawText(line, { x: 50, y, size: 12, font, color: rgb(0, 0, 0) })
+    y -= 24
+  }
+
+  return Buffer.from(await doc.save())
+}
+
 const GENERATORS: Record<string, () => Buffer | Promise<Buffer>> = {
   'piese-auto-csv': generatePieseAutoCsv,
   'utilaje-agricole-xlsx': generateUtilajeAgricoleXlsx,
@@ -375,6 +405,7 @@ const GENERATORS: Record<string, () => Buffer | Promise<Buffer>> = {
   'utilaje-industriale-xlsx': generateUtilajeIndustrialeXlsx,
   'textile-baia-mare-pdf': generateTextileBaiaMarePdf,
   'produse-chimice-deva-pdf': generateProduseChimiceDevaPdf,
+  'siderurgie-galati-budapesta-pdf': generateSiderurgieGalatiBudapestaPdf,
 }
 
 export async function generateAttachmentBytes(generatorRef: string): Promise<Buffer> {

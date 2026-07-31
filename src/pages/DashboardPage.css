@@ -241,17 +241,72 @@
   gap: 4px;
 }
 
+/* Bold labels + colored pill count badges, same treatment as
+   SentOrdersPage's tabs (.sent-orders-page__tab-count recipe) per explicit
+   request. This replaces an earlier rule that forced inactive tabs to
+   font-weight: 400 based on a plain-trailing-number reading of
+   figura1-dashboard.png; with the count now rendered as its own badge
+   (below) instead of trailing tab text, the label falls back to the
+   shared .emails-tabs__tab base weight (700 as of this pass, "all tabs
+   bold" per EmailsPage.css — bumped from 600, still being flagged as not
+   bold enough), matching the SentOrders pattern this mirrors. */
 .dashboard-split__list .emails-tabs__tab {
   white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
-/* Scoped to Dashboard only, not the shared .emails-tabs__tab base rule
-   (EmailsPage's own mockup wasn't re-checked this round per the standing
-   per-page-verification rule) — confirmed at native resolution against
-   figura1-dashboard.png that only the active tab is bold, the other two
-   are a lighter weight. */
-.dashboard-split__list .emails-tabs__tab:not(.emails-tabs__tab--active) {
-  font-weight: 400;
+/* Tab count badges — colored pill instead of plain trailing text, sampled
+   at native resolution from figura1-dashboard.png (Toate/Necesită
+   validare/Importate, in that order/color):
+   - blue (Toate): sampled bg ~#d1ddff, text ~#0f3a8a — matches
+     color-mix(--color-primary 15%, white) / --color-primary closely, so
+     reuses the token like SentOrders' own --blue variant.
+   - green (Importate): sampled bg ~#dceee2, text ~#13572e — matches
+     color-mix(--color-success 15%, white) / --color-success closely
+     (hue ~142° both), so reuses the token.
+   - orange (Necesită validare): sampled text core ~#c47c2a/#cd751c
+     (hue ~30°, value ~0.75-0.8) — clearly darker/more saturated than
+     --color-warning (#f59e0b, hue ~38°, value ~0.96 — would render
+     visibly lighter/yellower than the mockup), same mismatch SentOrders
+     found for its own orange badge. No theme token fits, so this reuses
+     SentOrdersPage's existing hardcoded fallback (#fce6db / #c2410c)
+     rather than inventing a new hex — both mockups sample to the same
+     "true orange, red-leaning" family. */
+.dashboard-tab-count {
+  display: inline-block;
+  padding: 1px 7px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.dashboard-tab-count--blue {
+  background: color-mix(in srgb, var(--color-primary) 15%, white);
+  color: var(--color-primary);
+}
+
+.dashboard-tab-count--orange {
+  background: #fce6db;
+  color: #c2410c;
+}
+
+.dashboard-tab-count--green {
+  background: color-mix(in srgb, var(--color-success) 15%, white);
+  color: var(--color-success);
+}
+
+/* Scoped to Dashboard's own detail column, not the shared .pending-orders-topbar
+   base rule (also used by EmailsPage/PendingOrdersPage, which render this
+   row first inside the scroll container and already get their gap from
+   its 20px padding). DashboardDetailPanel.tsx now renders the heading row
+   before this one (figura1-dashboard.png order), and the heading row's
+   own margin is zeroed by .pending-orders-detail__heading-row .pending-orders-detail__heading
+   (PendingOrdersPage.css) — without this, the AI-extract row would sit
+   flush against the heading above it. */
+.dashboard-split__detail .pending-orders-topbar {
+  margin-top: 16px;
 }
 
 .dashboard-split__list-scroll {

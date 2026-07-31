@@ -177,9 +177,30 @@
   color: white;
 }
 
+/* Two-tone ring, not a flat gray border — confirmed via pixel sampling
+   against figura3-comenzi-asteptare.png (consistent 180°/180° split across
+   many angle buckets, not antialiasing noise): the half facing the
+   completed steps (left, connecting into the green line) is
+   --color-success, the other half (right, nothing beyond) is --border.
+   conic-gradient + mask-composite draws just the ring, not a filled disc,
+   so the white center stays visible. */
 .pending-orders-workflow__step--current .pending-orders-workflow__marker {
+  position: relative;
   background: var(--color-surface);
-  border: 2px solid var(--border);
+  border: none;
+}
+
+.pending-orders-workflow__step--current .pending-orders-workflow__marker::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  padding: 2px;
+  background: conic-gradient(from 0deg, var(--border) 0deg 180deg, var(--color-success) 180deg 360deg);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
 }
 
 /* Green summary box (figura3-comenzi-asteptare.png) — was missing entirely
@@ -1008,6 +1029,22 @@
   border-color: transparent;
 }
 
+/* EmailsPage's own 'preview' variant (figura2-emailuri-noi.png) — the last
+   of the four PendingOrderFields variants still showing the shared base
+   rule's visible blue border (sectioned/flat/sent all got this same
+   border-color: transparent treatment already; 'sent' inherits it for free
+   since it reuses the --flat root class above). Checked figura2 at native
+   resolution first: it doesn't show a bordered Hartă button on the address
+   fields at all (just a leading pin icon inline with the value text), and
+   neither figura3's nor figura4's own Hartă buttons show a visible blue
+   border either — so there's no mockup case here that needs a border kept,
+   unlike a hypothetical variant that legitimately wants one. Scoped to
+   --preview only, not the shared base .pending-orders-fields__map-btn
+   rule. */
+.pending-orders-fields--preview .pending-orders-fields__map-btn {
+  border-color: transparent;
+}
+
 /* Sent variant only (figura4-comenzi-importate.png) — every field value
    sits in its own bordered box (confirmed at native resolution: this
    applies uniformly, icon or no icon, unlike other variants' plain-text
@@ -1070,17 +1107,15 @@
 
 /* Attachments side list */
 
-/* Narrower than before (was 220px) and no divider line — both per explicit
-   request, moving this panel's share of .pending-orders-detail__body
-   toward figura3's own smaller proportion, and giving the field-grid the
-   reclaimed room. Note: within this row-based card layout (icon+name+
-   size+badge+download all inline), the filename now truncates more
-   aggressively than before — a deeper restructure (stacking name below
-   icon) would preserve more of it, but that overlaps the
-   document-preview-thumbnail redesign already deferred for a later pass,
-   so left alone here. */
+/* Widened back to fit real document-preview thumbnails (see
+   .pending-orders-attachments__preview below) — this had been narrowed to
+   160px in an earlier pass specifically because there was no preview
+   content yet, just an icon+name+size row. figura3-comenzi-asteptare.png's
+   own attachment cards measure ~213px wide at native resolution; 240px
+   (minus this panel's 16px left padding) lands close to that once the
+   card's own internal padding is accounted for. */
 .pending-orders-attachments {
-  width: 160px;
+  width: 240px;
   flex-shrink: 0;
   padding-left: 16px;
 }
@@ -1106,7 +1141,24 @@
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
+}
+
+/* Card wrapper around each attachment's header row + its document-preview
+   thumbnail (figura3-comenzi-asteptare.png) — a real border is kept here
+   (unlike most other borders on this page, which were confirmed
+   near-invisible in the mockup and flattened to transparent) because
+   figura3's own attachment cards do show a distinct light card outline
+   around the white preview area, needed to read as a bounded "document"
+   shape rather than bleeding into the page background. */
+.pending-orders-attachments__card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--color-surface);
 }
 
 .pending-orders-attachments__row {
@@ -1138,6 +1190,166 @@
   font-size: 13px;
 }
 
+/* Document-preview thumbnails (figura3-comenzi-asteptare.png). Not a pixel
+   render of the actual PDF/XLSX page (no client-side PDF-to-canvas renderer
+   in this project — see the long comment on AttachmentPreviewThumbnail in
+   PendingOrderAttachments.tsx), but it now renders the order's own already-
+   extracted fields (client/route/price/cargo) in the same header+table
+   layout figura3's cards use, instead of empty gray placeholder bars — real
+   per-order data, not invented sample content. The whole thing is a real
+   <button> (was a decorative aria-hidden div): clicking it opens the actual
+   attachment via the same signed-URL flow as the download icon above it. */
+.pending-orders-attachments__preview {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+  width: 100%;
+  padding: 10px;
+  border: none;
+  border-radius: 6px;
+  background: var(--color-bg);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.pending-orders-attachments__preview:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--color-primary) 6%, var(--color-bg));
+}
+
+.pending-orders-attachments__preview:disabled {
+  cursor: default;
+  opacity: 0.7;
+}
+
+.pending-orders-attachments__preview-title {
+  overflow: hidden;
+  color: var(--color-text);
+  font-size: 12px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pending-orders-attachments__preview-subtitle {
+  color: #6b6375;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.pending-orders-attachments__preview-table {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-top: 4px;
+  overflow: hidden;
+  border-radius: 4px;
+}
+
+.pending-orders-attachments__preview-table-header,
+.pending-orders-attachments__preview-table-row {
+  display: flex;
+  gap: 6px;
+  padding: 3px 6px;
+}
+
+.pending-orders-attachments__preview-table-header {
+  background: var(--color-success);
+}
+
+.pending-orders-attachments__preview-table-header span {
+  overflow: hidden;
+  color: #fff;
+  font-size: 9px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pending-orders-attachments__preview-table-row {
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--border);
+}
+
+.pending-orders-attachments__preview-table-row span {
+  overflow: hidden;
+  color: var(--color-text);
+  font-size: 10px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pending-orders-attachments__preview-table-header span:first-child,
+.pending-orders-attachments__preview-table-row span:first-child {
+  flex: 1.4;
+}
+
+.pending-orders-attachments__preview-table-header span:last-child,
+.pending-orders-attachments__preview-table-row span:last-child {
+  flex: 1;
+}
+
+/* Spreadsheet-style grid (XLSX/CSV) — header row uses the same brand green
+   as the PDF preview's table header, matching figura3's own two attachment
+   cards (both use a green-header table, not a red/PDF-vs-green/Excel color
+   split). Data row shows the order's real fields; the 2 filler rows below
+   stay as empty gray bars (same as before) purely for visual density —
+   there's only one order's worth of real data per attachment, not the 3
+   separate line items figura3's own mockup image shows. */
+.pending-orders-attachments__preview-grid-row {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr;
+  gap: 3px;
+}
+
+.pending-orders-attachments__preview-grid-row--header span {
+  display: block;
+  height: 12px;
+  overflow: hidden;
+  border-radius: 2px;
+  background: var(--color-success);
+  color: #fff;
+  font-size: 8px;
+  font-weight: 700;
+  line-height: 12px;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pending-orders-attachments__preview-grid-row--data span {
+  display: block;
+  overflow: hidden;
+  padding: 2px 3px;
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: 9px;
+  font-weight: 600;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pending-orders-attachments__preview-grid-row--filler span {
+  display: block;
+  height: 9px;
+  border-radius: 2px;
+  background: var(--color-surface);
+  border: 1px solid var(--border);
+}
+
+.pending-orders-attachments__preview--generic {
+  align-items: center;
+  justify-content: center;
+  padding: 20px 10px;
+  color: var(--text);
+}
+
 /* Inline variant (Dashboard, figura1-dashboard.png) — side-by-side cards
    in PendingOrderTopBar's row, replacing the sidebar column above. */
 .pending-orders-attachments--inline {
@@ -1162,9 +1374,8 @@
   gap: 8px;
 }
 
-/* Border kept for spacing but made transparent per explicit request — same
-   pragmatic treatment as the sectioned variant's field boxes and Istoric
-   AI elsewhere in this file. */
+/* Border made transparent per explicit user request — overrides the
+   earlier pixel-sampling call that kept it visible against figura1. */
 .pending-orders-attachments--inline__card {
   position: relative;
   display: flex;
@@ -1177,26 +1388,86 @@
 }
 
 /* EmailsPage only (figura2-emailuri-noi.png) — off by default, see
-   showProcessedBadge on PendingOrderAttachments. */
-.pending-orders-attachments--inline__processed-badge {
-  position: absolute;
-  top: -6px;
-  right: -6px;
+   showProcessedBadge on PendingOrderAttachments. Re-checked at native
+   resolution against this page's own mockup: the checkmark there is a
+   plain glyph sitting at the card's far right (after the filename/size),
+   not a circle badge overlaid on the icon's corner — this replaces the
+   earlier absolute-positioned CheckCircle2 treatment (which was never
+   actually verified against figura2, just assumed). */
+.pending-orders-attachments--inline__processed-check {
+  flex-shrink: 0;
   color: var(--color-success);
-  background: var(--color-surface);
-  border-radius: 999px;
+}
+
+/* EmailsPage-only "processed" card treatment (showProcessedBadge=true,
+   card gets --card--processed) — scoped so Dashboard's own inline cards
+   (variant="inline" without showProcessedBadge, figura1-dashboard.png)
+   keep their existing neutral-icon-box + corner-badge look untouched.
+   figura2-emailuri-noi.png's own cards show a solid-filled icon (red PDF /
+   green Excel document glyph with the type baked into the icon itself),
+   not a neutral box with a small corner pill, so this overrides the icon's
+   background/color and hides the now-redundant corner pill for this
+   variant only. */
+.pending-orders-attachments--inline__card--processed .pending-orders-attachments--inline__icon {
+  color: #ffffff;
+}
+
+.pending-orders-attachments--inline__card--processed .pending-orders-attachments--inline__icon--pdf {
+  background: var(--color-error);
+}
+
+.pending-orders-attachments--inline__card--processed .pending-orders-attachments--inline__icon--xlsx,
+.pending-orders-attachments--inline__card--processed .pending-orders-attachments--inline__icon--csv {
+  background: var(--color-success);
+}
+
+.pending-orders-attachments--inline__card--processed .pending-orders-attachments--inline__type-badge {
+  display: none;
 }
 
 .pending-orders-attachments--inline__icon {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  width: 34px;
+  height: 34px;
   flex-shrink: 0;
   border-radius: 6px;
   background: var(--color-bg);
   color: var(--text);
+}
+
+/* Solid-fill corner badge overlapping the icon's bottom-left corner —
+   figura1's cards show a solid red "PDF"/green "Excel" tag here, not the
+   light-tint pill AttachmentBadge renders inline elsewhere (email list
+   rows, sidebar variant), so this recolors just the nested badge, scoped
+   to this wrapper only. */
+.pending-orders-attachments--inline__type-badge {
+  position: absolute;
+  left: -6px;
+  bottom: -6px;
+}
+
+.pending-orders-attachments--inline__type-badge .emails-file-badge {
+  padding: 1px 5px;
+  font-size: 9px;
+  font-weight: 700;
+  color: #ffffff;
+  white-space: nowrap;
+}
+
+.pending-orders-attachments--inline__type-badge .emails-file-badge--pdf {
+  background: var(--color-error);
+}
+
+.pending-orders-attachments--inline__type-badge .emails-file-badge--xlsx,
+.pending-orders-attachments--inline__type-badge .emails-file-badge--csv {
+  background: var(--color-success);
+}
+
+.pending-orders-attachments--inline__type-badge .emails-file-badge--neutral {
+  background: var(--text);
 }
 
 .pending-orders-attachments--inline__info {
@@ -1208,7 +1479,7 @@
 
 .pending-orders-attachments--inline__name {
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--color-text);
   white-space: nowrap;
   overflow: hidden;
@@ -1216,10 +1487,7 @@
   max-width: 160px;
 }
 
-.pending-orders-attachments--inline__meta {
-  display: flex;
-  align-items: center;
-  gap: 6px;
+.pending-orders-attachments--inline__size {
   font-size: 11px;
   color: var(--text);
 }
@@ -1229,12 +1497,12 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  width: 24px;
-  height: 24px;
-  border: none;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--border);
   border-radius: 6px;
-  background: transparent;
-  color: var(--text);
+  background: var(--color-surface);
+  color: var(--color-text);
   cursor: pointer;
 }
 
@@ -1254,9 +1522,21 @@
    buttons' text or font-size) rather than touching the shared base rules
    in EmailsPage.css, which would also resize Dashboard/EmailsPage/
    SentOrdersPage's own action bars without checking their mockups. */
+/* Divider above the action bar: checked figura3-comenzi-asteptare.png at
+   native resolution (pixel-sampled across the full row width) — there is a
+   hairline there, but it's ~4-6% gray (RGB ~241-250 out of 255, essentially
+   indistinguishable from the white page background at normal viewing
+   distance), nowhere near as dark/distinct as this page's shared
+   .emails-action-bar border-top: 1px solid var(--border) (#e5e4e7) renders
+   it. Same "kept for spacing but made transparent" treatment as every other
+   near-invisible border already flattened on this page (field-value boxes,
+   map-btn, Istoric AI) — scoped here rather than touching the shared base
+   rule in EmailsPage.css, which Dashboard/EmailsPage/SentOrdersPage still
+   rely on unchanged. */
 .pending-orders-detail .emails-action-bar {
   padding: 8px;
   gap: 3px;
+  border-top-color: transparent;
 }
 
 .pending-orders-detail .emails-action-bar__btn {

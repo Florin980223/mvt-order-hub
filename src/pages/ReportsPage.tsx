@@ -257,6 +257,7 @@ export function ReportsPage() {
             title="Filtrarea după rută nu este încă disponibilă — nu există un câmp de rută/lanț în date, doar adrese text libere"
           >
             Toate rutele
+            <ChevronDown aria-hidden="true" size={14} className="reports-route-filter__chevron" />
           </button>
           <button
             type="button"

@@ -60,7 +60,7 @@ export function ListFooter({
         <span className="emails-list-footer__updated">{updatedContent}</span>
       )}
       <div className="emails-list-footer__pagination">
-        <span>
+        <span className="emails-list-footer__range">
           {total === 0 ? 0 : rangeStart}-{rangeEnd} din {total}
         </span>
         <button

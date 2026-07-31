@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { Bell, CheckCircle2, ChevronDown, Headset, HelpCircle, Mail, Phone } from 'lucide-react'
 import { supabase } from '../../lib/supabaseClient'
@@ -66,6 +66,37 @@ export function AppLayout() {
   const [notificationsOpen, setNotificationsOpen] = useState(false)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
   const [helpOpen, setHelpOpen] = useState(false)
+
+  // Outside-click-to-close for the 3 header popovers — same pattern used
+  // site-wide for every other popover panel (Dashboard/Emails/PendingOrders/
+  // SentOrders filter/sort/history panels): a ref wrapping trigger+panel,
+  // and a single document mousedown listener that closes whichever popover
+  // is open when the click lands outside its own wrapper. Previously none
+  // of these 3 had this — closing required clicking the trigger button
+  // again, flagged explicitly for the help icon.
+  const notificationsRef = useRef<HTMLDivElement>(null)
+  const helpRef = useRef<HTMLDivElement>(null)
+  const userMenuRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!notificationsOpen && !helpOpen && !userMenuOpen) return
+
+    function handleClickOutside(event: MouseEvent) {
+      const target = event.target as Node
+      if (notificationsOpen && notificationsRef.current && !notificationsRef.current.contains(target)) {
+        setNotificationsOpen(false)
+      }
+      if (helpOpen && helpRef.current && !helpRef.current.contains(target)) {
+        setHelpOpen(false)
+      }
+      if (userMenuOpen && userMenuRef.current && !userMenuRef.current.contains(target)) {
+        setUserMenuOpen(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [notificationsOpen, helpOpen, userMenuOpen])
 
   const visibleNavItems = navItems.filter((item) => !item.adminOnly || role === 'admin')
   const currentNavItem = navItems.find((item) => item.to === location.pathname)
@@ -175,7 +206,7 @@ export function AppLayout() {
               </span>
             )}
 
-            <div className="app-notifications">
+            <div className="app-notifications" ref={notificationsRef}>
               <button
                 type="button"
                 className="app-notifications-bell"
@@ -212,7 +243,7 @@ export function AppLayout() {
                 panel (contact info reused from the sidebar's own "Suport"
                 block + a short FAQ) — same open/close pattern as the
                 notification bell above. */}
-            <div className="app-help">
+            <div className="app-help" ref={helpRef}>
               <button
                 type="button"
                 className="app-header-help"
@@ -263,7 +294,7 @@ export function AppLayout() {
             </div>
 
             {user && (
-              <div className="app-user-menu">
+              <div className="app-user-menu" ref={userMenuRef}>
                 <button
                   type="button"
                   className="app-header-user"

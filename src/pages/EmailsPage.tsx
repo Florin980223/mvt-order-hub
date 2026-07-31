@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Inbox, Loader2, RefreshCw, Search, SlidersHorizontal, TriangleAlert } from 'lucide-react'
 import { EmailDetailPanel } from '../components/emails/EmailDetailPanel'
 import { EmailList } from '../components/emails/EmailList'
@@ -40,6 +40,27 @@ export function EmailsPage() {
   const [filterOpen, setFilterOpen] = useState(false)
   const [filterMinConfidence, setFilterMinConfidence] = useState<ConfidenceFilter>('all')
   const [filterCarrier, setFilterCarrier] = useState('all')
+
+  // Outside-click-to-close for the filter popover — same useRef+useEffect+
+  // mousedown pattern as DashboardPage's own sort/filter panels
+  // (DashboardPage.tsx). Only one ref is needed here (unlike Dashboard's
+  // filterWrapperRef+filterIconBtnRef pair): this page has a single
+  // "Filtrează" trigger, not a second standalone icon-button trigger
+  // outside the panel's own DOM subtree, so wrapping trigger+panel together
+  // is enough for the containment check to leave the trigger's own onClick
+  // toggle alone.
+  const filterWrapperRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!filterOpen) return
+    function handleClickOutside(event: MouseEvent) {
+      if (filterWrapperRef.current && !filterWrapperRef.current.contains(event.target as Node)) {
+        setFilterOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [filterOpen])
 
   const emails = useMemo(() => data ?? [], [data])
 
@@ -155,7 +176,7 @@ export function EmailsPage() {
                 />
                 <Search aria-hidden="true" size={16} />
               </div>
-              <div className="emails-filter">
+              <div className="emails-filter" ref={filterWrapperRef}>
                 <button
                   type="button"
                   className={`emails-filter-button${hasActiveFilters ? ' emails-filter-button--active' : ''}`}
@@ -199,34 +220,46 @@ export function EmailsPage() {
               </div>
             </div>
 
+            {/* Colored pill count badges — sampled at native resolution against
+                figura2-emailuri-noi.png, same "badge instead of trailing tab
+                text" treatment Dashboard's tabs got (dashboard-tab-count,
+                DashboardPage.css), but with this page's own colors: Toate/Cu
+                atașamente sample as blue, Necesită validare as amber/gold,
+                Prioritare as red — not the blue/orange/green set Dashboard's
+                own figura1 sampled, since the two mockups use independently
+                chosen badge colors per tab rather than a shared palette. */}
             <nav className="emails-tabs">
               <button
                 type="button"
                 className={`emails-tabs__tab${activeTab === 'all' ? ' emails-tabs__tab--active' : ''}`}
                 onClick={() => setActiveTab('all')}
               >
-                Toate {counts.all}
+                Toate
+                <span className="emails-tab-count emails-tab-count--blue">{counts.all}</span>
               </button>
               <button
                 type="button"
                 className={`emails-tabs__tab${activeTab === 'needs_validation' ? ' emails-tabs__tab--active' : ''}`}
                 onClick={() => setActiveTab('needs_validation')}
               >
-                Necesită validare {counts.needsValidation}
+                Necesită validare
+                <span className="emails-tab-count emails-tab-count--amber">{counts.needsValidation}</span>
               </button>
               <button
                 type="button"
                 className={`emails-tabs__tab${activeTab === 'with_attachments' ? ' emails-tabs__tab--active' : ''}`}
                 onClick={() => setActiveTab('with_attachments')}
               >
-                Cu atașamente {counts.withAttachments}
+                Cu atașamente
+                <span className="emails-tab-count emails-tab-count--blue">{counts.withAttachments}</span>
               </button>
               <button
                 type="button"
                 className={`emails-tabs__tab${activeTab === 'priority' ? ' emails-tabs__tab--active' : ''}`}
                 onClick={() => setActiveTab('priority')}
               >
-                Prioritare {counts.priority}
+                Prioritare
+                <span className="emails-tab-count emails-tab-count--red">{counts.priority}</span>
               </button>
             </nav>
 

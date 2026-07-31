@@ -12,6 +12,34 @@
   margin-bottom: 12px;
 }
 
+/* Filtrează popover clipping fix. Root cause: .emails-filter-panel
+   (EmailsPage.css) is `position: absolute; left: 0; width: 240px`,
+   anchored to .emails-filter's left edge — i.e. the "Filtrează" button's
+   own left edge. That's fine on EmailsPage/DashboardPage, where the
+   filter trigger's search row sits *outside* their own scrollable list
+   wrapper (.emails-split__list-scroll only wraps the rows below the
+   tabs). Here it doesn't: .pending-orders-split__left (PendingOrdersPage.css,
+   reused for this page's own left column) puts `overflow-y: auto` on the
+   *entire* column — search row, tabs, table and all — and per spec,
+   setting overflow on only one axis computes the other axis (overflow-x)
+   to non-visible too, not literally "visible". The "Filtrează" button
+   sits near the right edge of that 590px-wide column (search input is
+   flex:1, button trails it), so the 240px-wide panel anchored to the
+   button's *left* edge extends ~100–150px past the column's right inner
+   edge and gets silently clipped there — the "half cut off, page content
+   bleeding through" the user saw was actually the detail column (16px
+   away, right past the clip line) showing through where the popover
+   should have continued. Anchoring the panel to the button's *right*
+   edge instead keeps its full 240px width inside the column, since the
+   button already sits flush against the row's own right edge. Scoped to
+   this page's search row rather than changing the shared
+   .emails-filter-panel rule (which Dashboard/EmailsPage also use, and
+   isn't clipped there). */
+.sent-orders-page__search-row .emails-filter-panel {
+  left: auto;
+  right: 0;
+}
+
 .sent-orders-page__search {
   flex: 1;
   min-width: 0;
@@ -89,10 +117,17 @@
   color: var(--color-text);
 }
 
+/* figura4: "Atașamente" sits flush against the panel's right edge (lined
+   up under the star/back/kebab icons in the heading row above), not just
+   trailing after "Importată la" with the row's natural left-packed flex
+   gap — the other 3 items (banner + 2 cards) don't fill the row's full
+   width, so without this the whole block would sit bunched on the left
+   with dead space to its right instead of at top-right like the mockup. */
 .sent-order-summary__attachments {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  margin-left: auto;
 }
 
 .sent-order-summary__attachments .pending-orders-attachments--inline__cards {

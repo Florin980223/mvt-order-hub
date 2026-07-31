@@ -1,0 +1,10 @@
+{
+  "graphMessageId": "mock-025-siderurgie-galati-budapesta",
+  "sender": "aprovizionare@metalgalati-siderurgie.ro",
+  "subject": "Comandă transport internațional produse siderurgice - Galați - Budapesta",
+  "receivedAt": "2026-07-31T10:20:00Z",
+  "bodyHtml": "<div><p>Bună ziua,</p><p>Vă rugăm procesați comanda atașată (PDF).</p><p>MetalGalați Siderurgie SRL</p></div>",
+  "attachments": [
+    { "filename": "comanda-siderurgie.pdf", "mimeType": "application/pdf", "generatorRef": "siderurgie-galati-budapesta-pdf" }
+  ]
+}

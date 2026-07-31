@@ -8,7 +8,6 @@ import {
   Loader2,
   Mail,
   Pencil,
-  ScrollText,
   Shield,
   Smartphone,
   Sparkles,
@@ -56,6 +55,10 @@ const CONNECTABLE_STATUSES = ['disconnected', 'error', 'expiring_soon', 'connect
 const CONFIDENCE_THRESHOLD_OPTIONS = [70, 75, 80, 85, 90, 95, 99]
 const NOT_CONFIGURABLE_TITLE = 'Această setare nu este încă configurabilă'
 const ALWAYS_ON_LOG_TITLE = 'Jurnalizarea activității este întotdeauna activă și nu poate fi dezactivată'
+// Mirrors supabase/functions/extract-order-ai/index.ts's OPENAI_MODEL —
+// not user-configurable/no app_setting exists for it, but it's a real,
+// constant fact about the wired AI provider, not a fabricated value.
+const AI_MODEL_LABEL = 'GPT-4o mini (OpenAI)'
 
 interface OutlookOauthStartResult {
   authorize_url: string
@@ -284,7 +287,12 @@ export function SettingsPage() {
               statusText={isOutlookConnected ? 'Conectat cu succes' : 'Neconectat'}
               active={isOutlookConnected}
               action={
-                <button type="button" className="settings-btn" onClick={() => startMutation.mutate()} disabled={connectDisabled}>
+                <button
+                  type="button"
+                  className="settings-btn settings-btn--outline"
+                  onClick={() => startMutation.mutate()}
+                  disabled={connectDisabled}
+                >
                   {startMutation.isPending ? 'Se conectează...' : isOutlookConnected ? 'Reconectează' : 'Conectează'}
                 </button>
               }
@@ -358,7 +366,7 @@ export function SettingsPage() {
               </a>
             }
           >
-            <p>Model: —</p>
+            <p>Model: {AI_MODEL_LABEL}</p>
             {!isConfidenceThresholdLoading && !isConfidenceThresholdError && <p>Nivel încredere implicit: {currentThresholdPercent}%</p>}
           </IntegrationRow>
 
@@ -809,8 +817,10 @@ export function SettingsPage() {
           <div className="settings-backup-col">
             <span className="settings-field-row__label">Jurnale sistem</span>
             <DisabledSelect label="Nivel logare" value="Informațional" title={NOT_CONFIGURABLE_TITLE} />
+            {/* No leading icon here — confirmed against figura6-setari.png
+                at native resolution: unlike "Gestionează utilizatori",
+                "Deschide jurnale" is text + chevron only. */}
             <Link to="/technical-logs" className="settings-link-btn settings-link-btn--field settings-link-btn--nav">
-              <ScrollText aria-hidden="true" size={12} />
               Deschide jurnale
               <ChevronRight aria-hidden="true" size={12} />
             </Link>

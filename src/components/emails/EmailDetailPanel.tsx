@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import DOMPurify from 'dompurify'
 import { Calendar, MoreVertical, Reply, Star } from 'lucide-react'
@@ -88,6 +88,52 @@ export function EmailDetailPanel({ email, isFavorite, onToggleFavorite }: EmailD
     setReplyOpen(false)
   }
 
+  // Outside-click-to-close for both popovers — same useRef+useEffect+
+  // mousedown pattern as DashboardPage's own sort/filter panels
+  // (DashboardPage.tsx) and DashboardDetailPanel's kebab
+  // (historyWrapperRef there). Each ref wraps its own trigger + panel, so a
+  // mousedown on the trigger itself is seen as "inside" and left to that
+  // button's own onClick toggle.
+  //
+  // The kebab (history) panel is read-only, same as DashboardDetailPanel's
+  // — safe to close on any outside click, no guard needed.
+  const historyWrapperRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!historyOpen) return
+    function handleClickOutside(event: MouseEvent) {
+      if (historyWrapperRef.current && !historyWrapperRef.current.contains(event.target as Node)) {
+        setHistoryOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [historyOpen])
+
+  // The Reply panel is a form with user-entered text, unlike the kebab —
+  // closing it on any outside click risks silently discarding a half-typed
+  // message, which the kebab's read-only event list has no equivalent risk
+  // for. Still closes on outside click (consistent with every other
+  // popover on this page), but only once there's nothing to lose: if
+  // Mesaj has unsaved text, the click is ignored and the panel stays open
+  // rather than dropping the draft. Subject isn't guarded — it's a
+  // pre-filled "Re: ..." default, not something the user is likely typing
+  // fresh, so it doesn't carry the same silent-data-loss risk Mesaj does.
+  const replyWrapperRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!replyOpen) return
+    function handleClickOutside(event: MouseEvent) {
+      if (replyWrapperRef.current && !replyWrapperRef.current.contains(event.target as Node)) {
+        if (replyBody.trim().length === 0) {
+          setReplyOpen(false)
+        }
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [replyOpen, replyBody])
+
   const sanitizedBody = email.body_html
     ? DOMPurify.sanitize(email.body_html, { FORBID_TAGS: ['style', 'script'] })
     : ''
@@ -115,7 +161,7 @@ export function EmailDetailPanel({ email, isFavorite, onToggleFavorite }: EmailD
                 <Star aria-hidden="true" size={16} fill={isFavorite ? 'currentColor' : 'none'} />
               </button>
             )}
-            <div className="emails-detail__reply">
+            <div className="emails-detail__reply" ref={replyWrapperRef}>
               <button
                 type="button"
                 className={`emails-detail__icon-btn${replyOpen ? ' emails-detail__icon-btn--active' : ''}`}
@@ -179,7 +225,7 @@ export function EmailDetailPanel({ email, isFavorite, onToggleFavorite }: EmailD
                 </div>
               )}
             </div>
-            <div className="emails-detail__more">
+            <div className="emails-detail__more" ref={historyWrapperRef}>
               <button
                 type="button"
                 className={`emails-detail__icon-btn${historyOpen ? ' emails-detail__icon-btn--active' : ''}`}

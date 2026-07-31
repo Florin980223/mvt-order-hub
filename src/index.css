@@ -34,15 +34,22 @@
 }
 
 /* Settings page's "Temă interfață" → Întunecată (general_preferences.theme,
-   see src/lib/settings/useThemePreferenceEffect.ts). Deliberately reuses
-   the exact same limited rules as prefers-color-scheme above rather than a
-   separate, fuller palette — there is no complete dark design for this app
-   yet (--color-* brand tokens above stay pinned light either way). This
-   only makes a manual selection do what the OS preference already did. */
+   see src/lib/settings/useThemePreferenceEffect.ts). Extends the base
+   --text/--bg/--border swap above with the --color-* brand tokens that
+   every card/table/page surface in this app actually uses (--color-surface,
+   --color-bg, --color-text) so selecting "Întunecată" has a real, visible
+   effect across the whole app, not just the couple of elements styled
+   directly off --text/--bg. --color-navy/--color-primary/--color-success/
+   --color-warning/--color-error stay fixed (accent colors already read
+   fine on a dark surface); a handful of mockup-matched hardcoded hex
+   colors (specific status pills) are intentionally left as-is. */
 [data-theme='dark'] {
   --text: #9ca3af;
   --bg: #16171d;
-  --border: #2e303a;
+  --border: #383a45;
+  --color-surface: #1e2027;
+  --color-bg: #16171d;
+  --color-text: #e5e7eb;
 }
 
 body {

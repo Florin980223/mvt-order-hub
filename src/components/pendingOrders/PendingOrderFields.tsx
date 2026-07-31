@@ -83,7 +83,7 @@ const PREVIEW_ROWS: string[][] = [
 const SENT_LABELS: Record<string, string> = {
   ...MOCKUP_LABELS,
   carrier_proposed: 'Carrier atribuit',
-  external_reference_id: 'Numărcomandă AscendTMS',
+  external_reference_id: 'Număr comandă AscendTMS',
 }
 
 // __operator_import is a sentinel, not a real OrderFieldDef — "Operator

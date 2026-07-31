@@ -1,8 +1,27 @@
-import { Mail, Star } from 'lucide-react'
+import { Star } from 'lucide-react'
 import { formatDate, formatTime } from '../../lib/emails/format'
 import type { EmailRow } from '../../lib/emails/types'
 import { AttachmentBadge } from './AttachmentBadge'
 import { StatusBadge } from './StatusBadge'
+
+// Outlook app-icon glyph (folder+ring in front, envelope peeking behind) —
+// sampled at native resolution against figura1-dashboard.png and
+// figura2-emailuri-noi.png: both mockups show this exact two-tone icon on
+// every row (identical between the two, only the surrounding square's size
+// differs, in proportion to each page's own row height), not a generic
+// lucide mail glyph. Recreated inline since there's no lucide equivalent
+// and no brand-icon package in this project (only lucide-react is used for
+// icons elsewhere) rather than embedding a scraped image asset.
+function OutlookGlyph() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M10 6h9.5a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H10V6z" fill="#3EA6F5" />
+      <path d="M10 7l5 4 4.5-4" fill="none" stroke="#ffffff" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" />
+      <rect x="3" y="3" width="10" height="18" rx="1.5" fill="#0B65C4" />
+      <ellipse cx="8" cy="12" rx="2.6" ry="3.6" fill="none" stroke="#ffffff" strokeWidth="1.6" />
+    </svg>
+  )
+}
 
 interface EmailListProps {
   emails: EmailRow[]
@@ -51,8 +70,19 @@ export function EmailList({
                 if (event.key === 'Enter' || event.key === ' ') onSelect(email.id)
               }}
             >
+              {/* Small leading dot — sampled at native resolution against
+                  figura1-dashboard.png: every row has one, blue on all rows
+                  except the single "Importat" (already-imported) row, which
+                  is muted gray instead. There's no read/unread field in the
+                  data model this could track, so it's tied to the one
+                  status distinction the mockup's own sample actually shows
+                  a color change for (fully imported vs. still in-flight). */}
+              <span
+                className={`emails-list-item__dot${email.status === 'imported' ? ' emails-list-item__dot--muted' : ''}`}
+                aria-hidden="true"
+              />
               <span className="emails-list-item__source-icon" aria-hidden="true">
-                <Mail size={14} />
+                <OutlookGlyph />
               </span>
               <div className="emails-list-item__content">
                 <div className="emails-list-item__row">

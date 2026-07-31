@@ -10,7 +10,7 @@ export function isWithinDateRange(isoTimestamp: string, fromDate: string, toDate
   return day >= fromDate && day <= toDate
 }
 
-export function countByStatus<T extends string>(items: { status: string }[], statuses: T[]): Record<T, number> {
+export function countByStatus<T extends string>(items: { status: string }[], statuses: readonly T[]): Record<T, number> {
   const counts = Object.fromEntries(statuses.map((status) => [status, 0])) as Record<T, number>
   for (const item of items) {
     if (item.status in counts) counts[item.status as T] += 1

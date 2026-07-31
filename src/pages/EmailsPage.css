@@ -137,6 +137,9 @@
 }
 
 .emails-tabs__tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   padding: 10px 4px;
   margin-right: 20px;
   border: none;
@@ -145,15 +148,66 @@
   color: var(--text);
   font: inherit;
   /* All tabs bold now, not just --active — active is still distinguished
-     by its blue color + underline on top of this. */
-  font-weight: 600;
+     by its blue color + underline on top of this. Bumped 600 -> 700:
+     figura1-dashboard.png's own active tab actually only samples bold on
+     "Toate" (inactive "Necesită validare"/"Importate" are regular weight
+     there), but the "bold all tabs" call was an explicit, repeated request
+     this session (SentOrdersPage's own tabs use 700 for the same reason —
+     see .sent-orders-page__tabs.emails-tabs .emails-tabs__tab in
+     SentOrdersPage.css), and 600 alone was still being flagged as "not
+     bold enough" — 700 matches that page's weight and reads unambiguously
+     bold instead of merely semibold. */
+  font-weight: 700;
   cursor: pointer;
 }
 
 .emails-tabs__tab--active {
   color: var(--color-primary);
   border-bottom-color: var(--color-primary);
-  font-weight: 600;
+  font-weight: 700;
+}
+
+/* Tab count badges — colored pill instead of trailing tab text, sampled at
+   native resolution from figura2-emailuri-noi.png (Toate/Necesită
+   validare/Cu atașamente/Prioritare, in that order/color). Same recipe as
+   Dashboard's own dashboard-tab-count (DashboardPage.css) but this page's
+   own sampled colors, which don't match Dashboard's figura1 set:
+   - blue (Toate, Cu atașamente): sampled bg ~#d8e7fa, text core ~#2f5fc6 —
+     matches color-mix(--color-primary 15%, white) / --color-primary almost
+     exactly, so reuses that token pair.
+   - amber (Necesită validare): sampled bg ~#fada87 — clearly more
+     saturated/gold than this file's own .emails-status-badge--amber
+     (color-mix(--color-warning 18%, white) ≈ #fdeed3, much lighter/pinker),
+     so that existing mix doesn't fit; falls back to this sampled hex rather
+     than stretching the token. Text kept as var(--color-warning), matching
+     this file's existing amber-badge convention (pure token color as text).
+   - red (Prioritare): sampled bg ~#fbada7 — a light, fairly saturated pink-
+     red that color-mix(--color-error, white) can't reproduce at any single
+     percentage (the R channel implies ~10-15%, G/B imply ~35-40%, i.e. not
+     a simple tint of --color-error at all), but matches Tailwind's red-300
+     (#fca5a5) almost exactly, so uses that literal hex. Text kept as
+     var(--color-error), same token-as-text convention as the other two. */
+.emails-tab-count {
+  display: inline-block;
+  padding: 1px 7px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.emails-tab-count--blue {
+  background: color-mix(in srgb, var(--color-primary) 15%, white);
+  color: var(--color-primary);
+}
+
+.emails-tab-count--amber {
+  background: #fada87;
+  color: var(--color-warning);
+}
+
+.emails-tab-count--red {
+  background: #fca5a5;
+  color: var(--color-error);
 }
 
 .emails-state {
@@ -221,12 +275,47 @@
   padding: 0 16px;
 }
 
+/* Tabs — shrunk to fit this page's 4th tab ("Prioritare") on one line,
+   same class of overflow bug already fixed on SentOrdersPage's own 4-tab
+   row (SentOrdersPage.css's .sent-orders-page__tabs.emails-tabs rules):
+   widening the list column above (525px, wider than Dashboard's 420px)
+   wasn't enough on its own — "Prioritare" was still clipped at the column
+   edge. Scoped to this page's own list container (not the shared base
+   .emails-tabs__tab rule) so Dashboard's 3-tab row, which already fits at
+   full/unshrunk size, stays untouched. overflow-x/scrollbar-hiding is a
+   safety net for narrower viewports, same technique as SentOrdersPage's
+   own tabs. */
 .emails-split__list .emails-tabs {
   gap: 4px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.emails-split__list .emails-tabs::-webkit-scrollbar {
+  display: none;
 }
 
 .emails-split__list .emails-tabs__tab {
+  font-size: 12px;
+  padding: 8px 2px;
+  margin-right: 12px;
   white-space: nowrap;
+}
+
+.emails-split__list .emails-tabs__tab:last-child {
+  margin-right: 0;
+}
+
+/* Count pill shrunk to match the tab label shrink above — same recipe as
+   SentOrdersPage's own .sent-orders-page__tab-count (10.5px vs the shared
+   .emails-tab-count's 11px), scoped here rather than on the shared base
+   rule for the same reason: Dashboard's own tab-count badges (which reuse
+   a differently-named class, .dashboard-tab-count, so aren't even touched
+   by this selector) stay at their own size. */
+.emails-split__list .emails-tab-count {
+  padding: 1px 6px;
+  font-size: 10.5px;
 }
 
 .emails-split__list .emails-search {
@@ -305,6 +394,15 @@
   gap: 8px;
 }
 
+/* "1-6 din 32" — sampled at native resolution against figura1-dashboard.png:
+   this range text is at least as bold as "Actualizat acum 2 minute" right
+   next to it (.emails-list-footer__updated, 700 above); it previously had
+   no weight override at all (plain <span>, inherits the footer's regular
+   400). */
+.emails-list-footer__range {
+  font-weight: 700;
+}
+
 .emails-list-footer__page-btn {
   display: flex;
   align-items: center;
@@ -366,6 +464,28 @@
   cursor: pointer;
 }
 
+.emails-list-item__dot {
+  flex-shrink: 0;
+  width: 8px;
+  height: 8px;
+  margin-top: 8px;
+  border-radius: 999px;
+  background: var(--color-primary);
+}
+
+/* Only sampled variant besides the default blue — the one "Importat" row
+   in figura1-dashboard.png's own list. */
+.emails-list-item__dot--muted {
+  background: #b3b8c4;
+}
+
+/* Plain bordered white square, not a solid-color fill — sampled at native
+   resolution against figura1-dashboard.png/figura2-emailuri-noi.png: the
+   Outlook glyph sits inside a light card-style square (--color-surface +
+   --border), not a filled --color-primary block with a white icon on top
+   (the previous lucide-Mail treatment). Shared by Dashboard and EmailsPage
+   since both render rows through this same component/stylesheet, which
+   keeps the two automatically identical. */
 .emails-list-item__source-icon {
   display: flex;
   align-items: center;
@@ -374,8 +494,8 @@
   height: 28px;
   flex-shrink: 0;
   border-radius: 6px;
-  background: var(--color-primary);
-  color: #ffffff;
+  background: var(--color-surface);
+  border: 1px solid var(--border);
 }
 
 .emails-list-item__content {
@@ -414,7 +534,11 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-weight: 600;
+  /* 600 -> 700: sampled at native resolution against figura1-dashboard.png
+     ("SC Agrocom SRL" etc.) — the sender line is a heavier, true-bold
+     weight there, clearly thicker than the subject line right below it
+     (which stays unbold — see .emails-list-item__subject, unchanged). */
+  font-weight: 700;
 }
 
 .emails-list-item__time {
@@ -900,6 +1024,17 @@
 .emails-action-bar__btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
+  /* Edge-to-edge full-width row, proportions kept content-driven rather
+     than forced equal — sampled at native resolution against
+     figura1-dashboard.png/figura2-emailuri-noi.png: "Salvează & Importă.../
+     Trimite confirmare client" are visibly wider than "Corectează manual/
+     Respinge email" in both, i.e. sized to their own (longer) label, not
+     split into 4 equal columns. flex-grow with an auto (content) basis
+     reproduces that: each button keeps its natural content width as a
+     floor and only the leftover row space gets distributed, so the row
+     still spans edge-to-edge without flattening the width differences. */
+  flex: 1 1 auto;
   gap: 6px;
   padding: 10px 12px;
   border-radius: 6px;
@@ -929,7 +1064,7 @@
 .emails-action-bar__btn--amber {
   border: none;
   background: var(--color-warning);
-  color: white;
+  color: #000;
 }
 
 .emails-action-bar__btn--red {
@@ -938,10 +1073,21 @@
   color: white;
 }
 
+/* Border restored (not hidden) — re-checked at native resolution against
+   figura2-emailuri-noi.png specifically (this file's own mockup, not
+   figura1's): "Trimite confirmare client" there shows a clearly visible,
+   saturated medium blue edge (~rgb(120,153,199) even through anti-aliasing,
+   backing out to something close to var(--color-primary) once the ~50%
+   background blend from the thin stroke is accounted for) — not the faint
+   ~8-10-RGB-off-white hairline the site-wide border-hiding treatment was
+   calibrated against elsewhere. Per the same "check before flattening"
+   discipline applied to Dashboard's own borders this session: this one is
+   real and deliberate (a colored outline button, not a subtle box edge), so
+   it's kept instead of matching every other hidden border on this page. */
 .emails-action-bar__btn--outline {
-  border: 1px solid var(--border);
+  border: 1px solid var(--color-primary);
   background: var(--color-surface);
-  color: var(--color-text);
+  color: #000;
 }
 
 .emails-action-bar__btn--primary:not(:disabled):hover,

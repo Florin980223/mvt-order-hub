@@ -2,7 +2,7 @@
   "graphMessageId": "mock-021-lactate-brasov-constanta",
   "sender": "logistica@lactobrasov-distributie.ro",
   "subject": "Comandă transport frigorific - atașat fișier",
-  "receivedAt": "2026-07-30T10:40:00Z",
+  "receivedAt": "2026-07-31T08:40:00Z",
   "bodyHtml": "<div><p>Bună ziua,</p><p>Detaliile comenzii sunt în fișierul atașat.</p><p>Vă mulțumim,<br>LactoBrașov Distribuție SRL</p></div>",
   "attachments": [
     { "filename": "comanda-lactate.csv", "mimeType": "text/csv", "generatorRef": "lactate-frigorific-csv" }

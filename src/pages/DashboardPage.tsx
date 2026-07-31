@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { ArrowDownWideNarrow, Filter, Inbox, Loader2, RefreshCw, Search, SlidersHorizontal, TriangleAlert } from 'lucide-react'
 import { DashboardDetailPanel } from '../components/dashboard/DashboardDetailPanel'
 import { EmailList } from '../components/emails/EmailList'
@@ -53,6 +53,44 @@ export function DashboardPage() {
   const [filterIsPriority, setFilterIsPriority] = useState(false)
   const [filterMinConfidence, setFilterMinConfidence] = useState<ConfidenceFilter>('all')
   const [filterCarrier, setFilterCarrier] = useState('all')
+
+  // Outside-click-to-close for the sort/filter popovers. Each ref wraps the
+  // popover's own trigger + panel, so a mousedown on the trigger itself is
+  // seen as "inside" and left alone — the trigger's own onClick toggle
+  // handles open/close for that case. Only filter has a second, separate
+  // trigger (the standalone funnel icon-button up in the list heading,
+  // outside .dashboard-filter's DOM subtree), so that one gets its own ref
+  // too, checked the same way. The listener only ever closes (never
+  // opens), and is only attached while the popover is open, so it can't
+  // race the toggle handler: the mousedown that first opens a popover
+  // fires before the effect (re-)subscribes, and the mousedown that closes
+  // it via its own trigger is filtered out by the containment check above.
+  const sortWrapperRef = useRef<HTMLDivElement>(null)
+  const filterWrapperRef = useRef<HTMLDivElement>(null)
+  const filterIconBtnRef = useRef<HTMLButtonElement>(null)
+
+  useEffect(() => {
+    if (!sortOpen) return
+    function handleClickOutside(event: MouseEvent) {
+      if (sortWrapperRef.current && !sortWrapperRef.current.contains(event.target as Node)) {
+        setSortOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [sortOpen])
+
+  useEffect(() => {
+    if (!filterOpen) return
+    function handleClickOutside(event: MouseEvent) {
+      const target = event.target as Node
+      if (filterWrapperRef.current?.contains(target)) return
+      if (filterIconBtnRef.current?.contains(target)) return
+      setFilterOpen(false)
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [filterOpen])
 
   const emails = useMemo(() => data ?? [], [data])
 
@@ -184,7 +222,7 @@ export function DashboardPage() {
             <div className="dashboard-list-heading">
               <h3 className="dashboard-list-heading__title">Inbox comenzi</h3>
               <div className="dashboard-list-heading__actions">
-                <div className="dashboard-sort">
+                <div className="dashboard-sort" ref={sortWrapperRef}>
                   <button
                     type="button"
                     className={`dashboard-list-heading__icon-btn${sortKey !== 'date_desc' ? ' dashboard-list-heading__icon-btn--active' : ''}`}
@@ -213,6 +251,7 @@ export function DashboardPage() {
                 </div>
                 <button
                   type="button"
+                  ref={filterIconBtnRef}
                   className={`dashboard-list-heading__icon-btn${hasActiveFilters ? ' dashboard-list-heading__icon-btn--active' : ''}`}
                   aria-label="Filtrează"
                   onClick={toggleFilterOpen}
@@ -231,7 +270,7 @@ export function DashboardPage() {
                 />
                 <Search aria-hidden="true" size={16} />
               </div>
-              <div className="dashboard-filter">
+              <div className="dashboard-filter" ref={filterWrapperRef}>
                 <button
                   type="button"
                   className={`emails-filter-button${hasActiveFilters ? ' emails-filter-button--active' : ''}`}
@@ -296,21 +335,24 @@ export function DashboardPage() {
                 className={`emails-tabs__tab${activeTab === 'all' ? ' emails-tabs__tab--active' : ''}`}
                 onClick={() => setActiveTab('all')}
               >
-                Toate {summary.total}
+                Toate
+                <span className="dashboard-tab-count dashboard-tab-count--blue">{summary.total}</span>
               </button>
               <button
                 type="button"
                 className={`emails-tabs__tab${activeTab === 'needs_validation' ? ' emails-tabs__tab--active' : ''}`}
                 onClick={() => setActiveTab('needs_validation')}
               >
-                Necesită validare {summary.needsValidation}
+                Necesită validare
+                <span className="dashboard-tab-count dashboard-tab-count--orange">{summary.needsValidation}</span>
               </button>
               <button
                 type="button"
                 className={`emails-tabs__tab${activeTab === 'imported' ? ' emails-tabs__tab--active' : ''}`}
                 onClick={() => setActiveTab('imported')}
               >
-                Importate {summary.imported}
+                Importate
+                <span className="dashboard-tab-count dashboard-tab-count--green">{summary.imported}</span>
               </button>
             </nav>
 

@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Inbox, Loader2, MoreVertical, RefreshCw, Reply, Search, SlidersHorizontal, Star, TriangleAlert } from 'lucide-react'
 import { ListFooter } from '../components/emails/ListFooter'
@@ -229,6 +229,68 @@ export function SentOrdersPage() {
     setReplyOpen(false)
   }
 
+  // Outside-click-to-close for the filter/reply/history popovers — same
+  // useRef+useEffect+mousedown pattern as DashboardPage's sort/filter
+  // panels and EmailDetailPanel's own reply/kebab panels. Each ref wraps
+  // its own trigger + panel, so a mousedown on the trigger itself is seen
+  // as "inside" and left to that button's own onClick toggle.
+  const filterWrapperRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!filterOpen) return
+    function handleClickOutside(event: MouseEvent) {
+      if (filterWrapperRef.current && !filterWrapperRef.current.contains(event.target as Node)) {
+        setFilterOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [filterOpen])
+
+  // Same "don't discard a half-typed reply" guard as EmailDetailPanel's own
+  // replyWrapperRef effect: closes on outside click, but only once Mesaj is
+  // empty — otherwise the click is ignored and the panel stays open.
+  const replyWrapperRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!replyOpen) return
+    function handleClickOutside(event: MouseEvent) {
+      if (replyWrapperRef.current && !replyWrapperRef.current.contains(event.target as Node)) {
+        if (replyBody.trim().length === 0) {
+          setReplyOpen(false)
+        }
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [replyOpen, replyBody])
+
+  // The history panel is special: its trigger (the kebab, "Mai multe
+  // opțiuni") lives here in the detail header, but the panel itself is
+  // rendered inside SentOrderActionBar — a separate child component
+  // further down the DOM (see showHistory/onToggleHistory lifted to this
+  // page, and "Vezi istoric import" there toggling the same state). A
+  // single wrapper ref can't span both locations, so this mirrors
+  // DashboardPage's filterWrapperRef+filterIconBtnRef combo instead: one
+  // ref on the kebab trigger, and one ref passed down as a prop for
+  // SentOrderActionBar to attach to its own root (which already covers
+  // both its "Vezi istoric import" trigger and the history panel it
+  // renders) — a mousedown is "inside" if it lands in either.
+  const historyTriggerRef = useRef<HTMLButtonElement>(null)
+  const historyPanelRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!showHistory) return
+    function handleClickOutside(event: MouseEvent) {
+      const target = event.target as Node
+      if (historyTriggerRef.current?.contains(target)) return
+      if (historyPanelRef.current?.contains(target)) return
+      setShowHistory(false)
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [showHistory])
+
   return (
     <div className="pending-orders-page">
       <header className="pending-orders-page__header">
@@ -274,7 +336,7 @@ export function SentOrdersPage() {
                   />
                   <Search aria-hidden="true" size={16} />
                 </div>
-                <div className="emails-filter">
+                <div className="emails-filter" ref={filterWrapperRef}>
                   <button
                     type="button"
                     className={`emails-filter-button${hasActiveFilters ? ' emails-filter-button--active' : ''}`}
@@ -405,7 +467,7 @@ export function SentOrdersPage() {
                     >
                       <Star aria-hidden="true" size={16} fill={favoriteOrderIds.has(selectedItem.order.id) ? 'currentColor' : 'none'} />
                     </button>
-                    <div className="pending-orders-detail__reply emails-detail__reply">
+                    <div className="pending-orders-detail__reply emails-detail__reply" ref={replyWrapperRef}>
                       <button
                         type="button"
                         className={`pending-orders-detail__icon-btn${replyOpen ? ' pending-orders-detail__icon-btn--active' : ''}`}
@@ -471,6 +533,7 @@ export function SentOrdersPage() {
                     </div>
                     <button
                       type="button"
+                      ref={historyTriggerRef}
                       className={`pending-orders-detail__icon-btn${showHistory ? ' pending-orders-detail__icon-btn--active' : ''}`}
                       onClick={toggleHistory}
                       aria-label="Mai multe opțiuni"
@@ -486,7 +549,12 @@ export function SentOrdersPage() {
                     <PendingOrderFields order={selectedItem.order} variant="sent" operatorName={operatorName} />
                   </div>
                 </div>
-                <SentOrderActionBar order={selectedItem.order} showHistory={showHistory} onToggleHistory={toggleHistory} />
+                <SentOrderActionBar
+                  order={selectedItem.order}
+                  showHistory={showHistory}
+                  onToggleHistory={toggleHistory}
+                  historyPanelRef={historyPanelRef}
+                />
               </div>
             )}
           </div>

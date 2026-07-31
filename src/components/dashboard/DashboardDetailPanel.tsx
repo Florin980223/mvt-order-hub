@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { MoreVertical, Star } from 'lucide-react'
 import { ActionBar } from '../emails/ActionBar'
 import { PendingOrderFields } from '../pendingOrders/PendingOrderFields'
@@ -37,12 +37,40 @@ export function DashboardDetailPanel({ email, isFavorite, onToggleFavorite }: Da
     ? [...order.order_events].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
     : []
 
+  // Outside-click-to-close for the kebab's "Istoric eveniment comandă"
+  // panel — same useRef+useEffect+mousedown pattern DashboardPage's own
+  // sort/filter popovers use (sortWrapperRef/filterWrapperRef there); this
+  // is a separate component/state, so that earlier fix doesn't cover it.
+  // The ref wraps both the trigger button and the panel, so a mousedown on
+  // the trigger itself is seen as "inside" and left to the button's own
+  // onClick toggle instead of being double-toggled here.
+  const historyWrapperRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!showHistory) return
+    function handleClickOutside(event: MouseEvent) {
+      if (historyWrapperRef.current && !historyWrapperRef.current.contains(event.target as Node)) {
+        setShowHistory(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [showHistory])
+
   return (
     <div className="pending-orders-detail">
       <div className="pending-orders-detail__scroll">
         {order ? (
           <>
-            <PendingOrderTopBar order={order} attachments={email.email_attachments} />
+            {/* Heading row above the AI-extract/confidence row — confirmed
+                at native resolution against figura1-dashboard.png: "Comandă
+                #... – Status: ..." (+ Star/"...") renders first, with
+                "Extrage Automat cu AI"/confidence ring/Atașamente below it.
+                This file owns both the heading and this call site, and is
+                the only place that renders them in this order — PendingOrdersPage.tsx
+                and EmailDetailPanel.tsx have their own separate call sites
+                (matching figura3/figura2's own, different ordering there),
+                so this reorder can't affect either of them. */}
             <div className="pending-orders-detail__heading-row">
               <h2 className="pending-orders-detail__heading">
                 Comandă #{order.client_order_number ?? order.id} – Status: {formatOrderStatus(order.status)}
@@ -63,7 +91,7 @@ export function DashboardDetailPanel({ email, isFavorite, onToggleFavorite }: Da
                   <Star aria-hidden="true" size={16} fill={isFavorite ? 'currentColor' : 'none'} />
                 </button>
               )}
-              <div className="pending-orders-detail__more">
+              <div className="pending-orders-detail__more" ref={historyWrapperRef}>
                 <button
                   type="button"
                   className={`pending-orders-detail__icon-btn${showHistory ? ' pending-orders-detail__icon-btn--active' : ''}`}
@@ -92,6 +120,7 @@ export function DashboardDetailPanel({ email, isFavorite, onToggleFavorite }: Da
                 )}
               </div>
             </div>
+            <PendingOrderTopBar order={order} attachments={email.email_attachments} />
             <div className="pending-orders-detail__body">
               <PendingOrderFields order={order} correction={correction} variant="flat" />
             </div>

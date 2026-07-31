@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { CheckCircle2, History, Sparkles, TriangleAlert } from 'lucide-react'
 import { supabase } from '../../lib/supabaseClient'
@@ -69,6 +69,32 @@ export function PendingOrderTopBar({ order, attachments, showReadiness, compactC
   const sortedEvents = [...order.order_events].sort(
     (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
   )
+
+  // Outside-click-to-close, same useRef+useEffect+mousedown pattern as
+  // DashboardPage's sort/filter popovers (DashboardPage.tsx) and
+  // DashboardDetailPanel's/EmailDetailPanel's own kebab history panels.
+  // The wrapper ref covers both the "Istoric AI" trigger button and its
+  // panel (they're already siblings under .pending-orders-topbar__history
+  // below), so a mousedown on the trigger itself is left to its own
+  // onClick toggle. This panel is read-only (event list), same as those
+  // kebab panels — safe to close on any outside click, no guard needed.
+  // The effect only ever attaches while historyOpen is true, and
+  // historyOpen can only become true via this button's own onClick, which
+  // only renders in the `attachments`-undefined/`showReadiness`-falsy
+  // branch below (PendingOrdersPage's case) — so this is inert on
+  // Dashboard/EmailsPage's renders of this shared component.
+  const historyWrapperRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!historyOpen) return
+    function handleClickOutside(event: MouseEvent) {
+      if (historyWrapperRef.current && !historyWrapperRef.current.contains(event.target as Node)) {
+        setHistoryOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [historyOpen])
 
   // Same mutation shape as ActionBar's submitMutation/rejectMutation/etc.:
   // supabase.functions.invoke, invalidate the shared ['emails', 'list']
@@ -154,7 +180,7 @@ export function PendingOrderTopBar({ order, attachments, showReadiness, compactC
             </span>
           )
         ) : (
-          <div className="pending-orders-topbar__history">
+          <div className="pending-orders-topbar__history" ref={historyWrapperRef}>
             <button
               type="button"
               className="pending-orders-topbar__btn"
