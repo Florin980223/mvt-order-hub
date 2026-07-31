@@ -54,6 +54,14 @@
   border-radius: 8px;
   padding: 10px 12px;
   font: inherit;
+  /* Explicit background needed alongside color: without it, browsers
+     honor index.css's `color-scheme: light dark` and render the native
+     dark-mode form-control background (near-black) under a dark OS
+     theme, while this rule still forces --color-text's dark navy on top
+     — dark text on a dark background, unreadable while typing. This page
+     has no light/dark toggle of its own, so it's pinned to the same
+     light surface/text pairing every other card in the app uses. */
+  background: var(--color-surface);
   color: var(--color-text);
 }
 
